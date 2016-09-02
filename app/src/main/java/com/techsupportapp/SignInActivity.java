@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
+import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -56,8 +57,20 @@ public class SignInActivity extends AppCompatActivity {
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                readPasswordDatabase(); // Временная реализация
-                //TODO Написать логику входа в приложения через логин/пароль
+                if (loginET.getText().toString().equals(""))
+                {
+                    loginET.requestFocus();
+                    Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG);
+                }
+                else if (passwordET.getText().toString().equals(""))
+                {
+                    passwordET.requestFocus();
+                    Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG);
+                }
+                else {
+                    readPasswordDatabase(); // Временная реализация
+                    //TODO Написать логику входа в приложения через логин/пароль
+                }
             }
         });
     }
