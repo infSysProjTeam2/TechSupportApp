@@ -35,6 +35,7 @@
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:inputType="textPassword"
                 android:maxLines="1"
                 android:minWidth="200dp"
                 android:hint="Пароль"/>
@@ -43,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="Нет аккаунта? Обратитесь к администратору вашей компании."
+                android:text="Нет аккаунта? Забыли пароль? Обратитесь к администратору вашей компании."
                 android:clickable="true"/>
 
             <LinearLayout

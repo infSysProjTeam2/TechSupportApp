@@ -48,6 +48,11 @@ public class SignInActivity extends AppCompatActivity {
         });
     }
 
+    private void loadPasswordDatabase()
+    {
+        //TODO Скачивание базы данных с паролями с сервера.
+    }
+
     @Override
     public void onBackPressed() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
