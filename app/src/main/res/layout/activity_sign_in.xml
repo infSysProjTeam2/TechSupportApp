@@ -22,6 +22,8 @@
             android:gravity="center">
 
             <EditText
+                android:id="@+id/loginET"
+                android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -29,6 +31,8 @@
                 android:hint="Логин"/>
 
             <EditText
+                android:id="@+id/passwordET"
+                android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:maxLines="1"
@@ -39,7 +43,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="Нету аккаунта? Обратитесь к администратору вашей компании."
+                android:text="Нет аккаунта? Обратитесь к администратору вашей компании."
                 android:clickable="true"/>
 
             <LinearLayout
@@ -48,11 +52,13 @@
                 android:orientation="horizontal">
 
                 <Button
+                    android:id="@+id/closeAppButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Закрыть"/>
 
                 <Button
+                    android:id="@+id/signInButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Вход"/>
