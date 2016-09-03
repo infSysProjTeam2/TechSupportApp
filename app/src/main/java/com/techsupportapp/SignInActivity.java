@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.os.Message;
@@ -85,15 +86,26 @@ public class SignInActivity extends AppCompatActivity {
         File file = new File("/sdcard/Android/data/com.techsuppotapp/passwordDatabase.db");
         File directory = new File("/sdcard/Android/data/com.techsuppotapp/");
 
-        if (!file.exists())
-        {
-            if (!directory.exists())
-                directory.mkdirs();
-            //TODO используем метод loadPasswordDatabase
-        }
+        if (!directory.exists())
+            directory.mkdirs();
 
-        DatabaseOpenHelper helper = new DatabaseOpenHelper(this, file.getPath(), 1); //Временное решение до реализации скачивания базы с сервера
+        /*DatabaseOpenHelper helper = new DatabaseOpenHelper(this, file.getPath(), 1); //Временное решение до реализации скачивания базы с сервера
         SQLiteDatabase base = helper.getReadableDatabase();
+        Cursor resultList = base.query(false, "personality_table", new String[] {"login", "password"}, null, null, null, null, null, null);
+        resultList.moveToFirst();
+        if (resultList.getCount() == 0)
+        {
+            Toast.makeText(getApplicationContext(), "Введен неверный логин или пароль", Toast.LENGTH_LONG);
+        }
+        else if (resultList.getString(resultList.getColumnIndex("login")).equals(loginET.getText().toString()))
+        {
+            Toast.makeText(getApplicationContext(), "Вход выполнен успешно!!!", Toast.LENGTH_LONG);
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(), "Ошибка базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG);
+        }*/
+
     }
 
     @Override
