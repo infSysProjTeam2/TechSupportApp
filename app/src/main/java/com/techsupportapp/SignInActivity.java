@@ -1,6 +1,8 @@
 package com.techsupportapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
@@ -8,13 +10,20 @@ import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -25,7 +34,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private EditText loginET;
     private EditText passwordET;
-
+    private CheckBox rememberPas;
     //endregion
 
     @Override
@@ -44,6 +53,7 @@ public class SignInActivity extends AppCompatActivity {
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
+        rememberPas = (CheckBox)findViewById((R.id.checkBoxBold));
     }
 
     private void setEvents()
@@ -69,6 +79,7 @@ public class SignInActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG);
                 }
                 else {
+                    savePassAndLogin();
                     readPasswordDatabase(); // Временная реализация
                     //TODO Написать логику входа в приложения через логин/пароль
                 }
@@ -80,7 +91,18 @@ public class SignInActivity extends AppCompatActivity {
     {
         //TODO Скачивание базы данных с паролями с сервера.
     }
-
+    private void savePassAndLogin(){
+        SharedPreferences settings = getPreferences(0);
+        SharedPreferences.Editor editor = settings.edit();
+        if (rememberPas.isChecked()) {
+            String login = loginET.getText().toString();
+            String password = passwordET.getText().toString();
+            editor.putString("Login", login);
+            editor.putString("Password", password);
+        }
+        else editor.clear();
+           editor.commit();
+    }
     private void readPasswordDatabase()
     {
         File file = new File("/sdcard/Android/data/com.techsuppotapp/passwordDatabase.db");
@@ -130,4 +152,14 @@ public class SignInActivity extends AppCompatActivity {
         builder.setMessage("Вы действительно хотите закрыть приложение?");
         builder.show();
     }
-}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences settings = getPreferences(0);
+        String login = settings.getString("Login","");
+        String password = settings.getString("Password","");
+        loginET.setText(login);
+        passwordET.setText(password);
+    }
+    }
+
