@@ -19,6 +19,13 @@ android {
     }
 }
 
+repositories {
+    maven { url "https://raw.githubusercontent.com/smilefam/SendBird-SDK-Android/master/" }
+}
+dependencies {
+    compile 'com.sendbird.sdk:sendbird-android-sdk:2.2.11'
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'

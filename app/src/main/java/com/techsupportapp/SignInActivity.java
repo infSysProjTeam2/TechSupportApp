@@ -1,9 +1,11 @@
 package com.techsupportapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Environment;
-import android.os.Message;
+import android.os.Build;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,11 +15,15 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.IOException;
+import java.security.MessageDigest;
 
 public class SignInActivity extends AppCompatActivity {
 
     //region Composite Controls
+
+    final String appId = "E78031C1-13EA-4B71-A80A-53120BD37E3F";
+    String userId = generateDeviceUUID(SignInActivity.this);
+    String userName;
 
     private Button closeAppBut;
     private Button signInBut;
@@ -68,7 +74,23 @@ public class SignInActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG);
                 }
                 else {
-                    readPasswordDatabase(); // Временная реализация
+                    //readPasswordDatabase(); // Временная реализация
+
+                    Intent intent;
+                    userName = loginET.getText().toString();
+
+                    if (userName.equals("admin")) {
+                        userId = "admin";
+                        intent = new Intent(SignInActivity.this, AdminActivity.class);
+                    }
+                    else {
+                        userId = "user";
+                        intent = new Intent(SignInActivity.this, UserActivity.class);
+                    }
+                    Bundle args = AdminActivity.makeSendBirdArgs(appId, userId, userName);
+                    intent.putExtras(args);
+
+                    startActivityForResult(intent, 201);
                     //TODO Написать логику входа в приложения через логин/пароль
                 }
             }
@@ -117,5 +139,32 @@ public class SignInActivity extends AppCompatActivity {
         builder.setCancelable(false);
         builder.setMessage("Вы действительно хотите закрыть приложение?");
         builder.show();
+    }
+
+    private String generateDeviceUUID(Context context) {
+        String serial = Build.SERIAL;
+        String androidID = Settings.Secure.ANDROID_ID;
+        String deviceUUID = serial + androidID;
+
+        /*
+         * SHA-1
+         */
+        MessageDigest digest;
+        byte[] result;
+        try {
+            digest = MessageDigest.getInstance("SHA-1");
+            result = digest.digest(deviceUUID.getBytes("UTF-8"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : result) {
+            sb.append(String.format("%02X", b));
+        }
+
+
+        return sb.toString();
     }
 }
