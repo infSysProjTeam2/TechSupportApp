@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "1021846048359",
+    "firebase_url": "https://infsysprojteam2.firebaseio.com",
+    "project_id": "infsysprojteam2",
+    "storage_bucket": "infsysprojteam2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1021846048359:android:32fb6743ee7ca060",
+        "android_client_info": {
+          "package_name": "com.techsupportapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1021846048359-c5gvn1psspr2tmi6nfvmtnrept63uffj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ335cDfP6YLlWucRW15iKdgvHftfPh-I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
