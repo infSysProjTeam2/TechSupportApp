@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
@@ -17,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,7 +36,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -62,6 +67,8 @@ public class SignInActivity extends AppCompatActivity {
 
     private EditText loginET;
     private EditText passwordET;
+
+    private CheckBox rememberPas;
 
     //endregion
 
@@ -96,6 +103,8 @@ public class SignInActivity extends AppCompatActivity {
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
+
+        rememberPas = (CheckBox)findViewById((R.id.checkBoxBold));
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
