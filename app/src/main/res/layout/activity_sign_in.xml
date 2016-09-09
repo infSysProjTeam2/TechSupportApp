@@ -74,18 +74,14 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:checked="true">
-
+                </CheckBox>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:text="Сохранить пароль"
                     android:clickable="true"/>
-            </CheckBox>
+            </LinearLayout>
         </LinearLayout>
-
-        </LinearLayout>
-
     </RelativeLayout>
-
 </RelativeLayout>
