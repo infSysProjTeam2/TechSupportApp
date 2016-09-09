@@ -3,8 +3,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <Button
-        android:id="@+id/helpBtn"
-        android:text="HELP"
+        android:id="@+id/createTicket"
+        android:text="Создать заявку"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/listOfChannels"
+        android:text="Открыть список каналов"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>

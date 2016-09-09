@@ -8,7 +8,9 @@ import android.view.View;
 import android.widget.Button;
 
 public class UserActivity extends AppCompatActivity {
-    private Button helpBtn;
+    private Button createTicketBtn;
+    private Button listOfChannelsBtn;
+
     private String mAppId;
     private String mUserId;
     private String mNickname;
@@ -37,19 +39,31 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        helpBtn = (Button)findViewById(R.id.helpBtn);
+        createTicketBtn = (Button)findViewById(R.id.createTicket);
+        listOfChannelsBtn = (Button)findViewById(R.id.listOfChannelsBtn);
     }
 
     private void setEvents()
     {
-        helpBtn.setOnClickListener(new View.OnClickListener() {
+        createTicketBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(UserActivity.this, ChatActivity.class);
-                Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, "admin");
+                Intent intent = new Intent(UserActivity.this, CreateTicketActivity.class);
+                Bundle args = UserActivity.makeSendBirdArgs(mAppId, mUserId, mNickname);
                 intent.putExtras(args);
 
-                startActivityForResult(intent, 200);
+                startActivityForResult(intent, 204);
+            }
+        });
+
+        listOfChannelsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UserActivity.this, ListOfChannelsActivity.class);
+                Bundle args = UserActivity.makeSendBirdArgs(mAppId, mUserId, mNickname);
+                intent.putExtras(args);
+
+                startActivityForResult(intent, 205);
             }
         });
     }
