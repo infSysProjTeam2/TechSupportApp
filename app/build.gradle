@@ -24,6 +24,7 @@ repositories {
 }
 dependencies {
     compile 'com.sendbird.sdk:sendbird-android-sdk:2.2.11'
+    compile 'com.google.firebase:firebase-database:9.4.0'
 }
 
 dependencies {
@@ -31,3 +32,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.3.0'
 }
+
+apply plugin: 'com.google.gms.google-services'
