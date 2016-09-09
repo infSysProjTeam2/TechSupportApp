@@ -40,7 +40,7 @@ public class UserActivity extends AppCompatActivity {
 
     private void initializeComponents() {
         createTicketBtn = (Button)findViewById(R.id.createTicket);
-        listOfChannelsBtn = (Button)findViewById(R.id.listOfChannelsBtn);
+        listOfChannelsBtn = (Button)findViewById(R.id.listOfChannels);
     }
 
     private void setEvents()
