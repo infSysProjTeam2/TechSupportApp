@@ -3,17 +3,11 @@ package com.techsupportapp;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Environment;
-import android.os.Message;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,24 +16,18 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ValueEventListener;
-import com.sendbird.android.shadow.okhttp3.internal.DiskLruCache;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;;
+
+;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -151,7 +139,7 @@ public class SignInActivity extends AppCompatActivity {
                             else {
                                 intent = new Intent(SignInActivity.this, UserActivity.class);
                             }
-                            Bundle args = AdminActivity.makeSendBirdArgs(appId, userName, userName);
+                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, userName, userName);
                             intent.putExtras(args);
 
                             startActivityForResult(intent, 201);
