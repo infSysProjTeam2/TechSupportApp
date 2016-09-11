@@ -36,8 +36,6 @@ import com.sendbird.android.model.Message;
 import com.sendbird.android.model.MessageModel;
 import com.sendbird.android.model.MessagingChannel;
 
-import org.w3c.dom.Text;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -111,7 +109,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
         resizeMenubar();
     }
 
-
     private void resizeMenubar() { //TODO перепроверить - вероятно удалить
         ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -171,6 +168,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
                 startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
             }
         });
+
 
         resizeMenubar();
     }

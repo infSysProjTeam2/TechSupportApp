@@ -7,8 +7,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
+import android.widget.ListView;
 
-public class ListOfTicketsActivity extends AppCompatActivity {
+public class listOfTicketsActivity extends AppCompatActivity {
 
     private ListView listOfTickets;
     private TextView problemBut;

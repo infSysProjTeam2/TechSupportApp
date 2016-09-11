@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+<<<<<<< HEAD
 import android.support.annotation.NonNull;
+=======
+>>>>>>> 422bcc166777b96e6ddfb5dd2c9af176236b7365
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -27,7 +30,10 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+<<<<<<< HEAD
 import java.util.Arrays;
+=======
+>>>>>>> 422bcc166777b96e6ddfb5dd2c9af176236b7365
 
 ;
 
@@ -139,7 +145,11 @@ public class SignInActivity extends AppCompatActivity {
                             else {
                                 intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
                             }
+<<<<<<< HEAD
                             Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName);
+=======
+                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, userName, userName);
+>>>>>>> 422bcc166777b96e6ddfb5dd2c9af176236b7365
                             intent.putExtras(args);
 
                             startActivityForResult(intent, 201);
