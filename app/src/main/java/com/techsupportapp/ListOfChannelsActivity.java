@@ -65,16 +65,18 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private String mAppId;
     private String mUserId;
     private String mNickname;
+    private boolean isAdmin;
     private String mGcmRegToken;
 
     private ImageView menuBut;
     private TextView newRequestsBut;
 
-    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname) {
+    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
+        args.putBoolean("isAdmin", isAdmin);
         return args;
     }
 
@@ -87,6 +89,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
+        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(ListOfChannelsActivity.this).getString("SendBirdGCMToken", "");
 
         initFragment();
@@ -118,7 +121,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
         }
         mTopBarContainer.setLayoutParams(lp);
     }
-
 
     @Override
     protected void onResume() {
@@ -165,7 +167,14 @@ public class ListOfChannelsActivity extends FragmentActivity {
         newRequestsBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
+                if (isAdmin)
+                    startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
+                else
+                {
+                    Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
+                    intent.putExtra("userId", mUserId);
+                    startActivity(intent);
+                }
             }
         });
 

@@ -32,8 +32,6 @@ import java.util.ArrayList;
 
 import java.util.Arrays;
 
-;
-
 public class SignInActivity extends AppCompatActivity {
 
     //region Constants
@@ -143,7 +141,7 @@ public class SignInActivity extends AppCompatActivity {
                                 intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
                             }
 
-                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName);
+                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
 
                             intent.putExtras(args);
 
