@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+
+import android.support.annotation.NonNull;
+
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -27,13 +30,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+import java.util.Arrays;
+
 ;
 
 public class SignInActivity extends AppCompatActivity {
 
     //region Constants
-
-    private static final String DATABASE_USER_TABLE = "user_table";
 
     private static final String appId = "E78031C1-13EA-4B71-A80A-53120BD37E3F";
 
@@ -79,7 +82,7 @@ public class SignInActivity extends AppCompatActivity {
             public void run(){
                 isConnectedToInternet = hasConnection();
                 if (!isConnectedToInternet) {
-                    Toast.makeText(getApplicationContext(), "Нет подключения к Интернету", Toast.LENGTH_LONG).show();;
+                    Toast.makeText(getApplicationContext(), "Нет подключения к Интернету", Toast.LENGTH_LONG).show();
                 }
             }
         }).start();
@@ -112,13 +115,13 @@ public class SignInActivity extends AppCompatActivity {
                 if (isConnectedToInternet) {
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();;
+                        Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
                     } else if (passwordET.getText().toString().equals("")) {
                         passwordET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();;
+                        Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
                     } else if (userList.size() == 0){
                         Toast.makeText(getApplicationContext(), "База данных пуста. " +
-                                "Зарегистрируйте компанию у нас", Toast.LENGTH_LONG).show();;
+                                "Зарегистрируйте компанию у нас", Toast.LENGTH_LONG).show(); //Заготовка
                     } else {
                         int i = 0;
                         while (!loginET.getText().toString().equals(userList.get(i).login) && ++i < userList.size()); //TODO binarySearch
@@ -134,12 +137,14 @@ public class SignInActivity extends AppCompatActivity {
                             userName = loginET.getText().toString();
 
                             if (userList.get(i).isAdmin) {
-                                intent = new Intent(SignInActivity.this, AdminActivity.class);
+                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
                             }
                             else {
-                                intent = new Intent(SignInActivity.this, UserActivity.class);
+                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
                             }
-                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, userName, userName);
+
+                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName);
+
                             intent.putExtras(args);
 
                             startActivityForResult(intent, 201);
@@ -158,7 +163,7 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DATABASE_USER_TABLE).getChildren()) {
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_USER_TABLE).getChildren()) {
                     User user = userRecord.getValue(User.class);
                     userList.add(user);
                 }
@@ -167,7 +172,7 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. " +
-                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();;
+                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
         });
     }
@@ -175,13 +180,13 @@ public class SignInActivity extends AppCompatActivity {
     private void addUser(String user_id, String login, String password) {//Метод для админов, потом перенести. TODO с учетом компании
         User newUser = new User(login, password, false);
 
-        databaseReference.child(DATABASE_USER_TABLE).child(user_id).setValue(newUser);
+        databaseReference.child(DatabaseVariables.DATABASE_USER_TABLE).child(user_id).setValue(newUser);
     }
 
     private void addUser(String user_id, String login, String password, boolean isAdmin) {//Метод для разработчиков, потом перенести. TODO в базах данных
         User newUser = new User(login, password, isAdmin);
 
-        databaseReference.child(DATABASE_USER_TABLE).child(user_id).setValue(newUser);
+        databaseReference.child(DatabaseVariables.DATABASE_USER_TABLE).child(user_id).setValue(newUser);
     }
 
     @Override
@@ -207,8 +212,7 @@ public class SignInActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private boolean hasConnection()
-    {
+    private boolean hasConnection() {
         ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         if (activeNetwork != null && activeNetwork.isConnected()) {
@@ -226,7 +230,7 @@ public class SignInActivity extends AppCompatActivity {
 
             } catch (IOException e) {
                 Toast.makeText(getApplicationContext(), "Ошибка проверки подключения к Интернету. " +
-                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();;
+                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
                 return false;
             }
         }
@@ -252,6 +256,14 @@ public class SignInActivity extends AppCompatActivity {
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private String getId(String value)
+    {
+        String result = "";
+        for (int i = 0; i < value.length(); i++)
+            result += (char)(value.charAt(i) + 1);
+        return result;
     }
 
     /*//TODO ВЕРНУТЬ после показа

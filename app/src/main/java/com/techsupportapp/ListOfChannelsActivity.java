@@ -67,6 +67,9 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private String mNickname;
     private String mGcmRegToken;
 
+    private ImageView menuBut;
+    private TextView newRequestsBut;
+
     public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
@@ -90,6 +93,8 @@ public class ListOfChannelsActivity extends FragmentActivity {
         initUIComponents();
         initSendBird();
 
+        mTxtChannelUrl.setText(mUserId);
+
         Toast.makeText(this, "Long press the channel to leave.", Toast.LENGTH_LONG).show();
     }
 
@@ -104,11 +109,10 @@ public class ListOfChannelsActivity extends FragmentActivity {
         resizeMenubar();
     }
 
-
-    private void resizeMenubar() {
+    private void resizeMenubar() { //TODO перепроверить - вероятно удалить
         ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.height = (int) (28 * getResources().getDisplayMetrics().density);
+            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
         } else {
             lp.height = (int) (48 * getResources().getDisplayMetrics().density);
         }
@@ -155,6 +159,17 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private void initUIComponents() {
         mTopBarContainer = findViewById(R.id.top_bar_container);
         mTxtChannelUrl = (TextView)findViewById(R.id.txt_channel_url);
+
+        newRequestsBut = (TextView)findViewById(R.id.requestsBut);
+
+        newRequestsBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
+            }
+        });
+
+
         resizeMenubar();
     }
 
