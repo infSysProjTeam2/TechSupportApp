@@ -111,7 +111,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:gravity="right"
-                    android:text="Unread"
+                    android:text="Непрочит."
                     android:textColor="#ac90ff"
                     android:textSize="10sp"
                     />

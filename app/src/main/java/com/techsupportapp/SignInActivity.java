@@ -256,12 +256,13 @@ public class SignInActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private String getId(String value)
+    private String getId(String value) //TODO Вернуть
     {
-        String result = "";
+        /*String result = "";
         for (int i = 0; i < value.length(); i++)
             result += (char)(value.charAt(i) + 1);
-        return result;
+        return result;*/
+        return value;
     }
 
     /*//TODO ВЕРНУТЬ после показа
