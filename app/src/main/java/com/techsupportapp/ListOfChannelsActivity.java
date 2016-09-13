@@ -6,8 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -36,23 +34,12 @@ import com.sendbird.android.model.Message;
 import com.sendbird.android.model.MessageModel;
 import com.sendbird.android.model.MessagingChannel;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 public class ListOfChannelsActivity extends FragmentActivity {
@@ -101,7 +88,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
 
         mTxtChannelUrl.setText(mUserId);
 
-        Toast.makeText(this, "Long press the channel to leave.", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "Долгое удержание по каналу для выхода из него.", Toast.LENGTH_LONG).show();
     }
 
     private void initSendBird() {
@@ -241,9 +228,9 @@ public class ListOfChannelsActivity extends FragmentActivity {
                 public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                     final MessagingChannel channel = mAdapter.getItem(position);
                     new AlertDialog.Builder(getActivity())
-                            .setTitle("Leave")
-                            .setMessage("Do you want to leave this channel?")
-                            .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                            .setTitle("Покинуть")
+                            .setMessage("Вы хотите покинуть этот канал??")
+                            .setPositiveButton("Покинуть", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mAdapter.remove(position);
@@ -251,15 +238,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
                                     SendBird.endMessaging(channel.getUrl());
                                 }
                             })
-                            .setNeutralButton("Hide", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    mAdapter.remove(position);
-                                    mAdapter.notifyDataSetChanged();
-                                    SendBird.hideMessaging(channel.getUrl());
-                                }
-                            })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                 }
@@ -494,13 +473,11 @@ public class ListOfChannelsActivity extends FragmentActivity {
 
     private static String getDisplayCoverImageUrl(List<MessagingChannel.Member> members) {
         for(MessagingChannel.Member member : members) {
-            /*if(member.getId().equals(SendBird.getUserId())) {
+            if(member.getId().equals(SendBird.getUserId())) {
                 continue;
             }
-
-            return member.getImageUrl();*/
-            return member.getId();
-            //return member.getName();
+            //return member.getImageUrl();*/
+            return member.getName();
         }
 
         return "";
@@ -536,8 +513,5 @@ public class ListOfChannelsActivity extends FragmentActivity {
         LetterBitmap letterBitmap = new LetterBitmap(cntxt);
         Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
         imageView.setImageBitmap(letterTile);
-
-        //UrlDownloadAsyncTask.display(url, imageView);
     }
-
 }
