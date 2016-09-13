@@ -65,13 +65,18 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private String mAppId;
     private String mUserId;
     private String mNickname;
+    private boolean isAdmin;
     private String mGcmRegToken;
 
-    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname) {
+    private ImageView menuBut;
+    private TextView newRequestsBut;
+
+    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
+        args.putBoolean("isAdmin", isAdmin);
         return args;
     }
 
@@ -84,11 +89,14 @@ public class ListOfChannelsActivity extends FragmentActivity {
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
+        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(ListOfChannelsActivity.this).getString("SendBirdGCMToken", "");
 
         initFragment();
         initUIComponents();
         initSendBird();
+
+        mTxtChannelUrl.setText(mUserId);
 
         Toast.makeText(this, "Long press the channel to leave.", Toast.LENGTH_LONG).show();
     }
@@ -104,17 +112,15 @@ public class ListOfChannelsActivity extends FragmentActivity {
         resizeMenubar();
     }
 
-
-    private void resizeMenubar() {
+    private void resizeMenubar() { //TODO перепроверить - вероятно удалить
         ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
         if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.height = (int) (28 * getResources().getDisplayMetrics().density);
+            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
         } else {
             lp.height = (int) (48 * getResources().getDisplayMetrics().density);
         }
         mTopBarContainer.setLayoutParams(lp);
     }
-
 
     @Override
     protected void onResume() {
@@ -155,6 +161,24 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private void initUIComponents() {
         mTopBarContainer = findViewById(R.id.top_bar_container);
         mTxtChannelUrl = (TextView)findViewById(R.id.txt_channel_url);
+
+        newRequestsBut = (TextView)findViewById(R.id.requestsBut);
+
+        newRequestsBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isAdmin)
+                    startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
+                else
+                {
+                    Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
+                    intent.putExtra("userId", mUserId);
+                    startActivity(intent);
+                }
+            }
+        });
+
+
         resizeMenubar();
     }
 
