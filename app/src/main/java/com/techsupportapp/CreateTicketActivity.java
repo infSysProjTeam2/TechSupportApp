@@ -2,7 +2,6 @@ package com.techsupportapp;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Binder;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -55,9 +54,9 @@ public class CreateTicketActivity extends AppCompatActivity {
         cancelBut = (Button)findViewById(R.id.cancel_but);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        mSettings = getSharedPreferences(SharePrefsVariables.APP_PREFERENCES, Context.MODE_PRIVATE);
+        mSettings = getSharedPreferences(SharedPrefsVariables.APP_PREFERENCES, Context.MODE_PRIVATE);
 
-        ticketCount = mSettings.getInt(SharePrefsVariables.TICKETS_COUNT, 0);
+        ticketCount = mSettings.getInt(SharedPrefsVariables.TICKETS_COUNT, 0);
     }
 
     private void setEvents() {
@@ -67,12 +66,13 @@ public class CreateTicketActivity extends AppCompatActivity {
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Заполните поля", Toast.LENGTH_LONG).show();
                 } else {
-                    Ticket newTicket = new Ticket(userId, topicET.getText().toString(), messageET.getText().toString());
+                    Ticket newTicket = new Ticket("ticket" + ticketCount, userId, topicET.getText().toString(), messageET.getText().toString());
                     databaseReference.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
                     SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putInt(SharePrefsVariables.TICKETS_COUNT, ticketCount);
+                    editor.putInt(SharedPrefsVariables.TICKETS_COUNT, ticketCount);
                     editor.apply();
                 }
+                Toast.makeText(getApplicationContext(), "ТИКЕТ ТИПА ДОБАВЛЕН", Toast.LENGTH_LONG).show();
             }
         });
     }
