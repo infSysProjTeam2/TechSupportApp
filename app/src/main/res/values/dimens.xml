@@ -15,6 +15,9 @@
         <item>#ad62a7</item>
     </array>
 
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="nav_header_vertical_spacing">16dp</dimen>
+    <dimen name="nav_header_height">160dp</dimen>
     <!-- The default letter tile text size -->
     <dimen name="tile_letter_font_size">33sp</dimen>
     <!-- The deafult tile size -->
