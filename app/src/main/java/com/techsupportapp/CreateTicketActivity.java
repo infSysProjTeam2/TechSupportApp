@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
@@ -130,6 +133,21 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        int COVER_IMAGE_SIZE = 150;
+        LetterBitmap letterBitmap = new LetterBitmap(CreateTicketActivity.this);
+        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+
+        userName.setText(mNickname);
+        if (isAdmin)
+            userType.setText("Администратор");
+        else
+            userType.setText("Пользователь");
     }
 
     private void setEvents() {
