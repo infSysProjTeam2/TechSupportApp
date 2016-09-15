@@ -41,6 +41,7 @@ import com.sendbird.android.model.Mention;
 import com.sendbird.android.model.Message;
 import com.sendbird.android.model.MessageModel;
 import com.sendbird.android.model.MessagingChannel;
+import com.techsupportapp.variables.GlobalsMethods;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -163,18 +164,7 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(ListOfChannelsActivity.this);
-            builder.setTitle("О программе");
-            String str = String.format("Tech Support App V1.0");
-            builder.setMessage(str);
-            builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-
-                }
-            });
-            builder.setCancelable(false);
-            AlertDialog alert = builder.create();
-            alert.show();
+            GlobalsMethods.showAbout(ListOfChannelsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.os.Process.killProcess(android.os.Process.myPid());

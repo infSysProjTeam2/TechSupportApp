@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,15 +22,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.variables.DatabaseVariables;
+import com.techsupportapp.variables.GlobalsMethods;
 
 public class CreateTicketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     //region Fields
 
     private DatabaseReference databaseReference;
-    private SharedPreferences mSettings;
 
     private int ticketCount;
     private String mAppId;
@@ -88,18 +94,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(CreateTicketActivity.this);
-            builder.setTitle("О программе");
-            String str = String.format("Tech Support App V1.0");
-            builder.setMessage(str);
-            builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-
-                }
-            });
-            builder.setCancelable(false);
-            AlertDialog alert = builder.create();
-            alert.show();
+            GlobalsMethods.showAbout(CreateTicketActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.os.Process.killProcess(android.os.Process.myPid());
@@ -118,9 +113,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         cancelBut = (Button)findViewById(R.id.cancel_but);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        mSettings = getSharedPreferences(SharedPrefsVariables.APP_PREFERENCES, Context.MODE_PRIVATE);
-
-        ticketCount = mSettings.getInt(SharedPrefsVariables.TICKETS_COUNT, 0);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Создать заявку");
@@ -159,11 +151,21 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                 } else {
                     Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, topicET.getText().toString(), messageET.getText().toString());
                     databaseReference.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
-                    SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putInt(SharedPrefsVariables.TICKETS_COUNT, ticketCount);
-                    editor.apply();
+                    databaseReference.child(DatabaseVariables.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                 }
                 Toast.makeText(getApplicationContext(), "ТИКЕТ ТИПА ДОБАВЛЕН", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ticketCount = dataSnapshot.child(DatabaseVariables.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
