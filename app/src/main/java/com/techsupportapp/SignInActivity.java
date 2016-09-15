@@ -6,9 +6,6 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-
-import android.support.annotation.NonNull;
-
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -29,8 +26,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-
-import java.util.Arrays;
 
 public class SignInActivity extends AppCompatActivity {
 
@@ -256,12 +251,13 @@ public class SignInActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private String getId(String value)
+    private String getId(String value) //TODO Вернуть
     {
-        String result = "";
+        /*String result = "";
         for (int i = 0; i < value.length(); i++)
             result += (char)(value.charAt(i) + 1);
-        return result;
+        return result;*/
+        return value;
     }
 
     /*//TODO ВЕРНУТЬ после показа
