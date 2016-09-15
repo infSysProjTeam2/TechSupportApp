@@ -8,10 +8,17 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -42,13 +49,9 @@ import java.util.Hashtable;
 import java.util.List;
 
 
-public class ListOfChannelsActivity extends FragmentActivity {
+public class ListOfChannelsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private SendBirdMessagingChannelListFragment mSendBirdMessagingChannelListFragment;
 
-    private ImageButton mBtnClose;
-    private ImageButton mBtnSettings;
-    private TextView mTxtChannelUrl;
-    private View mTopBarContainer;
     private String mAppId;
     private String mUserId;
     private String mNickname;
@@ -56,9 +59,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
     private String mGcmRegToken;
 
     private static Context cntxt;
-
-    private ImageView menuBut;
-    private TextView newRequestsBut;
 
     public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
@@ -82,13 +82,83 @@ public class ListOfChannelsActivity extends FragmentActivity {
         isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(ListOfChannelsActivity.this).getString("SendBirdGCMToken", "");
 
+        initializeComponents();
         initFragment();
-        initUIComponents();
         initSendBird();
 
-        mTxtChannelUrl.setText(mUserId);
-
         Toast.makeText(this, "Долгое удержание по каналу для выхода из него.", Toast.LENGTH_LONG).show();
+    }
+
+    private void initializeComponents(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(mUserId);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            //super.onBackPressed();
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.listOfTickets) {
+            if (isAdmin) {
+                Intent intent = new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class);
+                intent.putExtra("appKey", mAppId);
+                intent.putExtra("uuid", mUserId);
+                intent.putExtra("nickname", mNickname);
+                intent.putExtra("isAdmin", isAdmin);
+                startActivity(intent);
+            }
+            else
+            {
+                Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
+                intent.putExtra("appKey", mAppId);
+                intent.putExtra("uuid", mUserId);
+                intent.putExtra("nickname", mNickname);
+                intent.putExtra("isAdmin", isAdmin);
+                startActivity(intent);
+            }
+        } else if (id == R.id.settings) {
+
+        } else if (id == R.id.about) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ListOfChannelsActivity.this);
+            builder.setTitle("О программе");
+            String str = String.format("Tech Support App V1.0");
+            builder.setMessage(str);
+            builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                }
+            });
+            builder.setCancelable(false);
+            AlertDialog alert = builder.create();
+            alert.show();
+            return true;
+        } else if (id == R.id.exit) {
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     private void initSendBird() {
@@ -99,17 +169,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        resizeMenubar();
-    }
-
-    private void resizeMenubar() { //TODO перепроверить - вероятно удалить
-        ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
-        } else {
-            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
-        }
-        mTopBarContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -146,30 +205,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_container, mSendBirdMessagingChannelListFragment)
                 .commit();
-    }
-
-    private void initUIComponents() {
-        mTopBarContainer = findViewById(R.id.top_bar_container);
-        mTxtChannelUrl = (TextView)findViewById(R.id.txt_channel_url);
-
-        newRequestsBut = (TextView)findViewById(R.id.requestsBut);
-
-        /*newRequestsBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isAdmin)
-                    startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
-                else
-                {
-                    Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
-                    intent.putExtra("userId", mUserId);
-                    startActivity(intent);
-                }
-            }
-        });*/
-
-
-        resizeMenubar();
     }
 
     public static class SendBirdMessagingChannelListFragment extends Fragment {
