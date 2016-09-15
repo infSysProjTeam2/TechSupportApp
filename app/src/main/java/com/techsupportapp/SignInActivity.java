@@ -64,21 +64,6 @@ public class SignInActivity extends AppCompatActivity {
         initializeComponents();
 
         setEvents();
-
-        checkInternet();
-    }
-
-    private void checkInternet()
-    {
-        new Thread(new Runnable() {
-            @Override
-            public void run(){
-                isConnectedToInternet = hasConnection();
-                if (!isConnectedToInternet) {
-                    Toast.makeText(getApplicationContext(), "Нет подключения к Интернету", Toast.LENGTH_LONG).show();
-                }
-            }
-        }).start();
     }
 
     private void initializeComponents() {
@@ -104,8 +89,7 @@ public class SignInActivity extends AppCompatActivity {
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkInternet();
-                if (isConnectedToInternet) {
+                if (hasConnection()) {
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
                         Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
@@ -147,6 +131,10 @@ public class SignInActivity extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
                         }
                     }
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -206,27 +194,15 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private boolean hasConnection() {
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (activeNetwork != null && activeNetwork.isConnected()) {
-            try {
-                URL url = new URL("http://www.google.com/");
-                HttpURLConnection urlc = (HttpURLConnection)url.openConnection();
-                urlc.setRequestProperty("User-Agent", "test");
-                urlc.setRequestProperty("Connection", "close");
-                urlc.setConnectTimeout(1000);
-                urlc.connect();
-                if (urlc.getResponseCode() == 200) {
-                    return true;
-                }
-                return false;
+        Runtime runtime = Runtime.getRuntime();
+        try {
 
-            } catch (IOException e) {
-                Toast.makeText(getApplicationContext(), "Ошибка проверки подключения к Интернету. " +
-                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
-                return false;
-            }
-        }
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
 
         return false;
     }
