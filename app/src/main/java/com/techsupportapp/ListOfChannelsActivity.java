@@ -1,19 +1,25 @@
 package com.techsupportapp;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -36,40 +42,26 @@ import com.sendbird.android.model.Message;
 import com.sendbird.android.model.MessageModel;
 import com.sendbird.android.model.MessagingChannel;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 
-public class ListOfChannelsActivity extends FragmentActivity {
+public class ListOfChannelsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private SendBirdMessagingChannelListFragment mSendBirdMessagingChannelListFragment;
 
-    private ImageButton mBtnClose;
-    private ImageButton mBtnSettings;
-    private TextView mTxtChannelUrl;
-    private View mTopBarContainer;
     private String mAppId;
     private String mUserId;
     private String mNickname;
     private boolean isAdmin;
     private String mGcmRegToken;
 
-    private ImageView menuBut;
-    private TextView newRequestsBut;
+    private static Context cntxt;
+
+    private static ProgressDialog dialog;
 
     public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
@@ -85,6 +77,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_channels);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        cntxt = getBaseContext();
 
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
@@ -92,13 +85,104 @@ public class ListOfChannelsActivity extends FragmentActivity {
         isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(ListOfChannelsActivity.this).getString("SendBirdGCMToken", "");
 
+        dialog = new ProgressDialog(ListOfChannelsActivity.this);
+        dialog.setMessage("Загрузка...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
+
+        initializeComponents();
         initFragment();
-        initUIComponents();
         initSendBird();
 
-        mTxtChannelUrl.setText(mUserId);
+        Toast.makeText(this, "Долгое удержание по каналу для выхода из него.", Toast.LENGTH_LONG).show();
+    }
 
-        Toast.makeText(this, "Long press the channel to leave.", Toast.LENGTH_LONG).show();
+    private void initializeComponents(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(mUserId);
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        int COVER_IMAGE_SIZE = 150;
+        LetterBitmap letterBitmap = new LetterBitmap(ListOfChannelsActivity.this);
+        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+
+        userName.setText(mNickname);
+        if (isAdmin)
+            userType.setText("Администратор");
+        else
+            userType.setText("Пользователь");
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            //super.onBackPressed();
+        }
+    }
+
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.listOfTickets) {
+            if (isAdmin) {
+                Intent intent = new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class);
+                intent.putExtra("appKey", mAppId);
+                intent.putExtra("uuid", mUserId);
+                intent.putExtra("nickname", mNickname);
+                intent.putExtra("isAdmin", isAdmin);
+                startActivity(intent);
+            }
+            else
+            {
+                Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
+                intent.putExtra("appKey", mAppId);
+                intent.putExtra("uuid", mUserId);
+                intent.putExtra("nickname", mNickname);
+                intent.putExtra("isAdmin", isAdmin);
+                startActivity(intent);
+            }
+        } else if (id == R.id.settings) {
+
+        } else if (id == R.id.about) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(ListOfChannelsActivity.this);
+            builder.setTitle("О программе");
+            String str = String.format("Tech Support App V1.0");
+            builder.setMessage(str);
+            builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int arg1) {
+
+                }
+            });
+            builder.setCancelable(false);
+            AlertDialog alert = builder.create();
+            alert.show();
+            return true;
+        } else if (id == R.id.exit) {
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     private void initSendBird() {
@@ -109,17 +193,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        resizeMenubar();
-    }
-
-    private void resizeMenubar() { //TODO перепроверить - вероятно удалить
-        ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
-        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
-        } else {
-            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
-        }
-        mTopBarContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -158,30 +231,6 @@ public class ListOfChannelsActivity extends FragmentActivity {
                 .commit();
     }
 
-    private void initUIComponents() {
-        mTopBarContainer = findViewById(R.id.top_bar_container);
-        mTxtChannelUrl = (TextView)findViewById(R.id.txt_channel_url);
-
-        newRequestsBut = (TextView)findViewById(R.id.requestsBut);
-
-        newRequestsBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isAdmin)
-                    startActivity(new Intent(ListOfChannelsActivity.this, ListOfTicketsActivity.class));
-                else
-                {
-                    Intent intent = new Intent(ListOfChannelsActivity.this, CreateTicketActivity.class);
-                    intent.putExtra("userId", mUserId);
-                    startActivity(intent);
-                }
-            }
-        });
-
-
-        resizeMenubar();
-    }
-
     public static class SendBirdMessagingChannelListFragment extends Fragment {
         private SendBirdMessagingChannelListHandler mHandler;
         private ListView mListView;
@@ -201,8 +250,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
 
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_messaging_channel_list, container, false);
             initUIComponents(rootView);
             return rootView;
@@ -238,9 +286,9 @@ public class ListOfChannelsActivity extends FragmentActivity {
                 public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                     final MessagingChannel channel = mAdapter.getItem(position);
                     new AlertDialog.Builder(getActivity())
-                            .setTitle("Leave")
-                            .setMessage("Do you want to leave this channel?")
-                            .setPositiveButton("Leave", new DialogInterface.OnClickListener() {
+                            .setTitle("Покинуть")
+                            .setMessage("Вы хотите покинуть этот канал??")
+                            .setPositiveButton("Покинуть", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mAdapter.remove(position);
@@ -248,15 +296,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
                                     SendBird.endMessaging(channel.getUrl());
                                 }
                             })
-                            .setNeutralButton("Hide", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    mAdapter.remove(position);
-                                    mAdapter.notifyDataSetChanged();
-                                    SendBird.hideMessaging(channel.getUrl());
-                                }
-                            })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                 }
@@ -468,7 +508,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
                 viewHolder.getView("txt_date", TextView.class).setText("");
                 viewHolder.getView("txt_desc", TextView.class).setText("");
             }
-
+            dialog.dismiss();
             return convertView;
         }
 
@@ -494,8 +534,7 @@ public class ListOfChannelsActivity extends FragmentActivity {
             if(member.getId().equals(SendBird.getUserId())) {
                 continue;
             }
-
-            return member.getImageUrl();
+            return member.getName();
         }
 
         return "";
@@ -526,263 +565,10 @@ public class ListOfChannelsActivity extends FragmentActivity {
         }
     }
 
-    private static void displayUrlImage(ImageView imageView, String url) {
-        UrlDownloadAsyncTask.display(url, imageView);
-    }
-
-    private static class UrlDownloadAsyncTask extends AsyncTask<Void, Void, Object> {
-        private static LRUCache cache = new LRUCache((int) (Runtime.getRuntime().maxMemory() / 16)); // 1/16th of the maximum memory.
-        private final UrlDownloadAsyncTaskHandler handler;
-        private String url;
-
-        public static void download(String url, final File downloadFile, final Context context) {
-            UrlDownloadAsyncTask task = new UrlDownloadAsyncTask(url, new UrlDownloadAsyncTaskHandler() {
-                @Override
-                public void onPreExecute() {
-                    Toast.makeText(context, "Start downloading", Toast.LENGTH_SHORT).show();
-                }
-
-                @Override
-                public Object doInBackground(File file) {
-                    if(file == null) {
-                        return null;
-                    }
-
-                    try {
-                        BufferedInputStream in = null;
-                        BufferedOutputStream out = null;
-
-                        //create output directory if it doesn't exist
-                        File dir = downloadFile.getParentFile();
-                        if (!dir.exists()) {
-                            dir.mkdirs();
-                        }
-
-                        in = new BufferedInputStream(new FileInputStream(file));
-                        out = new BufferedOutputStream(new FileOutputStream(downloadFile));
-
-                        byte[] buffer = new byte[1024 * 100];
-                        int read;
-                        while ((read = in.read(buffer)) != -1) {
-                            out.write(buffer, 0, read);
-                        }
-                        in.close();
-                        out.flush();
-                        out.close();
-
-                        return downloadFile;
-                    } catch(IOException e) {
-                        e.printStackTrace();
-                    }
-
-                    return null;
-                }
-
-                @Override
-                public void onPostExecute(Object object, UrlDownloadAsyncTask task) {
-                    if(object != null && object instanceof File) {
-                        Toast.makeText(context, "Finish downloading: " + ((File)object).getAbsolutePath(), Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(context, "Error downloading", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            } else {
-                task.execute();
-            }
-        }
-
-        public static void display(String url, final ImageView imageView) {
-            UrlDownloadAsyncTask task = null;
-
-            if(imageView.getTag() != null && imageView.getTag() instanceof UrlDownloadAsyncTask) {
-                try {
-                    task = (UrlDownloadAsyncTask) imageView.getTag();
-                    task.cancel(true);
-                } catch(Exception e) {}
-
-                imageView.setTag(null);
-            }
-
-            task = new UrlDownloadAsyncTask(url, new UrlDownloadAsyncTaskHandler() {
-                @Override
-                public void onPreExecute() {
-                }
-
-                @Override
-                public Object doInBackground(File file) {
-                    if(file == null) {
-                        return null;
-                    }
-
-                    Bitmap bm = null;
-                    try {
-                        int targetHeight = 256;
-                        int targetWidth = 256;
-
-                        BufferedInputStream bin = new BufferedInputStream(new FileInputStream(file));
-                        bin.mark(bin.available());
-
-                        BitmapFactory.Options options = new BitmapFactory.Options();
-                        options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeStream(bin, null, options);
-
-                        Boolean scaleByHeight = Math.abs(options.outHeight - targetHeight) >= Math.abs(options.outWidth - targetWidth);
-
-                        if(options.outHeight * options.outWidth >= targetHeight * targetWidth) {
-                            double sampleSize = scaleByHeight
-                                    ? options.outHeight / targetHeight
-                                    : options.outWidth / targetWidth;
-                            options.inSampleSize = (int)Math.pow(2d, Math.floor(Math.log(sampleSize)/Math.log(2d)));
-                        }
-
-                        try {
-                            bin.reset();
-                        } catch(IOException e) {
-                            bin = new BufferedInputStream(new FileInputStream(file));
-                        }
-
-                        // Do the actual decoding
-                        options.inJustDecodeBounds = false;
-                        bm = BitmapFactory.decodeStream(bin, null, options);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    return bm;
-                }
-
-                @Override
-                public void onPostExecute(Object object, UrlDownloadAsyncTask task) {
-                    if(object != null && object instanceof Bitmap && imageView.getTag() == task) {
-                        imageView.setImageBitmap((Bitmap)object);
-                    } else {
-                        imageView.setImageResource(R.drawable.img_placeholder);
-                    }
-                }
-            });
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
-                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            } else {
-                task.execute();
-            }
-
-            imageView.setTag(task);
-        }
-
-        public UrlDownloadAsyncTask(String url, UrlDownloadAsyncTaskHandler handler) {
-            this.handler = handler;
-            this.url = url;
-        }
-
-        public interface UrlDownloadAsyncTaskHandler {
-            public void onPreExecute();
-            public Object doInBackground(File file);
-            public void onPostExecute(Object object, UrlDownloadAsyncTask task);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            if(handler != null) {
-                handler.onPreExecute();
-            }
-        }
-
-        protected Object doInBackground(Void... args) {
-            File outFile = null;
-            try {
-                if(cache.get(url) != null && new File(cache.get(url)).exists()) { // Cache Hit
-                    outFile = new File(cache.get(url));
-                } else { // Cache Miss, Downloading a file from the url.
-                    outFile = File.createTempFile("sendbird-download", ".tmp");
-                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(outFile));
-
-                    InputStream input = new BufferedInputStream(new URL(url).openStream());
-                    byte[] buf = new byte[1024 * 100];
-                    int read = 0;
-                    while ((read = input.read(buf, 0, buf.length)) >= 0) {
-                        outputStream.write(buf, 0, read);
-                    }
-
-                    outputStream.flush();
-                    outputStream.close();
-                    cache.put(url, outFile.getAbsolutePath());
-                }
-
-
-
-            } catch(IOException e) {
-                e.printStackTrace();
-
-                if(outFile != null) {
-                    outFile.delete();
-                }
-
-                outFile = null;
-            }
-
-
-            if(handler != null) {
-                return handler.doInBackground(outFile);
-            }
-
-            return outFile;
-        }
-
-        protected void onPostExecute(Object result) {
-            if(handler != null) {
-                handler.onPostExecute(result, this);
-            }
-        }
-
-        private static class LRUCache {
-            private final int maxSize;
-            private int totalSize;
-            private ConcurrentLinkedQueue<String> queue;
-            private ConcurrentHashMap<String, String> map;
-
-            public LRUCache(final int maxSize) {
-                this.maxSize = maxSize;
-                this.queue	= new ConcurrentLinkedQueue<String>();
-                this.map	= new ConcurrentHashMap<String, String>();
-            }
-
-            public String get(final String key) {
-                if (map.containsKey(key)) {
-                    queue.remove(key);
-                    queue.add(key);
-                }
-
-                return map.get(key);
-            }
-
-            public synchronized void put(final String key, final String value) {
-                if(key == null || value == null) {
-                    throw new NullPointerException();
-                }
-
-                if (map.containsKey(key)) {
-                    queue.remove(key);
-                }
-
-                queue.add(key);
-                map.put(key, value);
-                totalSize = totalSize + getSize(value);
-
-                while (totalSize >= maxSize) {
-                    String expiredKey = queue.poll();
-                    if (expiredKey != null) {
-                        totalSize = totalSize - getSize(map.remove(expiredKey));
-                    }
-                }
-            }
-
-            private int getSize(String value) {
-                return value.length();
-            }
-        }
+    private static void displayUrlImage(ImageView imageView, String name) {
+        int COVER_IMAGE_SIZE = 100;
+        LetterBitmap letterBitmap = new LetterBitmap(cntxt);
+        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        imageView.setImageBitmap(letterTile);
     }
 }

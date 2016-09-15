@@ -25,6 +25,7 @@ repositories {
 dependencies {
     compile 'com.sendbird.sdk:sendbird-android-sdk:2.2.11'
     compile 'com.google.firebase:firebase-database:9.4.0'
+    compile 'com.android.support:design:23.1.1'
 }
 
 dependencies {

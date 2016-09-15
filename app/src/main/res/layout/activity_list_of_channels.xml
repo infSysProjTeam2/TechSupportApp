@@ -1,145 +1,25 @@
-<android.support.v4.widget.DrawerLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:ignore="MergeRootFrame"
-    android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <FrameLayout
+    <include
+        layout="@layout/app_bar_channels"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" />
 
-        <RelativeLayout
-            android:id="@+id/top_bar_container"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="#824096"
-            >
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                >
-
-                <RelativeLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    >
-
-                    <TextView
-                        android:id="@+id/txt_channel_url"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_centerInParent="true"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#ffffff"
-                        android:text="Список каналов"
-                        />
-
-                </RelativeLayout>
-
-            </LinearLayout>
-
-        </RelativeLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            >
-
-            <!--<ImageView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:src="@drawable/sendbird_img_bg_default"-->
-                <!--android:scaleType="centerCrop"-->
-                <!--/>-->
-
-            <FrameLayout
-                android:id="@+id/fragment_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#f0f1f2"
-                />
-
-        </FrameLayout>
-
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="290dp"
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:background="#ffffff"
         android:layout_gravity="start"
-        android:gravity="center_horizontal"
-        >
-
-        <View
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:background="#824096"
-            />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="#000000"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="40sp"
-            android:paddingTop="15dp"
-            android:paddingBottom="15dp"
-            android:text="Меню"
-            />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:background="#000000"/>
-
-        <TextView
-            android:id="@+id/requestsBut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:paddingTop="15dp"
-            android:clickable="true"
-            android:text="Новые запросы"
-            />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#000000"/>
-
-        <TextView
-            android:id="@+id/problemsBut"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:textSize="20sp"
-            android:paddingTop="15dp"
-            android:background="#aaaaaa"
-            android:text="Нерешенные проблемы" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#000000"/>
-
-    </LinearLayout>
+        android:fitsSystemWindows="true"
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/list_of_channels_drawer" />
 
 </android.support.v4.widget.DrawerLayout>
-
