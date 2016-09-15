@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -115,6 +117,21 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        int COVER_IMAGE_SIZE = 150;
+        LetterBitmap letterBitmap = new LetterBitmap(ListOfTicketsActivity.this);
+        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+
+        userName.setText(mNickname);
+        if (isAdmin)
+            userType.setText("Администратор");
+        else
+            userType.setText("Пользователь");
     }
 
     private void setEvents() {

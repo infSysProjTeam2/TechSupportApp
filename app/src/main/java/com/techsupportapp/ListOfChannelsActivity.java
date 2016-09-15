@@ -110,6 +110,21 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        int COVER_IMAGE_SIZE = 150;
+        LetterBitmap letterBitmap = new LetterBitmap(ListOfChannelsActivity.this);
+        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+
+        userName.setText(mNickname);
+        if (isAdmin)
+            userType.setText("Администратор");
+        else
+            userType.setText("Пользователь");
     }
 
     @Override
