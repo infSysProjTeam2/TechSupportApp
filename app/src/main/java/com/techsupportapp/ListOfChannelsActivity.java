@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -60,6 +61,8 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
 
     private static Context cntxt;
 
+    private static ProgressDialog dialog;
+
     public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
@@ -81,6 +84,12 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         mNickname = getIntent().getExtras().getString("nickname");
         isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(ListOfChannelsActivity.this).getString("SendBirdGCMToken", "");
+
+        dialog = new ProgressDialog(ListOfChannelsActivity.this);
+        dialog.setMessage("Загрузка...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
 
         initializeComponents();
         initFragment();
@@ -226,8 +235,7 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
 
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_messaging_channel_list, container, false);
             initUIComponents(rootView);
             return rootView;
@@ -485,7 +493,7 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
                 viewHolder.getView("txt_date", TextView.class).setText("");
                 viewHolder.getView("txt_desc", TextView.class).setText("");
             }
-
+            dialog.dismiss();
             return convertView;
         }
 
@@ -511,7 +519,6 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
             if(member.getId().equals(SendBird.getUserId())) {
                 continue;
             }
-            //return member.getImageUrl();*/
             return member.getName();
         }
 
