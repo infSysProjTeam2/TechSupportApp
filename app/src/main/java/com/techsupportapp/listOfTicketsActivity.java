@@ -24,6 +24,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.variables.DatabaseVariables;
+import com.techsupportapp.variables.GlobalsMethods;
 
 import java.util.ArrayList;
 
@@ -79,18 +82,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(ListOfTicketsActivity.this);
-            builder.setTitle("О программе");
-            String str = String.format("Tech Support App V1.0");
-            builder.setMessage(str);
-            builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int arg1) {
-
-                }
-            });
-            builder.setCancelable(false);
-            AlertDialog alert = builder.create();
-            alert.show();
+            GlobalsMethods.showAbout(ListOfTicketsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.os.Process.killProcess(android.os.Process.myPid());
