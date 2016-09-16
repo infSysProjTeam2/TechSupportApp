@@ -137,8 +137,12 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
             intent.putExtra("nickname", mNickname);
             intent.putExtra("isAdmin", true);
             startActivity(intent);
-        } else if (id == R.id.signUpUser) {
-
+        } else if (id == R.id.listOfTickets) {
+            Intent intent = new Intent(SignUpUserActivity.this, ListOfTicketsActivity.class);
+            intent.putExtra("appKey", mAppId);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            startActivity(intent);
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {

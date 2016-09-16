@@ -9,6 +9,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -39,7 +40,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private String mAppId;
     private String mUserId;
     private String mNickname;
-    private boolean isAdmin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +49,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
-        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
 
         initializeComponents();
         setEvents();
@@ -73,7 +72,12 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.signUpUser) {
-
+            Intent intent = new Intent(ListOfTicketsActivity.this, SignUpUserActivity.class);
+            intent.putExtra("appKey", mAppId);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
@@ -115,10 +119,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         userImage.setImageBitmap(ChatActivity.getclip(letterTile));
 
         userName.setText(mNickname);
-        if (isAdmin)
-            userType.setText("Администратор");
-        else
-            userType.setText("Пользователь");
+        userType.setText("Администратор");
+
+        Menu nav_menu = navigationView.getMenu();
+        nav_menu.findItem(R.id.listOfTickets).setVisible(false);
     }
 
     private void setEvents() {

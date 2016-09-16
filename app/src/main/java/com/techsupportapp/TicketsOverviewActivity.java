@@ -106,6 +106,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
+        nav_menu.findItem(R.id.listOfChannels).setVisible(false);
         if (isAdmin) {
             userType.setText("Администратор");
         }
@@ -177,7 +178,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 intent.putExtra("appKey", mAppId);
                 intent.putExtra("uuid", mUserId);
                 intent.putExtra("nickname", mNickname);
-                intent.putExtra("isAdmin", isAdmin);
                 startActivity(intent);
             }
             else
@@ -186,7 +186,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 intent.putExtra("appKey", mAppId);
                 intent.putExtra("uuid", mUserId);
                 intent.putExtra("nickname", mNickname);
-                intent.putExtra("isAdmin", isAdmin);
                 startActivity(intent);
             }
         } else if (id == R.id.signUpUser) {
