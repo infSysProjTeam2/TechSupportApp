@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -80,12 +81,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            /*Intent intent = new Intent(CreateTicketActivity.this, ListOfChannelsActivity.class);
-            intent.putExtra("appKey", mAppId);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
-            intent.putExtra("isAdmin", isAdmin);
-            startActivity(intent);*/
             finish();
         } else if (id == R.id.settings) {
 
@@ -132,10 +127,14 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         userImage.setImageBitmap(ChatActivity.getclip(letterTile));
 
         userName.setText(mNickname);
-        if (isAdmin)
+        Menu nav_menu = navigationView.getMenu();
+        if (isAdmin) {
             userType.setText("Администратор");
-        else
+        }
+        else {
             userType.setText("Пользователь");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        }
     }
 
     private void setEvents() {

@@ -2,8 +2,11 @@ package com.techsupportapp.variables;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.support.v7.app.AlertDialog;
+import android.widget.ImageView;
 
+import com.techsupportapp.LetterBitmap;
 import com.techsupportapp.ListOfTicketsActivity;
 
 public class GlobalsMethods {
