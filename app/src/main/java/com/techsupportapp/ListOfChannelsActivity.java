@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -26,7 +25,6 @@ import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -134,7 +132,7 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //super.onBackPressed();
+            super.onBackPressed();
         }
     }
 
@@ -249,6 +247,8 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         private void initUIComponents(View rootView) {
             mListView = (ListView)rootView.findViewById(R.id.list);
             mListView.setAdapter(mAdapter);
+            if (mListView.getCount() == 0)
+                dialog.dismiss();
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
