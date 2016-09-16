@@ -5,7 +5,11 @@
         <item
             android:id="@+id/listOfChannels"
             android:icon="@drawable/ic_message_black_24dp"
-            android:title="Список текущих заявок" />
+            android:title="Список принятых заявок" />
+        <item
+            android:id="@+id/listOfTickets"
+            android:icon="@drawable/ic_report_black_24dp"
+            android:title="Список возможных заявок" />
         <item
             android:id="@+id/signUpUser"
             android:icon="@drawable/ic_assignment_turned_in_black_24dp"
