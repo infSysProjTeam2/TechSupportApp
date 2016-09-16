@@ -64,6 +64,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             drawer.closeDrawer(GravityCompat.START);
         } else {
             //super.onBackPressed();
+            finish();
         }
     }
 
@@ -73,12 +74,13 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, ListOfChannelsActivity.class);
+            /*Intent intent = new Intent(ListOfTicketsActivity.this, ListOfChannelsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             intent.putExtra("isAdmin", isAdmin);
-            startActivity(intent);
+            startActivity(intent);*/
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {

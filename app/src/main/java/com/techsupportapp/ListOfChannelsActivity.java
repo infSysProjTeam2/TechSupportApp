@@ -134,7 +134,7 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //super.onBackPressed();
+            super.onBackPressed();
         }
     }
 
@@ -249,6 +249,8 @@ public class ListOfChannelsActivity extends AppCompatActivity implements Navigat
         private void initUIComponents(View rootView) {
             mListView = (ListView)rootView.findViewById(R.id.list);
             mListView.setAdapter(mAdapter);
+            if (mListView.getCount() == 0)
+                dialog.dismiss();
             mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

@@ -48,6 +48,8 @@ public class SignInActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
 
+    private boolean isDownloaded = false;
+
     //endregion
 
     //region Composite Controls
@@ -105,6 +107,11 @@ public class SignInActivity extends AppCompatActivity {
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isDownloaded)
+                {
+                    Toast.makeText(getApplicationContext(), "Подождиье, грузится база", Toast.LENGTH_LONG);
+                    return;
+                }
                 if (hasConnection()) {
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
@@ -168,6 +175,7 @@ public class SignInActivity extends AppCompatActivity {
                     User user = userRecord.getValue(User.class);
                     userList.add(user);
                 }
+                isDownloaded = true;
             }
 
             @Override
