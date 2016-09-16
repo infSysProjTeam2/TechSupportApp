@@ -1,4 +1,4 @@
-package com.techsupportapp;
+package com.techsupportapp.databaseClasses;
 
 import java.io.Serializable;
 
