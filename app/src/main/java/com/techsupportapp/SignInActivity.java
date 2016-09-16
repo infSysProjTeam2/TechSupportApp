@@ -52,6 +52,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private Button closeAppBut;
     private Button signInBut;
+    private Button signUpBut;
 
     private EditText loginET;
     private EditText passwordET;
@@ -78,11 +79,10 @@ public class SignInActivity extends AppCompatActivity {
     private void initializeComponents() {
         closeAppBut = (Button)findViewById(R.id.closeAppButton);
         signInBut = (Button)findViewById(R.id.signInButton);
+        signUpBut = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
-
-        noAccount = (TextView)findViewById(R.id.noAccountText);
 
         rememberPas = (CheckBox)findViewById((R.id.checkBoxBold));
 
@@ -135,13 +135,13 @@ public class SignInActivity extends AppCompatActivity {
                             userName = loginET.getText().toString();
 
                             if (userList.get(i).isAdmin) {
-                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
+                                intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
                             else {
-                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
+                                intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
 
-                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
+                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
 
                             intent.putExtras(args);
 
@@ -181,7 +181,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        noAccount.setOnClickListener(new View.OnClickListener() {
+        signUpBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(SignInActivity.this, CreateUserActivity.class));
