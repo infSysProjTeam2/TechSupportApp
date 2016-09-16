@@ -1,13 +1,7 @@
 package com.techsupportapp;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -76,6 +70,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             drawer.closeDrawer(GravityCompat.START);
         } else {
             //super.onBackPressed();
+            finish();
         }
     }
 
@@ -85,12 +80,13 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            Intent intent = new Intent(CreateTicketActivity.this, ListOfChannelsActivity.class);
+            /*Intent intent = new Intent(CreateTicketActivity.this, ListOfChannelsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             intent.putExtra("isAdmin", isAdmin);
-            startActivity(intent);
+            startActivity(intent);*/
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {

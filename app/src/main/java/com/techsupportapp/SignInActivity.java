@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -21,8 +19,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.variables.DatabaseVariables;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,6 +43,8 @@ public class SignInActivity extends AppCompatActivity {
     private ArrayList<User> userList = new ArrayList<>();
 
     private DatabaseReference databaseReference;
+
+    private boolean isDownloaded = false;
 
     //endregion
 
@@ -105,6 +103,11 @@ public class SignInActivity extends AppCompatActivity {
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isDownloaded)
+                {
+                    Toast.makeText(getApplicationContext(), "Подождиье, грузится база", Toast.LENGTH_LONG);
+                    return;
+                }
                 if (hasConnection()) {
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
@@ -168,6 +171,7 @@ public class SignInActivity extends AppCompatActivity {
                     User user = userRecord.getValue(User.class);
                     userList.add(user);
                 }
+                isDownloaded = true;
             }
 
             @Override
