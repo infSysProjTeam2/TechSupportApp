@@ -14,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 
 public class GlobalsMethods {
 
+    //Показ информации о программе
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("О программе");
@@ -29,6 +30,7 @@ public class GlobalsMethods {
         alert.show();
     }
 
+    //Спрятать клавиатуру
     public static void hideKeyboard(Activity activity) {
         if (activity == null || activity.getCurrentFocus() == null) {
             return;
@@ -40,13 +42,15 @@ public class GlobalsMethods {
         }
     }
 
+    //Получить изображение с буковй
     public static Bitmap createUserImage(String name, Context cntxt){
         int COVER_IMAGE_SIZE = 100;
         LetterBitmap letterBitmap = new LetterBitmap(cntxt);
-        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
         return(letterTile);
     }
 
+    //Сделать изображение круглым
     public static Bitmap getclip(Bitmap bitmap) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);

@@ -19,7 +19,7 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     <dimen name="nav_header_height">160dp</dimen>
     <!-- The default letter tile text size -->
-    <dimen name="tile_letter_font_size">33sp</dimen>
+    <dimen name="tile_letter_font_size">22sp</dimen>
     <!-- The deafult tile size -->
     <dimen name="letter_tile_size">64dp</dimen>
 </resources>

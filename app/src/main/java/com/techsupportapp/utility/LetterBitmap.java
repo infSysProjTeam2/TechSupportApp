@@ -14,14 +14,6 @@ import android.text.TextPaint;
 
 import com.techsupportapp.R;
 
-/**
- * Orginal http://stackoverflow.com/questions/23122088/colored-boxed-with-letters-a-la-gmail
- * Used to create a {@link Bitmap} that contains a letter used in the English
- * alphabet or digit, if there is no letter or digit available, a default image
- * is shown instead.
- * 
- * Only English language supported.
- */
 public class LetterBitmap {
 
     /**
@@ -58,12 +50,6 @@ public class LetterBitmap {
      * The default image to display
      */
     private final Bitmap mDefaultBitmap;
-
-    /**
-     * Constructor for <code>LetterTileProvider</code>
-     *
-     * @param context The {@link Context} to use
-     */
     public LetterBitmap(Context context) {
         final Resources res = context.getResources();
 

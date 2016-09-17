@@ -2,6 +2,7 @@ package com.techsupportapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -57,8 +58,7 @@ public class SignInActivity extends AppCompatActivity {
     private EditText loginET;
     private EditText passwordET;
 
-    private TextView noAccount;
-
+    private boolean cbState;
     private CheckBox rememberPas;
 
     //endregion
@@ -68,6 +68,7 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
+        setTitle("Авторизация");
         initializeComponents();
 
         setEvents();
@@ -144,8 +145,7 @@ public class SignInActivity extends AppCompatActivity {
                             Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
 
                             intent.putExtras(args);
-
-                            passwordET.setText("");
+                            savePassAndLogin();
 
                             startActivityForResult(intent, 201);
                         }
@@ -184,7 +184,7 @@ public class SignInActivity extends AppCompatActivity {
         signUpBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(SignInActivity.this, CreateUserActivity.class));
+                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
             }
         });
     }
@@ -233,4 +233,27 @@ public class SignInActivity extends AppCompatActivity {
         return value;
     }
 
+    private void savePassAndLogin(){
+        SharedPreferences settings = getPreferences(0);
+        SharedPreferences.Editor editor = settings.edit();
+        if (rememberPas.isChecked()) {
+            String login = loginET.getText().toString();
+            String password = passwordET.getText().toString();
+            editor.putString("Login", login);
+            editor.putString("Password", password);
+            editor.putBoolean("cbState", true);
+        }
+        else
+            editor.clear();
+        editor.commit();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences settings = getPreferences(0);
+        loginET.setText(settings.getString("Login",""));
+        passwordET.setText(settings.getString("Password",""));
+        rememberPas.setChecked(settings.getBoolean("cbState", false));
+    }
 }
