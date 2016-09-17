@@ -35,7 +35,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private TextView problemBut;
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> listOfTickets = new ArrayList<Ticket>();
-    private ArrayAdapter<Ticket> adapter;
+    private TicketAdapter adapter;
 
     private String mAppId;
     private String mUserId;
@@ -134,7 +134,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     listOfTickets.add(ticket);
                 }
-                adapter = new ArrayAdapter<Ticket>(getApplicationContext(), android.R.layout.simple_list_item_1, listOfTickets);
+                adapter = new TicketAdapter(getApplicationContext(), listOfTickets);
                 viewOfTickets.setAdapter(adapter);
             }
 

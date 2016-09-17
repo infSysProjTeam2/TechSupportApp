@@ -1,5 +1,10 @@
 package com.techsupportapp.databaseClasses;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.logging.SimpleFormatter;
+
 public class Ticket {
 
     public String ticketId;
@@ -7,6 +12,7 @@ public class Ticket {
     public String adminId;
     public String topic;
     public String message;
+    public String date;
 
     public Ticket() {
 
@@ -18,9 +24,11 @@ public class Ticket {
         this.topic = topic;
         this.message = message;
         this.adminId = null;
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
+        this.date = formatter.format(Calendar.getInstance().getTime());
     }
 
-    public void addAdmin(String adminId){
+    public void addAdmin(String adminId) {
         this.adminId = adminId; }
 
     @Override
