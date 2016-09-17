@@ -2,6 +2,7 @@ package com.techsupportapp.databaseClasses;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.logging.SimpleFormatter;
 
 public class Ticket {
@@ -23,7 +24,7 @@ public class Ticket {
         this.topic = topic;
         this.message = message;
         this.adminId = null;
-        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy");
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
         this.date = formatter.format(Calendar.getInstance().getTime());
     }
 

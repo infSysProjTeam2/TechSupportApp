@@ -160,15 +160,38 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         ticketsOverview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ticketsOverviewList.get(position).addAdmin(mUserId);
-                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).setValue(ticketsOverviewList.get(position));
-                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
-
-                Intent intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
-                intent.putExtras(args);
-
+                Intent intent;
+                if (isAdmin) {
+                    intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
+                    Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
+                    intent.putExtras(args);
+                } else {
+                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals("")) {
+                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    else {
+                        intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
+                        Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).adminId);
+                        intent.putExtras(args);
+                    }
+                }
                 startActivityForResult(intent, 210);
+            }
+        });
+
+        ticketsOverview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isAdmin){
+                    //что-то
+                } else {
+                    //TODO вы точно хотите отозвать тикет
+                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals(""))
+                        databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
+                    else; //TODO проблема решена
+                }
+                return true;
             }
         });
     }

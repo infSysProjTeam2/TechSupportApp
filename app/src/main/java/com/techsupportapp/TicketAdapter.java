@@ -31,7 +31,9 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         TextView dateText = (TextView)rowView.findViewById(R.id.ticketDate);
         TextView topicText = (TextView)rowView.findViewById(R.id.ticketTopic);
         TextView descText = (TextView)rowView.findViewById(R.id.ticketDesc);
-        authorText.setText(values.get(position).userId);
+        if (values.get(position).adminId == null || values.get(position).adminId.equals(""))
+            authorText.setText(values.get(position).userId);
+        else authorText.setText(values.get(position).userId + " ✔");
         dateText.setText(values.get(position).date);
         topicText.setText(values.get(position).topic);
         descText.setText(values.get(position).message);
