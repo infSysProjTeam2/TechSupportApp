@@ -1,15 +1,10 @@
-package com.techsupportapp.variables;
+package com.techsupportapp.utility;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
 import android.support.v7.app.AlertDialog;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
-
-import com.techsupportapp.LetterBitmap;
-import com.techsupportapp.ListOfTicketsActivity;
 
 public class GlobalsMethods {
 

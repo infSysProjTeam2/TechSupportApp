@@ -11,11 +11,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -23,9 +24,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
@@ -36,6 +39,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> listOfTickets = new ArrayList<Ticket>();
     private TicketAdapter adapter;
+    private TabHost tabHost;
 
     private String mAppId;
     private String mUserId;
@@ -50,6 +54,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
+        initTabHost();
         initializeComponents();
         setEvents();
     }
@@ -92,8 +97,31 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         return true;
     }
 
+    private void initTabHost(){
+        tabHost = (TabHost) findViewById(R.id.tabHost);
+        tabHost.setup();
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
+
+        tabSpec.setContent(R.id.tab1);
+        tabSpec.setIndicator("Доступные");
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec("tag2");
+        tabSpec.setContent(R.id.tab2);
+        tabSpec.setIndicator("Закрытые мною");
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec("tag3");
+        tabSpec.setContent(R.id.tab3);
+        tabSpec.setIndicator("Все закрытые");
+        tabHost.addTab(tabSpec);
+
+        tabHost.setCurrentTab(0);
+
+    }
+
     private void initializeComponents() {
-        viewOfTickets = (ListView)findViewById(R.id.listOfTickets);
+        viewOfTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -159,5 +187,4 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             }
         });
     }
-
 }

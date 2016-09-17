@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,10 +25,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
@@ -131,12 +129,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            Intent intent = new Intent(SignUpUserActivity.this, TicketsOverviewActivity.class);
-            intent.putExtra("appKey", mAppId);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
-            intent.putExtra("isAdmin", true);
-            startActivity(intent);
+            finish();
         } else if (id == R.id.listOfTickets) {
             Intent intent = new Intent(SignUpUserActivity.this, ListOfTicketsActivity.class);
             intent.putExtra("appKey", mAppId);

@@ -23,8 +23,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 public class CreateTicketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 

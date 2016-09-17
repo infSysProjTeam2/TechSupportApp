@@ -56,6 +56,7 @@ import com.sendbird.android.model.MessagingChannel;
 import com.sendbird.android.model.ReadStatus;
 import com.sendbird.android.model.SystemMessage;
 import com.sendbird.android.model.TypeStatus;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.io.IOException;
 import java.util.ArrayList;

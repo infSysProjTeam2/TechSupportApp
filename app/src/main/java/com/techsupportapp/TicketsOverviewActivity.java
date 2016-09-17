@@ -1,6 +1,5 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,9 +28,11 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.sendbird.android.SendBird;
+import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
