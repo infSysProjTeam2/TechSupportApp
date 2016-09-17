@@ -23,7 +23,7 @@ import java.util.Comparator;
  * Класс для запроса пользователей на создание своего аккаунта
  * @author Monarch
  */
-public class CreateUserActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
 
     //region Fields
 
@@ -47,8 +47,9 @@ public class CreateUserActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_user);
+        setContentView(R.layout.activity_sign_up);
 
+        setTitle("Регистрация");
         initializeComponents();
 
         setEvents();
@@ -75,7 +76,7 @@ public class CreateUserActivity extends AppCompatActivity {
         returnBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateUserActivity.super.finish();
+                SignUpActivity.super.finish();
             }
         });
 
@@ -101,7 +102,7 @@ public class CreateUserActivity extends AppCompatActivity {
                     databaseReference.child(DatabaseVariables.DATABASE_USER_TABLE).child("user_" + userCount++)
                             .setValue(new User(loginET.getText().toString(), passwordET.getText().toString(), false));
                     databaseReference.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
-                    CreateUserActivity.super.finish();
+                    SignUpActivity.super.finish();
                 }
             }
         });

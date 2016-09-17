@@ -1,7 +1,8 @@
 package com.techsupportapp;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
@@ -28,7 +28,6 @@ import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
-import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
@@ -81,7 +80,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, SignUpUserActivity.class);
+            Intent intent = new Intent(ListOfTicketsActivity.this, VerifyUserActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -146,10 +145,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        int COVER_IMAGE_SIZE = 150;
-        LetterBitmap letterBitmap = new LetterBitmap(ListOfTicketsActivity.this);
-        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -179,16 +175,26 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         viewOfAvailableTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listOfAvailableTickets.get(position).addAdmin(mUserId);
-                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).setValue(listOfAvailableTickets.get(position));
-                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).removeValue();
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                new AlertDialog.Builder(getApplicationContext())
+                        .setTitle("Принять заявку")
+                        .setMessage("Вы действительно хотите принять заявку?")
+                        .setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                listOfAvailableTickets.get(position).addAdmin(mUserId);
+                                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).setValue(listOfAvailableTickets.get(position));
+                                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).removeValue();
+                            }
+                        })
+                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .create()
+                        .show();
 
-                /*Intent intent = new Intent(ListOfTicketsActivity.this, ChatActivity.class);
-                Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, listOfTickets.get(position).userId);
-                intent.putExtras(args);
-
-                startActivityForResult(intent, 210);*/
             }
         });
     }

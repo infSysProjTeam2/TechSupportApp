@@ -2,7 +2,6 @@ package com.techsupportapp;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -27,11 +26,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
-import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
-public class SignUpUserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class VerifyUserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
     private ListView usersView;
 
     private String mAppId;
@@ -47,7 +45,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up_user);
+        setContentView(R.layout.activity_verify_user);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         cntxt = getBaseContext();
 
@@ -80,10 +78,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        int COVER_IMAGE_SIZE = 150;
-        LetterBitmap letterBitmap = new LetterBitmap(SignUpUserActivity.this);
-        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, VerifyUserActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -131,7 +126,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(SignUpUserActivity.this, ListOfTicketsActivity.class);
+            Intent intent = new Intent(VerifyUserActivity.this, ListOfTicketsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -139,7 +134,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(SignUpUserActivity.this);
+            GlobalsMethods.showAbout(VerifyUserActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.os.Process.killProcess(android.os.Process.myPid());
