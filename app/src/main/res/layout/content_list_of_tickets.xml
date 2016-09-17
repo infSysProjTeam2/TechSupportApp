@@ -43,7 +43,7 @@
                 android:layout_height="match_parent" >
 
                 <ListView
-                    android:id="@+id/listOfYourClosedTickets"
+                    android:id="@+id/listOfRevisedTickets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                 </ListView>
@@ -55,7 +55,7 @@
                 android:layout_height="match_parent" >
 
                 <ListView
-                    android:id="@+id/listOfAllClosedTickets"
+                    android:id="@+id/listOfClosedTickets"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
                 </ListView>

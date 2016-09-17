@@ -34,10 +34,14 @@ import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private ListView viewOfTickets;
-    private TextView problemBut;
+    private ListView viewOfAvailableTickets;
+    private ListView viewOfRevisedTickets;
+    private ListView viewOfClosedTickets;
+
     private DatabaseReference databaseRef;
-    private ArrayList<Ticket> listOfTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfRevisedTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfClosedTickets = new ArrayList<Ticket>();
     private TicketAdapter adapter;
     private TabHost tabHost;
 
@@ -108,20 +112,21 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         tabSpec = tabHost.newTabSpec("tag2");
         tabSpec.setContent(R.id.tab2);
-        tabSpec.setIndicator("Закрытые мною");
+        tabSpec.setIndicator("Пересмотр");
         tabHost.addTab(tabSpec);
 
         tabSpec = tabHost.newTabSpec("tag3");
         tabSpec.setContent(R.id.tab3);
-        tabSpec.setIndicator("Все закрытые");
+        tabSpec.setIndicator("Закрытые");
         tabHost.addTab(tabSpec);
 
         tabHost.setCurrentTab(0);
-
     }
 
     private void initializeComponents() {
-        viewOfTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
+        viewOfAvailableTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
+        viewOfRevisedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
+        viewOfClosedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -144,7 +149,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         int COVER_IMAGE_SIZE = 150;
         LetterBitmap letterBitmap = new LetterBitmap(ListOfTicketsActivity.this);
         Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -157,13 +162,13 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                listOfTickets.clear();
+                listOfAvailableTickets.clear();
                 for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    listOfTickets.add(ticket);
+                    listOfAvailableTickets.add(ticket);
                 }
-                adapter = new TicketAdapter(getApplicationContext(), listOfTickets);
-                viewOfTickets.setAdapter(adapter);
+                adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                viewOfAvailableTickets.setAdapter(adapter);
             }
 
             @Override
@@ -172,12 +177,12 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             }
         });
 
-        viewOfTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        viewOfAvailableTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listOfTickets.get(position).addAdmin(mUserId);
-                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfTickets.get(position).ticketId).setValue(listOfTickets.get(position));
-                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfTickets.get(position).ticketId).removeValue();
+                listOfAvailableTickets.get(position).addAdmin(mUserId);
+                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).setValue(listOfAvailableTickets.get(position));
+                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).removeValue();
 
                 /*Intent intent = new Intent(ListOfTicketsActivity.this, ChatActivity.class);
                 Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, listOfTickets.get(position).userId);

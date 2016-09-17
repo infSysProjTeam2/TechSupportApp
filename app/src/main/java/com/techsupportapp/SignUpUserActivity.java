@@ -83,7 +83,7 @@ public class SignUpUserActivity extends AppCompatActivity implements NavigationV
         int COVER_IMAGE_SIZE = 150;
         LetterBitmap letterBitmap = new LetterBitmap(SignUpUserActivity.this);
         Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
 
         userName.setText(mNickname);
         userType.setText("Администратор");

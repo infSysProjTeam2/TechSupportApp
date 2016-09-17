@@ -103,7 +103,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         int COVER_IMAGE_SIZE = 150;
         LetterBitmap letterBitmap = new LetterBitmap(TicketsOverviewActivity.this);
         Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
