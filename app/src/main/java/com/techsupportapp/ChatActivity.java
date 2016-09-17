@@ -56,6 +56,8 @@ import com.sendbird.android.model.MessagingChannel;
 import com.sendbird.android.model.ReadStatus;
 import com.sendbird.android.model.SystemMessage;
 import com.sendbird.android.model.TypeStatus;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -991,23 +993,6 @@ public class ChatActivity extends FragmentActivity {
         int COVER_IMAGE_SIZE = 100;
         LetterBitmap letterBitmap = new LetterBitmap(cntxt);
         Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        imageView.setImageBitmap(getclip(letterTile));
-    }
-
-    public static Bitmap getclip(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
+        imageView.setImageBitmap(GlobalsMethods.getclip(letterTile));
     }
 }

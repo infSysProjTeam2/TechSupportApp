@@ -18,8 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
 
 import java.io.IOException;
 import java.util.ArrayList;

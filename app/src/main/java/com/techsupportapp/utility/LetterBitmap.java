@@ -1,4 +1,4 @@
-package com.techsupportapp;
+package com.techsupportapp.utility;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -11,6 +11,8 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.text.TextPaint;
+
+import com.techsupportapp.R;
 
 /**
  * Orginal http://stackoverflow.com/questions/23122088/colored-boxed-with-letters-a-la-gmail

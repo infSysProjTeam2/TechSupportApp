@@ -23,8 +23,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 public class CreateTicketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -122,7 +123,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         int COVER_IMAGE_SIZE = 150;
         LetterBitmap letterBitmap = new LetterBitmap(CreateTicketActivity.this);
         Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(letterTile));
 
         userName.setText(mNickname);
         userType.setText("Пользователь");

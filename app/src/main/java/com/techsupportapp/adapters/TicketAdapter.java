@@ -1,4 +1,4 @@
-package com.techsupportapp;
+package com.techsupportapp.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
 
 import java.util.ArrayList;
