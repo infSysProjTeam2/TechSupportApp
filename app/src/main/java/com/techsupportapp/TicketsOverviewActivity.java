@@ -35,7 +35,7 @@ import com.techsupportapp.variables.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class TicketsOverviewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class TicketsOverviewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ListView ticketsOverview;
 
@@ -127,12 +127,28 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ticketsOverviewList.clear();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
-                    Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    ticketsOverviewList.add(ticket);
+                if (isAdmin) {
+                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                        Ticket ticket = ticketRecord.getValue(Ticket.class);
+                        if (ticket.adminId.equals(mUserId))
+                            ticketsOverviewList.add(ticket);
+                    }
+                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setAdapter(adapter);
+                } else {
+                    for (DataSnapshot markedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                        Ticket markedTicket = markedTicketRecord.getValue(Ticket.class);
+                        if (markedTicket.userId.equals(mUserId))
+                            ticketsOverviewList.add(markedTicket);
+                    }
+                    for (DataSnapshot unMarkedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
+                        Ticket unMarkedTicket = unMarkedTicketRecord.getValue(Ticket.class);
+                        if (unMarkedTicket.userId.equals(mUserId))
+                            ticketsOverviewList.add(unMarkedTicket);
+                    }
+                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setAdapter(adapter);
                 }
-                adapter = new ArrayAdapter<Ticket>(getApplicationContext(), R.layout.item_ticket, ticketsOverviewList);
-                ticketsOverview.setAdapter(adapter);
             }
 
             @Override
@@ -144,15 +160,38 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         ticketsOverview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ticketsOverviewList.get(position).addAdmin(mUserId);
-                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).setValue(ticketsOverviewList.get(position));
-                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
-
-                Intent intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
-                intent.putExtras(args);
-
+                Intent intent;
+                if (isAdmin) {
+                    intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
+                    Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
+                    intent.putExtras(args);
+                } else {
+                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals("")) {
+                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    else {
+                        intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
+                        Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).adminId);
+                        intent.putExtras(args);
+                    }
+                }
                 startActivityForResult(intent, 210);
+            }
+        });
+
+        ticketsOverview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                if (isAdmin){
+                    //что-то
+                } else {
+                    //TODO вы точно хотите отозвать тикет
+                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals(""))
+                        databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
+                    else; //TODO проблема решена
+                }
+                return true;
             }
         });
     }

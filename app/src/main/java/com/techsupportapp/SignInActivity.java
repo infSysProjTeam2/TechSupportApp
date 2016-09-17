@@ -19,6 +19,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.variables.DatabaseVariables;
+import com.techsupportapp.variables.GlobalsMethods;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -105,7 +106,7 @@ public class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!isDownloaded)
                 {
-                    Toast.makeText(getApplicationContext(), "Подождиье, грузится база", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Подождите, грузится база", Toast.LENGTH_LONG);
                     return;
                 }
                 if (hasConnection()) {

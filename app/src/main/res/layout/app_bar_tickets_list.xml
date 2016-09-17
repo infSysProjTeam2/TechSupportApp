@@ -22,4 +22,5 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_list_of_tickets" />
+
 </android.support.design.widget.CoordinatorLayout>

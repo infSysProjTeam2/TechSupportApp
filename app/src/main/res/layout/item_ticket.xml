@@ -3,12 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="#d9d9d9"
         android:layout_alignParentBottom="true"
         />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -16,6 +18,7 @@
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         >
+
         <ImageView
             android:id="@+id/ticketImage"
             android:layout_marginRight="17dp"
@@ -34,14 +37,16 @@
             android:orientation="vertical"
             android:layout_gravity="center_vertical"
             >
+
             <LinearLayout
                 android:id="@+id/top"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 >
+
                 <TextView
-                    android:id="@+id/ticketMember"
+                    android:id="@+id/ticketAuthor"
                     android:layout_width="0dp"
                     android:maxWidth="100dp"
                     android:layout_weight="1"
@@ -67,23 +72,80 @@
                     />
 
             </LinearLayout>
-            <TextView
+
+            <LinearLayout
                 android:layout_below="@+id/top"
-                android:id="@+id/ticketDesc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="4dp"
-                android:maxLines="2"
-                android:textSize="12sp"
-                android:textColor="#999999"
-                android:text="Описание"
-                android:paddingRight="20dp" />
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="4dp"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:text="Тема:"
+                        android:paddingRight="6dp" />
+
+                    <TextView
+                        android:id="@+id/ticketTopic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="4dp"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:text="Тема"
+                        android:paddingRight="20dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="4dp"
+                        android:maxLines="2"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:text="Описание:"
+                        android:paddingRight="6dp" />
+
+                    <TextView
+                        android:id="@+id/ticketDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="4dp"
+                        android:maxLines="2"
+                        android:textSize="12sp"
+                        android:textColor="#999999"
+                        android:text="Описание"
+                        android:paddingRight="20dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
         </RelativeLayout>
+
     </LinearLayout>
+
     <View
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="1px"
         android:background="#e4e4e4"
         />
+
 </RelativeLayout>
