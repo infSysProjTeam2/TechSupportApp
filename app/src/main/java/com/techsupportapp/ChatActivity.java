@@ -874,7 +874,7 @@ public class ChatActivity extends FragmentActivity {
                             @Override
                             public boolean onLongClick(View v) {
                                 new AlertDialog.Builder(mContext)
-                                        .setTitle("SendBird")
+                                        .setTitle("Удалить сообщение")
                                         .setMessage("Вы действительно хотите удалить сообщение?")
                                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                             @Override
@@ -894,7 +894,7 @@ public class ChatActivity extends FragmentActivity {
                                                 });
                                             }
                                         })
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
                                             }

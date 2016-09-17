@@ -1,19 +1,14 @@
 package com.techsupportapp;
 
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -63,7 +58,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
-        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
         initializeComponents();
 
         setEvents();
@@ -75,7 +69,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //super.onBackPressed();
+            finish();
         }
     }
 
@@ -85,12 +79,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            Intent intent = new Intent(CreateTicketActivity.this, ListOfChannelsActivity.class);
-            intent.putExtra("appKey", mAppId);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
-            intent.putExtra("isAdmin", isAdmin);
-            startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
@@ -136,10 +125,12 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         userImage.setImageBitmap(ChatActivity.getclip(letterTile));
 
         userName.setText(mNickname);
-        if (isAdmin)
-            userType.setText("Администратор");
-        else
-            userType.setText("Пользователь");
+        userType.setText("Пользователь");
+
+        Menu nav_menu = navigationView.getMenu();
+        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.listOfTickets).setVisible(false);
+        nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
     }
 
     private void setEvents() {

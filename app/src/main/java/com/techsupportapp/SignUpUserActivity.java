@@ -1,8 +1,10 @@
 package com.techsupportapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -12,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -24,27 +27,31 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.variables.DatabaseVariables;
 import com.techsupportapp.variables.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-
-    private ListView viewOfTickets;
-    private TextView problemBut;
-    private DatabaseReference databaseRef;
-    private ArrayList<Ticket> listOfTickets = new ArrayList<Ticket>();
-    private ArrayAdapter<Ticket> adapter;
+public class SignUpUserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    private ListView usersView;
 
     private String mAppId;
     private String mUserId;
     private String mNickname;
 
+    private DatabaseReference databaseRef;
+    private ArrayList<User> usersList = new ArrayList<User>();
+    private ArrayAdapter<User> adapter;
+
+    private static Context cntxt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_list_of_tickets);
+        setContentView(R.layout.activity_sign_up_user);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        cntxt = getBaseContext();
 
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
@@ -52,6 +59,60 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         initializeComponents();
         setEvents();
+    }
+
+    private void initializeComponents(){
+        usersView = (ListView)findViewById(R.id.listOfUsers);
+
+        databaseRef = FirebaseDatabase.getInstance().getReference();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Авторизация пользователей");
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        int COVER_IMAGE_SIZE = 150;
+        LetterBitmap letterBitmap = new LetterBitmap(SignUpUserActivity.this);
+        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+
+        userName.setText(mNickname);
+        userType.setText("Администратор");
+
+        Menu nav_menu = navigationView.getMenu();
+        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+    }
+
+    private void setEvents() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
     }
 
     @Override
@@ -70,18 +131,22 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         int id = item.getItemId();
 
         if (id == R.id.listOfChannels) {
-            finish();
-        } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, SignUpUserActivity.class);
+            Intent intent = new Intent(SignUpUserActivity.this, TicketsOverviewActivity.class);
+            intent.putExtra("appKey", mAppId);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            intent.putExtra("isAdmin", true);
+            startActivity(intent);
+        } else if (id == R.id.listOfTickets) {
+            Intent intent = new Intent(SignUpUserActivity.this, ListOfTicketsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
-            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(ListOfTicketsActivity.this);
+            GlobalsMethods.showAbout(SignUpUserActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.os.Process.killProcess(android.os.Process.myPid());
@@ -91,73 +156,4 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-    private void initializeComponents() {
-        viewOfTickets = (ListView)findViewById(R.id.listOfTickets);
-
-        databaseRef = FirebaseDatabase.getInstance().getReference();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Список заявок");
-        setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
-        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
-        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
-
-        int COVER_IMAGE_SIZE = 150;
-        LetterBitmap letterBitmap = new LetterBitmap(ListOfTicketsActivity.this);
-        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
-
-        userName.setText(mNickname);
-        userType.setText("Администратор");
-
-        Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.listOfTickets).setVisible(false);
-    }
-
-    private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                listOfTickets.clear();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
-                    Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    listOfTickets.add(ticket);
-                }
-                adapter = new ArrayAdapter<Ticket>(getApplicationContext(), android.R.layout.simple_list_item_1, listOfTickets);
-                viewOfTickets.setAdapter(adapter);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        viewOfTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                listOfTickets.get(position).addAdmin(mUserId);
-                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfTickets.get(position).ticketId).setValue(listOfTickets.get(position));
-                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfTickets.get(position).ticketId).removeValue();
-
-                /*Intent intent = new Intent(ListOfTicketsActivity.this, ChatActivity.class);
-                Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, listOfTickets.get(position).userId);
-                intent.putExtras(args);
-
-                startActivityForResult(intent, 210);*/
-            }
-        });
-    }
-
 }

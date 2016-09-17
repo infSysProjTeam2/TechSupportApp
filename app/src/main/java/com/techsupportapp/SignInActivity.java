@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -21,8 +19,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.variables.DatabaseVariables;
-
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,12 +44,15 @@ public class SignInActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
 
+    private boolean isDownloaded = false;
+
     //endregion
 
     //region Composite Controls
 
     private Button closeAppBut;
     private Button signInBut;
+    private Button signUpBut;
 
     private EditText loginET;
     private EditText passwordET;
@@ -80,11 +79,10 @@ public class SignInActivity extends AppCompatActivity {
     private void initializeComponents() {
         closeAppBut = (Button)findViewById(R.id.closeAppButton);
         signInBut = (Button)findViewById(R.id.signInButton);
+        signUpBut = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
-
-        noAccount = (TextView)findViewById(R.id.noAccountText);
 
         rememberPas = (CheckBox)findViewById((R.id.checkBoxBold));
 
@@ -105,6 +103,11 @@ public class SignInActivity extends AppCompatActivity {
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (!isDownloaded)
+                {
+                    Toast.makeText(getApplicationContext(), "Подождиье, грузится база", Toast.LENGTH_LONG);
+                    return;
+                }
                 if (hasConnection()) {
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
@@ -132,13 +135,13 @@ public class SignInActivity extends AppCompatActivity {
                             userName = loginET.getText().toString();
 
                             if (userList.get(i).isAdmin) {
-                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
+                                intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
                             else {
-                                intent = new Intent(SignInActivity.this, ListOfChannelsActivity.class);
+                                intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
 
-                            Bundle args = ListOfChannelsActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
+                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
 
                             intent.putExtras(args);
 
@@ -168,6 +171,7 @@ public class SignInActivity extends AppCompatActivity {
                     User user = userRecord.getValue(User.class);
                     userList.add(user);
                 }
+                isDownloaded = true;
             }
 
             @Override
@@ -177,7 +181,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        noAccount.setOnClickListener(new View.OnClickListener() {
+        signUpBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(SignInActivity.this, CreateUserActivity.class));
