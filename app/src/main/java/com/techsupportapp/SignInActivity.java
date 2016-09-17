@@ -105,7 +105,7 @@ public class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (!isDownloaded)
                 {
-                    Toast.makeText(getApplicationContext(), "Подождиье, грузится база", Toast.LENGTH_LONG);
+                    Toast.makeText(getApplicationContext(), "Подождите, грузится база", Toast.LENGTH_LONG);
                     return;
                 }
                 if (hasConnection()) {

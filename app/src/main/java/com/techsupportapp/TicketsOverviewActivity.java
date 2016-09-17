@@ -35,7 +35,7 @@ import com.techsupportapp.variables.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class TicketsOverviewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class TicketsOverviewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private ListView ticketsOverview;
 
@@ -127,12 +127,28 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ticketsOverviewList.clear();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
-                    Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    ticketsOverviewList.add(ticket);
+                if (isAdmin) {
+                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                        Ticket ticket = ticketRecord.getValue(Ticket.class);
+                        if (ticket.adminId.equals(mUserId))
+                            ticketsOverviewList.add(ticket);
+                    }
+                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setAdapter(adapter);
+                } else {
+                    for (DataSnapshot markedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                        Ticket markedTicket = markedTicketRecord.getValue(Ticket.class);
+                        if (markedTicket.userId.equals(mUserId))
+                            ticketsOverviewList.add(markedTicket);
+                    }
+                    for (DataSnapshot unMarkedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
+                        Ticket unMarkedTicket = unMarkedTicketRecord.getValue(Ticket.class);
+                        if (unMarkedTicket.userId.equals(mUserId))
+                            ticketsOverviewList.add(unMarkedTicket);
+                    }
+                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setAdapter(adapter);
                 }
-                adapter = new ArrayAdapter<Ticket>(getApplicationContext(), R.layout.item_ticket, ticketsOverviewList);
-                ticketsOverview.setAdapter(adapter);
             }
 
             @Override
