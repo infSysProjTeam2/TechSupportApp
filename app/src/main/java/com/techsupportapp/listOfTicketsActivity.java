@@ -10,7 +10,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,13 +35,13 @@ import java.util.ArrayList;
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private ListView viewOfAvailableTickets;
-    private ListView viewOfRevisedTickets;
+    private ListView viewOfMyClosedTickets;
     private ListView viewOfClosedTickets;
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfRevisedTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfClosedTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
     private TicketAdapter adapter;
     private TabHost tabHost;
 
@@ -104,29 +104,25 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private void initTabHost(){
         tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
-        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
 
-        tabSpec.setContent(R.id.tab1);
-        tabSpec.setIndicator("Доступные");
-        tabHost.addTab(tabSpec);
-
-        tabSpec = tabHost.newTabSpec("tag2");
-        tabSpec.setContent(R.id.tab2);
-        tabSpec.setIndicator("Пересмотр");
-        tabHost.addTab(tabSpec);
-
-        tabSpec = tabHost.newTabSpec("tag3");
-        tabSpec.setContent(R.id.tab3);
-        tabSpec.setIndicator("Закрытые");
-        tabHost.addTab(tabSpec);
+        initTabSpec("tag1", R.id.tab1, "Доступные");
+        initTabSpec("tag2", R.id.tab2, "Закрытые мною");
+        initTabSpec("tag3", R.id.tab3, "Закрытые все");
 
         tabHost.setCurrentTab(0);
     }
 
+    private void initTabSpec(String tag, int viewId, String label) {
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec(tag);
+        tabSpec.setContent(viewId);
+        tabSpec.setIndicator(label);
+        tabHost.addTab(tabSpec);
+    }
+
     private void initializeComponents() {
         viewOfAvailableTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
-        viewOfRevisedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
-        viewOfClosedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
+        viewOfMyClosedTickets = (ListView)findViewById(R.id.listOfMyClosedTickets);
+        viewOfClosedTickets = (ListView)findViewById(R.id.listOfClosedTickets);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -160,12 +156,25 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listOfAvailableTickets.clear();
+                listOfMyClosedTickets.clear();
+                listOfSolvedTickets.clear();
                 for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     listOfAvailableTickets.add(ticket);
                 }
-                adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
-                viewOfAvailableTickets.setAdapter(adapter);
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_SOLVED_TICKET_TABLE).getChildren()) {
+                    Ticket ticket = ticketRecord.getValue(Ticket.class);
+                    listOfSolvedTickets.add(ticket);
+                }
+                for (Ticket ticket : listOfSolvedTickets) {
+                    if (ticket.adminId.equals(mUserId))
+                        listOfMyClosedTickets.add(ticket);
+                }
+                if (adapter == null) {
+                    adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                    viewOfAvailableTickets.setAdapter(adapter);
+                }
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -198,6 +207,29 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             }
                         });
                 builder.show();
+            }
+        });
+
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                switch (tabId){
+                    case "tag1":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                        viewOfAvailableTickets.setAdapter(adapter);
+                        return;
+                    case "tag2":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfMyClosedTickets);
+                        viewOfMyClosedTickets.setAdapter(adapter);
+                        return;
+                    case "tag3":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfSolvedTickets);
+                        viewOfClosedTickets.setAdapter(adapter);
+                        return;
+                    default:
+                        Toast.makeText(getApplicationContext(), "При смене ТАБа что-то произошло. Сообщите разработчику", Toast.LENGTH_LONG).show();
+                        return;
+                }
             }
         });
     }

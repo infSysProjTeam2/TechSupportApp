@@ -1,7 +1,6 @@
 package com.techsupportapp.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,8 +37,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
 
         if (values.get(position).adminId == null || values.get(position).adminId.equals(""))
             authorText.setText(values.get(position).userId);
-        else
-            authorText.setText(values.get(position).userId + " ✔");
+        else authorText.setText(values.get(position).userId + " ✔");
 
         dateText.setText(values.get(position).date);
         topicText.setText(values.get(position).topic);
