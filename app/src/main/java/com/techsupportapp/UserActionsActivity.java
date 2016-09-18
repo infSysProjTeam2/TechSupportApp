@@ -8,6 +8,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -26,8 +27,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.adapters.UnverifiedUserAdapter;
+import com.techsupportapp.adapters.UserAdapter;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
@@ -43,7 +47,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     private DatabaseReference databaseRef;
     private ArrayList<UnverifiedUser> unverifiedUsersList = new ArrayList<UnverifiedUser>();
+    private ArrayList<User> usersList = new ArrayList<User>();
     private UnverifiedUserAdapter adapter;
+    private UserAdapter adapter1;
 
     private static Context cntxt;
     private TabHost tabHost;
@@ -122,7 +128,18 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     unverifiedUsersList.add(user);
                 }
                 adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
-                unverifiedUsersView.setAdapter(adapter);
+                usersView.setAdapter(adapter);
+
+                usersList.clear();
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
+                    User user = userRecord.getValue(User.class);
+                    usersList.add(user);
+                }
+                adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                usersView.setAdapter(adapter1);
+
+                adapter.notifyDataSetChanged();
+                adapter1.notifyDataSetChanged();
             }
 
             @Override
@@ -133,10 +150,53 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         unverifiedUsersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
-                databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
-                Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
+
+                builder.setTitle("Подтвердить пользователя" + unverifiedUsersList.get(position).userId);
+                builder.setMessage("Вы действительно хотите подтвердить пользователя?");
+
+                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
+                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
+                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                    }
+                });
+
+                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.setCancelable(false);
+                builder.show();
+            }
+        });
+
+        usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(UserActionsActivity.this);
+                builder.setTitle("Пользователь " + usersList.get(position).login);
+                String permissions;
+                if (usersList.get(position).isAdmin)
+                    permissions = "администратор";
+                else
+                    permissions = "пользователь";
+                String str = String.format("Логин: %s\nUserId: %s\nПароль: %s\nПривилегии: %s\n ", usersList.get(position).login, usersList.get(position).userId, usersList.get(position).password, permissions);
+                builder.setMessage(str);
+                builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int arg1) {
+
+                    }
+                });
+                builder.setCancelable(false);
+                AlertDialog alert = builder.create();
+                alert.show();
             }
         });
     }
