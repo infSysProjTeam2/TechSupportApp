@@ -78,7 +78,7 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, VerifyUserActivity.this)));
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, VerifyUserActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
