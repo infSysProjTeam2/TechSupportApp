@@ -960,6 +960,6 @@ public class ChatActivity extends AppCompatActivity {
         int COVER_IMAGE_SIZE = 100;
         LetterBitmap letterBitmap = new LetterBitmap(cntxt);
         Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        imageView.setImageBitmap(GlobalsMethods.getclip(letterTile));
+        imageView.setImageBitmap(GlobalsMethods.ImageMethods.getclip(letterTile));
     }
 }

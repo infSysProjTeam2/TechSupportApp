@@ -98,7 +98,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);

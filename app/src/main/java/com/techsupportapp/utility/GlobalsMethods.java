@@ -11,10 +11,14 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.support.v7.app.AlertDialog;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 
 public class GlobalsMethods {
 
-    //Показ информации о программе
+    /**
+     * Метод, вызывающий информацию о приложении.
+     * @param context Контекст вызывающего класса.
+     */
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("О программе");
@@ -30,7 +34,10 @@ public class GlobalsMethods {
         alert.show();
     }
 
-    //Спрятать клавиатуру
+    /**
+     * Метод, скрывающий клавиатуру.
+     * @param activity
+     */
     public static void hideKeyboard(Activity activity) {
         if (activity == null || activity.getCurrentFocus() == null) {
             return;
@@ -42,29 +49,42 @@ public class GlobalsMethods {
         }
     }
 
-    //Получить изображение с буковй
-    public static Bitmap createUserImage(String name, Context cntxt){
-        int COVER_IMAGE_SIZE = 100;
-        LetterBitmap letterBitmap = new LetterBitmap(cntxt);
-        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        return(letterTile);
-    }
+    public static class ImageMethods {
+        /**
+         * Метод, создающий картинку пользователя с первой буквой его имени по центру.
+         *
+         * @param name Отображаемое имя пользователя.
+         * @param context Контекст вызывающего класса.
+         * @return Возвращает картинку (класс Bitmap) с первой буквой имени пользователя по центру.
+         */
+        public static Bitmap createUserImage(String name, Context context) {
+            int COVER_IMAGE_SIZE = 100;
+            LetterBitmap letterBitmap = new LetterBitmap(context);
+            Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+            return (letterTile);
+        }
 
-    //Сделать изображение круглым
-    public static Bitmap getclip(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
+        /**
+         * Метод, задающий округлую форму картинки.
+         *
+         * @param bitmap Изображение, форму которого необходимо изменить.
+         * @return Возвращает закругленную картинку (класс Bitmap).
+         */
+        public static Bitmap getclip(Bitmap bitmap) {
+            Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                    bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(output);
 
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            final Paint paint = new Paint();
+            final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
 
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
+            paint.setAntiAlias(true);
+            canvas.drawARGB(0, 0, 0, 0);
+            canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
+                    bitmap.getWidth() / 2, paint);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+            canvas.drawBitmap(bitmap, rect, rect, paint);
+            return output;
+        }
     }
 }

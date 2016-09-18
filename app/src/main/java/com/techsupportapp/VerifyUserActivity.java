@@ -18,13 +18,18 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.TicketAdapter;
+import com.techsupportapp.adapters.UnverifiedUserAdapter;
+import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
@@ -37,8 +42,8 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
     private String mNickname;
 
     private DatabaseReference databaseRef;
-    private ArrayList<User> usersList = new ArrayList<User>();
-    private ArrayAdapter<User> adapter;
+    private ArrayList<UnverifiedUser> usersList = new ArrayList<UnverifiedUser>();
+    private UnverifiedUserAdapter adapter;
 
     private static Context cntxt;
 
@@ -78,7 +83,7 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, VerifyUserActivity.this)));
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, VerifyUserActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -91,7 +96,13 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
+                usersList.clear();
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
+                    UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
+                    usersList.add(user);
+                }
+                adapter = new UnverifiedUserAdapter(getApplicationContext(), usersList);
+                usersView.setAdapter(adapter);
             }
 
             @Override
@@ -103,7 +114,9 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(usersList.get(position).userId).setValue(usersList.get(position).verifyUser());
+                databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(usersList.get(position).userId).removeValue();
+                Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
             }
         });
     }

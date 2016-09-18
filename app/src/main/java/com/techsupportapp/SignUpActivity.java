@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 
@@ -99,8 +100,8 @@ public class SignUpActivity extends AppCompatActivity {
                     loginET.setText("");
                     Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
                 } else {
-                    databaseReference.child(DatabaseVariables.DATABASE_USER_TABLE).child("user_" + userCount++)
-                            .setValue(new User(loginET.getText().toString(), passwordET.getText().toString(), false));
+                    databaseReference.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                            .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(), passwordET.getText().toString(), false));
                     databaseReference.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
                     SignUpActivity.super.finish();
                 }
@@ -111,8 +112,10 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loginList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_USER_TABLE).getChildren())
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
                     loginList.add(userRecord.getValue(User.class).login);
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
+                    loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().login);
                 userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 

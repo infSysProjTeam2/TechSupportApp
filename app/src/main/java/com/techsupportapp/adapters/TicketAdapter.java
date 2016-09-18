@@ -44,7 +44,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         dateText.setText(values.get(position).date);
         topicText.setText(values.get(position).topic);
         descText.setText(values.get(position).message);
-        ticketImage.setImageBitmap(GlobalsMethods.createUserImage(values.get(position).userId, context));
+        ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).userId, context));
         return rowView;
     }
 

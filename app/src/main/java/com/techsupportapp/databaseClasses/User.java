@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class User implements Serializable {
 
+    public String userId;
     public String login;
     public String password;
     public boolean isAdmin;
@@ -12,7 +13,8 @@ public class User implements Serializable {
 
     }
 
-    public User(String login, String password, boolean isAdmin) {
+    public User(String userId, String login, String password, boolean isAdmin) {
+        this.userId = userId;
         this.login = login;
         this.password = password;
         this.isAdmin = isAdmin;
