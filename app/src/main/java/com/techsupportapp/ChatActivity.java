@@ -110,12 +110,6 @@ public class ChatActivity extends AppCompatActivity {
 
         initFragment();
         initSendBird(getIntent().getExtras());
-
-        dialog = new ProgressDialog(this);
-        dialog.setMessage("Загрузка...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
-        dialog.show();
     }
 
     @Override
@@ -126,6 +120,12 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Загрузка...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
 
         isForeground = true;
         SendBird.markAsRead();
@@ -350,6 +350,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onAllDataReceived(SendBird.SendBirdDataType type, int count) {
                 mSendBirdMessagingAdapter.notifyDataSetChanged();
                 mSendBirdMessagingFragment.mListView.setSelection(mSendBirdMessagingAdapter.getCount() - 1);
+                dialog.dismiss();
             }
 
             @Override
