@@ -19,6 +19,7 @@ import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextWatcher;
@@ -56,6 +57,8 @@ import com.sendbird.android.model.MessagingChannel;
 import com.sendbird.android.model.ReadStatus;
 import com.sendbird.android.model.SystemMessage;
 import com.sendbird.android.model.TypeStatus;
+import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,15 +68,13 @@ import java.util.Hashtable;
 import java.util.List;
 
 
-public class ChatActivity extends FragmentActivity {
+public class ChatActivity extends AppCompatActivity {
     private static final int REQUEST_MEMBER_LIST = 100;
     private static final int MY_PERMISSION_REQUEST_STORAGE = 100;
 
     private SendBirdChatFragment mSendBirdMessagingFragment;
     private SendBirdMessagingAdapter mSendBirdMessagingAdapter;
 
-    private TextView mTxtChannelUrl;
-    private View mTopBarContainer;
     private CountDownTimer mTimer;
     private MessagingChannel mMessagingChannel;
     private Bundle mSendBirdInfo;
@@ -99,27 +100,15 @@ public class ChatActivity extends FragmentActivity {
         return args;
     }
 
-    public static Bundle makeMessagingJoinArgs(String appKey, String uuid, String nickname, String channelUrl) {
-        Bundle args = new Bundle();
-        args.putBoolean("join", true);
-        args.putString("appKey", appKey);
-        args.putString("uuid", uuid);
-        args.putString("nickname", nickname);
-        args.putString("channelUrl", channelUrl);
-        return args;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-
+        setTitle("Загрузка");
         cntxt = getBaseContext();
 
         initFragment();
-
-        initUIComponents();
         initSendBird(getIntent().getExtras());
 
         dialog = new ProgressDialog(this);
@@ -132,18 +121,6 @@ public class ChatActivity extends FragmentActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        resizeMenubar();
-    }
-
-
-    private void resizeMenubar() {
-        ViewGroup.LayoutParams lp = mTopBarContainer.getLayoutParams();
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            lp.height = (int) (28 * getResources().getDisplayMetrics().density);
-        } else {
-            lp.height = (int) (48 * getResources().getDisplayMetrics().density);
-        }
-        mTopBarContainer.setLayoutParams(lp);
     }
 
     @Override
@@ -433,7 +410,7 @@ public class ChatActivity extends FragmentActivity {
 
     private void updateMessagingChannel(MessagingChannel messagingChannel) {
         mMessagingChannel = messagingChannel;
-        mTxtChannelUrl.setText(getDisplayMemberNames(messagingChannel.getMembers()));
+        setTitle(getDisplayMemberNames(messagingChannel.getMembers()));
 
         Hashtable<String, Long> readStatus = new Hashtable<String, Long>();
         for (MessagingChannel.Member member : messagingChannel.getMembers()) {
@@ -448,14 +425,6 @@ public class ChatActivity extends FragmentActivity {
         mSendBirdMessagingAdapter.setMembers(messagingChannel.getMembers());
         mSendBirdMessagingAdapter.notifyDataSetChanged();
         dialog.dismiss();
-    }
-
-    private void initUIComponents() {
-
-        mTopBarContainer = findViewById(R.id.top_bar_container);
-        mTxtChannelUrl = (TextView) findViewById(R.id.txt_channel_url);
-
-        resizeMenubar();
     }
 
     @Override
@@ -990,24 +959,7 @@ public class ChatActivity extends FragmentActivity {
     private static void displayUrlImage(ImageView imageView, String name) {
         int COVER_IMAGE_SIZE = 100;
         LetterBitmap letterBitmap = new LetterBitmap(cntxt);
-        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        imageView.setImageBitmap(getclip(letterTile));
-    }
-
-    public static Bitmap getclip(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                bitmap.getWidth() / 2, paint);
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-        return output;
+        Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
+        imageView.setImageBitmap(GlobalsMethods.getclip(letterTile));
     }
 }

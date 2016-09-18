@@ -1,9 +1,7 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
@@ -29,9 +27,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.sendbird.android.SendBird;
+import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.variables.DatabaseVariables;
-import com.techsupportapp.variables.GlobalsMethods;
+import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 
@@ -99,10 +98,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        int COVER_IMAGE_SIZE = 150;
-        LetterBitmap letterBitmap = new LetterBitmap(TicketsOverviewActivity.this);
-        Bitmap letterTile = letterBitmap.getLetterTile(mNickname.substring(0), mNickname.substring(1), COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-        userImage.setImageBitmap(ChatActivity.getclip(letterTile));
+        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
@@ -228,7 +224,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 startActivity(intent);
             }
         } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(TicketsOverviewActivity.this, SignUpUserActivity.class);
+            Intent intent = new Intent(TicketsOverviewActivity.this, VerifyUserActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);

@@ -1,4 +1,4 @@
-package com.techsupportapp.variables;
+package com.techsupportapp.utility;
 
 public class DatabaseVariables {
 
