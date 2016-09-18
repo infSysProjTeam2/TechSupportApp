@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,13 +35,13 @@ import java.util.ArrayList;
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private ListView viewOfAvailableTickets;
-    private ListView viewOfRevisedTickets;
+    private ListView viewOfMyClosedTickets;
     private ListView viewOfClosedTickets;
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfRevisedTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfClosedTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
+    private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
     private TicketAdapter adapter;
     private TabHost tabHost;
 
@@ -103,29 +104,25 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private void initTabHost(){
         tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
-        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
 
-        tabSpec.setContent(R.id.tab1);
-        tabSpec.setIndicator("Доступные");
-        tabHost.addTab(tabSpec);
-
-        tabSpec = tabHost.newTabSpec("tag2");
-        tabSpec.setContent(R.id.tab2);
-        tabSpec.setIndicator("Пересмотр");
-        tabHost.addTab(tabSpec);
-
-        tabSpec = tabHost.newTabSpec("tag3");
-        tabSpec.setContent(R.id.tab3);
-        tabSpec.setIndicator("Закрытые");
-        tabHost.addTab(tabSpec);
+        initTabSpec("tag1", R.id.tab1, "Доступные");
+        initTabSpec("tag2", R.id.tab2, "Закрытые мною");
+        initTabSpec("tag3", R.id.tab3, "Закрытые все");
 
         tabHost.setCurrentTab(0);
     }
 
+    private void initTabSpec(String tag, int viewId, String label) {
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec(tag);
+        tabSpec.setContent(viewId);
+        tabSpec.setIndicator(label);
+        tabHost.addTab(tabSpec);
+    }
+
     private void initializeComponents() {
         viewOfAvailableTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
-        viewOfRevisedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
-        viewOfClosedTickets = (ListView)findViewById(R.id.listOfRevisedTickets);
+        viewOfMyClosedTickets = (ListView)findViewById(R.id.listOfMyClosedTickets);
+        viewOfClosedTickets = (ListView)findViewById(R.id.listOfClosedTickets);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -145,7 +142,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.getclip(GlobalsMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -159,12 +156,25 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 listOfAvailableTickets.clear();
+                listOfMyClosedTickets.clear();
+                listOfSolvedTickets.clear();
                 for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     listOfAvailableTickets.add(ticket);
                 }
-                adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
-                viewOfAvailableTickets.setAdapter(adapter);
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_SOLVED_TICKET_TABLE).getChildren()) {
+                    Ticket ticket = ticketRecord.getValue(Ticket.class);
+                    listOfSolvedTickets.add(ticket);
+                }
+                for (Ticket ticket : listOfSolvedTickets) {
+                    if (ticket.adminId.equals(mUserId))
+                        listOfMyClosedTickets.add(ticket);
+                }
+                if (adapter == null) {
+                    adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                    viewOfAvailableTickets.setAdapter(adapter);
+                }
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -176,25 +186,50 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         viewOfAvailableTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                new AlertDialog.Builder(getApplicationContext())
-                        .setTitle("Принять заявку")
-                        .setMessage("Вы действительно хотите принять заявку?")
-                        .setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(ListOfTicketsActivity.this);
+
+                builder.setTitle("Принять заявку");
+                builder.setMessage("Вы действительно хотите принять заявку?");
+
+                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 listOfAvailableTickets.get(position).addAdmin(mUserId);
                                 databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).setValue(listOfAvailableTickets.get(position));
                                 databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).ticketId).removeValue();
                             }
-                        })
-                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        });
+
+                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
                             }
-                        })
-                        .create()
-                        .show();
+                        });
+                builder.show();
+            }
+        });
 
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                switch (tabId){
+                    case "tag1":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                        viewOfAvailableTickets.setAdapter(adapter);
+                        return;
+                    case "tag2":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfMyClosedTickets);
+                        viewOfMyClosedTickets.setAdapter(adapter);
+                        return;
+                    case "tag3":
+                        adapter = new TicketAdapter(getApplicationContext(), listOfSolvedTickets);
+                        viewOfClosedTickets.setAdapter(adapter);
+                        return;
+                    default:
+                        Toast.makeText(getApplicationContext(), "При смене ТАБа что-то произошло. Сообщите разработчику", Toast.LENGTH_LONG).show();
+                        return;
+                }
             }
         });
     }

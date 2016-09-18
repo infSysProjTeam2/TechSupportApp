@@ -13,16 +13,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Класс для аутентификации пользователей
@@ -41,7 +45,8 @@ public class SignInActivity extends AppCompatActivity {
 
     //region Fields
 
-    private ArrayList<User> userList = new ArrayList<>();
+    private ArrayList<User> userList = new ArrayList<User>();
+    private ArrayList<String> unverifiedLoginsList = new ArrayList<String>();
 
     private DatabaseReference databaseReference;
 
@@ -110,15 +115,24 @@ public class SignInActivity extends AppCompatActivity {
                     return;
                 }
                 if (hasConnection()) {
+                    int index = Collections.binarySearch(unverifiedLoginsList, loginET.getText().toString(), new Comparator<String>() {
+                        @Override
+                        public int compare(String lhs, String rhs) {
+                            return lhs.compareTo(rhs);
+                        }
+                    });
                     if (loginET.getText().toString().equals("")) {
                         loginET.requestFocus();
                         Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
                     } else if (passwordET.getText().toString().equals("")) {
                         passwordET.requestFocus();
                         Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
-                    } else if (userList.size() == 0){
+                    } else if (userList.size() == 0) {
                         Toast.makeText(getApplicationContext(), "База данных пуста. " +
                                 "Зарегистрируйте компанию у нас", Toast.LENGTH_LONG).show(); //Заготовка
+                    } else if (index >= 0) {
+                        Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
+                                "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
                     } else {
                         int i = 0;
                         while (!loginET.getText().toString().equals(userList.get(i).login) && ++i < userList.size()); //TODO binarySearch
@@ -167,9 +181,14 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_USER_TABLE).getChildren()) {
+                unverifiedLoginsList.clear();
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
                     User user = userRecord.getValue(User.class);
                     userList.add(user);
+                }
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
+                    UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
+                    unverifiedLoginsList.add(user.login);
                 }
                 isDownloaded = true;
             }
