@@ -161,7 +161,7 @@ public class SignInActivity extends AppCompatActivity {
                             intent.putExtras(args);
                             savePassAndLogin();
 
-                            startActivityForResult(intent, 201);
+                            startActivity(intent);
                         }
                         else
                         {
@@ -215,6 +215,7 @@ public class SignInActivity extends AppCompatActivity {
         builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                savePassAndLogin();
                 SignInActivity.super.onBackPressed();
             }
         });

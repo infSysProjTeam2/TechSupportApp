@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -14,9 +15,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,16 +26,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.adapters.UnverifiedUserAdapter;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
-import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class VerifyUserActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class UserActionsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+    private ListView unverifiedUsersView;
     private ListView usersView;
 
     private String mAppId;
@@ -42,15 +42,16 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
     private String mNickname;
 
     private DatabaseReference databaseRef;
-    private ArrayList<UnverifiedUser> usersList = new ArrayList<UnverifiedUser>();
+    private ArrayList<UnverifiedUser> unverifiedUsersList = new ArrayList<UnverifiedUser>();
     private UnverifiedUserAdapter adapter;
 
     private static Context cntxt;
+    private TabHost tabHost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_verify_user);
+        setContentView(R.layout.activity_user_actions);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         cntxt = getBaseContext();
 
@@ -58,17 +59,19 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
+        initTabHost();
         initializeComponents();
         setEvents();
     }
 
     private void initializeComponents(){
+        unverifiedUsersView = (ListView)findViewById(R.id.listOfUnverifiedUsers);
         usersView = (ListView)findViewById(R.id.listOfUsers);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Авторизация пользователей");
+        toolbar.setTitle("Пользователи");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -83,7 +86,7 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, VerifyUserActivity.this)));
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -92,17 +95,34 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
     }
 
+    private void initTabHost(){
+        tabHost = (TabHost) findViewById(R.id.tabHost);
+        tabHost.setup();
+
+        initTabSpec("tag1", R.id.tab1, "Авторизация");
+        initTabSpec("tag2", R.id.tab2, "Все");
+
+        tabHost.setCurrentTab(0);
+    }
+
+    private void initTabSpec(String tag, int viewId, String label) {
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec(tag);
+        tabSpec.setContent(viewId);
+        tabSpec.setIndicator(label);
+        tabHost.addTab(tabSpec);
+    }
+
     private void setEvents() {
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList.clear();
+                unverifiedUsersList.clear();
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
                     UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
-                    usersList.add(user);
+                    unverifiedUsersList.add(user);
                 }
-                adapter = new UnverifiedUserAdapter(getApplicationContext(), usersList);
-                usersView.setAdapter(adapter);
+                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                unverifiedUsersView.setAdapter(adapter);
             }
 
             @Override
@@ -111,11 +131,11 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
             }
         });
 
-        usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        unverifiedUsersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(usersList.get(position).userId).setValue(usersList.get(position).verifyUser());
-                databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(usersList.get(position).userId).removeValue();
+                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
+                databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
                 Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
             }
         });
@@ -139,7 +159,7 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(VerifyUserActivity.this, ListOfTicketsActivity.class);
+            Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -147,14 +167,36 @@ public class VerifyUserActivity extends AppCompatActivity implements NavigationV
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(VerifyUserActivity.this);
+            GlobalsMethods.showAbout(UserActionsActivity.this);
             return true;
         } else if (id == R.id.exit) {
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    exit();
+                }
+            });
+
+            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.setCancelable(false);
+            builder.setMessage("Вы действительно хотите закрыть приложение?");
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 }

@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -224,7 +225,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 startActivity(intent);
             }
         } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(TicketsOverviewActivity.this, VerifyUserActivity.class);
+            Intent intent = new Intent(TicketsOverviewActivity.this, UserActionsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -235,11 +236,33 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             GlobalsMethods.showAbout(TicketsOverviewActivity.this);
             return true;
         } else if (id == R.id.exit) {
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    exit();
+                }
+            });
+
+            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.setCancelable(false);
+            builder.setMessage("Вы действительно хотите закрыть приложение?");
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 }

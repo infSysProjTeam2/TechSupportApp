@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -87,7 +88,25 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             GlobalsMethods.showAbout(CreateTicketActivity.this);
             return true;
         } else if (id == R.id.exit) {
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    exit();
+                }
+            });
+
+            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.setCancelable(false);
+            builder.setMessage("Вы действительно хотите закрыть приложение?");
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -162,5 +181,9 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
     private void resizeTextComponents() {
 
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 }
