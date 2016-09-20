@@ -22,6 +22,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -160,7 +161,7 @@ public class SignInActivity extends AppCompatActivity {
 
                             intent.putExtras(args);
                             savePassAndLogin();
-
+                            GlobalsMethods.currUserId = userName;
                             startActivity(intent);
                         }
                         else

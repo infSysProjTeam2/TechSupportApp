@@ -19,6 +19,8 @@ public class GlobalsMethods {
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.
      */
+    public static String currUserId;
+
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("О программе");

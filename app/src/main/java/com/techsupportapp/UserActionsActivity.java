@@ -54,6 +54,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static Context cntxt;
     private TabHost tabHost;
 
+    private ImageView currUserImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,17 +90,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
-
-        Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
     }
 
     private void initTabHost(){
@@ -197,6 +196,16 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 builder.setCancelable(false);
                 AlertDialog alert = builder.create();
                 alert.show();
+            }
+        });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
     }

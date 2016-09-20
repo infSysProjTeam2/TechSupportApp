@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,6 +49,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayAdapter<Ticket> adapter;
+
+    private ImageView currUserImage;
 
     private static Context cntxt;
 
@@ -95,11 +98,11 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
@@ -110,6 +113,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         else {
             userType.setText("Пользователь");
             nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
     }
@@ -189,6 +193,16 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     else; //TODO проблема решена
                 }
                 return true;
+            }
+        });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TicketsOverviewActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
     }
