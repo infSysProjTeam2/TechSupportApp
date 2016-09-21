@@ -1,7 +1,7 @@
 package com.techsupportapp;
 
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,7 +26,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
-import com.techsupportapp.utility.LetterBitmap;
 
 public class CreateTicketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -38,7 +37,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private String mAppId;
     private String mUserId;
     private String mNickname;
-    private boolean isAdmin;
 
     //endregion
 
@@ -49,6 +47,8 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
     private Button createBut;
     private Button cancelBut;
+
+    private ImageView currUserImage;
 
     //endregion
 
@@ -135,18 +135,17 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, CreateTicketActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, CreateTicketActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Пользователь");
 
         Menu nav_menu = navigationView.getMenu();
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
-        nav_menu.findItem(R.id.listOfTickets).setVisible(false);
         nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
     }
 
@@ -175,6 +174,16 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreateTicketActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
     }

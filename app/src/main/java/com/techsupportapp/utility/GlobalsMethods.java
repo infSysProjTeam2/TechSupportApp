@@ -11,7 +11,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.support.v7.app.AlertDialog;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Toast;
 
 public class GlobalsMethods {
 
@@ -19,6 +18,8 @@ public class GlobalsMethods {
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.
      */
+    public static String currUserId;
+
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("О программе");

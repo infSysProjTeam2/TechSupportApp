@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +29,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.adapters.UnverifiedUserAdapter;
 import com.techsupportapp.adapters.UserAdapter;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
@@ -53,6 +54,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     private static Context cntxt;
     private TabHost tabHost;
+
+    private ImageView currUserImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,17 +91,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
-
-        Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
     }
 
     private void initTabHost(){
@@ -128,7 +128,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     unverifiedUsersList.add(user);
                 }
                 adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
-                usersView.setAdapter(adapter);
+                unverifiedUsersView.setAdapter(adapter);
 
                 usersList.clear();
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
@@ -153,7 +153,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                builder.setTitle("Подтвердить пользователя" + unverifiedUsersList.get(position).userId);
+                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).userId);
                 builder.setMessage("Вы действительно хотите подтвердить пользователя?");
 
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
@@ -199,11 +199,22 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 alert.show();
             }
         });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -254,6 +265,26 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_search) {
+            return true;
+        } else if (id == R.id.action_sort) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void exit(){

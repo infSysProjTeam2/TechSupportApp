@@ -1,6 +1,7 @@
 package com.techsupportapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.techsupportapp.R;
+import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
 
@@ -30,10 +32,21 @@ public class UserAdapter extends ArrayAdapter<User> {
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.item_user, parent, false);
         ImageView userImage = (ImageView) rowView.findViewById(R.id.userImage);
-        TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
+        final TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
 
         userNameText.setText(values.get(position).login);
         userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).login, context));
+
+        userImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, UserProfileActivity.class);
+                intent.putExtra("userId", userNameText.getText().toString());
+                intent.putExtra("currUserId", GlobalsMethods.currUserId);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
+        });
         return rowView;
     }
 }
