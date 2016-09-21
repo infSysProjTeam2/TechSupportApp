@@ -108,6 +108,12 @@ public class ChatActivity extends AppCompatActivity {
         setTitle("Загрузка");
         cntxt = getBaseContext();
 
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Загрузка...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
+
         initFragment();
         initSendBird(getIntent().getExtras());
     }
@@ -120,12 +126,6 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        dialog = new ProgressDialog(this);
-        dialog.setMessage("Загрузка...");
-        dialog.setCancelable(false);
-        dialog.setInverseBackgroundForced(false);
-        dialog.show();
 
         isForeground = true;
         SendBird.markAsRead();

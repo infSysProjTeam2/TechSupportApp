@@ -1,15 +1,18 @@
 package com.techsupportapp;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,7 +30,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.adapters.UnverifiedUserAdapter;
 import com.techsupportapp.adapters.UserAdapter;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
@@ -51,15 +53,19 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private UnverifiedUserAdapter adapter;
     private UserAdapter adapter1;
 
-    private static Context cntxt;
+    private MenuItem searchMenu;
+    private SearchView searchView;
+    private boolean search;
+
     private TabHost tabHost;
+
+    private ImageView currUserImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_actions);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        cntxt = getBaseContext();
 
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
@@ -88,17 +94,15 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
-
-        Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        search = false;
     }
 
     private void initTabHost(){
@@ -122,24 +126,26 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                unverifiedUsersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
-                    UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
-                    unverifiedUsersList.add(user);
-                }
-                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
-                usersView.setAdapter(adapter);
+                if (!search) {
+                    unverifiedUsersList.clear();
+                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
+                        UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
+                        unverifiedUsersList.add(user);
+                    }
+                    adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                    unverifiedUsersView.setAdapter(adapter);
 
-                usersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
-                    User user = userRecord.getValue(User.class);
-                    usersList.add(user);
-                }
-                adapter1 = new UserAdapter(getApplicationContext(), usersList);
-                usersView.setAdapter(adapter1);
+                    usersList.clear();
+                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
+                        User user = userRecord.getValue(User.class);
+                        usersList.add(user);
+                    }
+                    adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                    usersView.setAdapter(adapter1);
 
-                adapter.notifyDataSetChanged();
-                adapter1.notifyDataSetChanged();
+                    adapter.notifyDataSetChanged();
+                    adapter1.notifyDataSetChanged();
+                }
             }
 
             @Override
@@ -153,15 +159,17 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                builder.setTitle("Подтвердить пользователя" + unverifiedUsersList.get(position).userId);
+                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).userId);
                 builder.setMessage("Вы действительно хотите подтвердить пользователя?");
 
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        search = false;
                         databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
                         databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
                         Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                        searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });
 
@@ -199,11 +207,39 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 alert.show();
             }
         });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
+            }
+        });
+
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                searchView.setQuery("", false);
+                MenuItemCompat.collapseActionView(searchMenu);
+
+                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                unverifiedUsersView.setAdapter(adapter);
+
+                adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                usersView.setAdapter(adapter1);
+
+                adapter.notifyDataSetChanged();
+                adapter1.notifyDataSetChanged();
+            }
+        });
     }
 
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -254,6 +290,77 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        searchMenu = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchMenu.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            public boolean onQueryTextChange(String newText) {
+                if (!searchView.getQuery().toString().equals(""))
+                    search = true;
+                if (tabHost.getCurrentTabTag().equals("tag1")) {
+                    ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
+
+                    for (UnverifiedUser unverifiedUser: unverifiedUsersList){
+                        if (unverifiedUser.login.contains(searchView.getQuery().toString()))
+                            newUnverifiedUsersList.add(unverifiedUser);
+                    }
+
+                    adapter = new UnverifiedUserAdapter(getApplicationContext(), newUnverifiedUsersList);
+                    unverifiedUsersView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
+                else
+                {
+                    ArrayList<User> newUsersList = new ArrayList<User>();
+
+                    for (User user: usersList){
+                        if (user.login.contains(searchView.getQuery().toString()))
+                            newUsersList.add(user);
+                    }
+
+                    adapter1 = new UserAdapter(getApplicationContext(), newUsersList);
+                    usersView.setAdapter(adapter1);
+                    adapter1.notifyDataSetChanged();
+                }
+                return true;
+            }
+        });
+
+        MenuItemCompat.setOnActionExpandListener(searchMenu,
+                new MenuItemCompat.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        return true;
+                    }
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                        search = false;
+                        return true;
+                    }
+                });
+
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_search) {
+            return true;
+        } else if (id == R.id.action_sort) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void exit(){
