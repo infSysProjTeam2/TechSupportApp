@@ -8,7 +8,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -157,15 +156,15 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).userId);
+                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
                 builder.setMessage("Вы действительно хотите подтвердить пользователя?");
 
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         search = false;
-                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
-                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
+                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
                         Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
@@ -296,7 +295,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
 
                     for (UnverifiedUser unverifiedUser: unverifiedUsersList){
-                        if (unverifiedUser.login.contains(searchView.getQuery().toString()))
+                        if (unverifiedUser.getLogin().contains(searchView.getQuery().toString()))
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
@@ -309,7 +308,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     ArrayList<User> newUsersList = new ArrayList<User>();
 
                     for (User user: usersList){
-                        if (user.login.contains(searchView.getQuery().toString()))
+                        if (user.getLogin().contains(searchView.getQuery().toString()))
                             newUsersList.add(user);
                     }
 
