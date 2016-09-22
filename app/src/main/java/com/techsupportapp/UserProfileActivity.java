@@ -64,9 +64,6 @@ public class UserProfileActivity extends AppCompatActivity{
         userImage = (ImageView)findViewById(R.id.userImage);
 
         editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
-
-        if (!mCurrUserId.equals(mUserId))
-            editProfileBtn.setVisibility(View.INVISIBLE);
     }
 
     private void setEvents(){
