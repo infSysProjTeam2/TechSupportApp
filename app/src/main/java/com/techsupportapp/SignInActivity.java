@@ -187,7 +187,7 @@ public class SignInActivity extends AppCompatActivity {
                 }
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
                     UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
-                    unverifiedLoginsList.add(user.login);
+                    unverifiedLoginsList.add(user.getLogin());
                 }
                 isDownloaded = true;
             }
