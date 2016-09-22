@@ -2,7 +2,6 @@ package com.techsupportapp;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -129,7 +128,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Поле нового пароля пусто", Toast.LENGTH_LONG).show();
                         else if (newPasswordRepeat.getText().toString().equals(""))
                             Toast.makeText(getApplicationContext(), "Нужно повторить пароль", Toast.LENGTH_LONG).show();
-                        else if (!currentPassword.getText().toString().equals(usersList.get(userPosition).password))
+                        else if (!currentPassword.getText().toString().equals(usersList.get(userPosition).getPassword()))
                             Toast.makeText(getApplicationContext(), "Введен неправильный пароль", Toast.LENGTH_LONG).show();
                         else if (!newPassword.getText().toString().equals(newPasswordRepeat.getText().toString()))
                             Toast.makeText(getApplicationContext(), "Пароли должны совпадать", Toast.LENGTH_LONG).show();
@@ -166,7 +165,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")){
-                            if (usersList.get(userPosition).isAdmin) {
+                            if (usersList.get(userPosition).getIsAdmin()) {
                                 Toast.makeText(getApplicationContext(), "Переведен в статус пользователей (нет)", Toast.LENGTH_LONG).show();
                                 //TODO сделать
                                 //databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(usersList.get(userPosition).isAdmin).setValue("false");
@@ -202,11 +201,11 @@ public class EditUserProfileActivity extends AppCompatActivity{
         Collections.sort(usersList, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
-                return lhs.login.compareTo(rhs.login);
+                return lhs.getLogin().compareTo(rhs.getLogin());
             }
         });
         for (int i = 0; i < usersList.size(); i++)
-            idList.add(usersList.get(i).login);
+            idList.add(usersList.get(i).getLogin());
         userPosition = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -221,12 +220,12 @@ public class EditUserProfileActivity extends AppCompatActivity{
             }
         });
 
-        userName.setText(usersList.get(userPosition).login);
+        userName.setText(usersList.get(userPosition).getLogin());
         //workPlace.setText(usersList.get(index).workPlce); TODO сделать
 
-        if (!usersList.get(currUserPosition).isAdmin)
+        if (!usersList.get(currUserPosition).getIsAdmin())
             changeUserTypeBtn.setEnabled(false);
 
-        setTitle("Профиль " + usersList.get(userPosition).login);
+        setTitle("Профиль " + usersList.get(userPosition).getLogin());
     }
 }

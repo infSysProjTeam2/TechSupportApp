@@ -34,8 +34,8 @@ public class UserAdapter extends ArrayAdapter<User> {
         ImageView userImage = (ImageView) rowView.findViewById(R.id.userImage);
         final TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
 
-        userNameText.setText(values.get(position).login);
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).login, context));
+        userNameText.setText(values.get(position).getLogin());
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
 
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override

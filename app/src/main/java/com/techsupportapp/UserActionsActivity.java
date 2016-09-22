@@ -8,7 +8,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -309,7 +308,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     ArrayList<User> newUsersList = new ArrayList<User>();
 
                     for (User user: usersList){
-                        if (user.login.contains(searchView.getQuery().toString()))
+                        if (user.getLogin().contains(searchView.getQuery().toString()))
                             newUsersList.add(user);
                     }
 

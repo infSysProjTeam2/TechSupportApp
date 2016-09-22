@@ -134,12 +134,12 @@ public class SignInActivity extends AppCompatActivity {
                                 "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
                     } else {
                         int i = 0;
-                        while (!loginET.getText().toString().equals(userList.get(i).login) && ++i < userList.size()); //TODO binarySearch
+                        while (!loginET.getText().toString().equals(userList.get(i).getLogin()) && ++i < userList.size()); //TODO binarySearch
                         if (i >= userList.size()) {
                             passwordET.setText("");
                             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
                         }
-                        else if (loginET.getText().toString().equals(userList.get(i).login) && passwordET.getText().toString().equals(userList.get(i).password))
+                        else if (loginET.getText().toString().equals(userList.get(i).getLogin()) && passwordET.getText().toString().equals(userList.get(i).getPassword()))
                         {
                             Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
 
@@ -148,14 +148,14 @@ public class SignInActivity extends AppCompatActivity {
 
                             userName = loginET.getText().toString();
 
-                            if (userList.get(i).isAdmin) {
+                            if (userList.get(i).getIsAdmin()) {
                                 intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
                             else {
                                 intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
 
-                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).isAdmin);
+                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).getIsAdmin());
 
                             intent.putExtras(args);
                             savePassAndLogin();
