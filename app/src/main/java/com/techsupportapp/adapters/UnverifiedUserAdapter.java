@@ -33,9 +33,9 @@ public class UnverifiedUserAdapter extends ArrayAdapter<UnverifiedUser> {
         TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
         TextView userDateText = (TextView)rowView.findViewById(R.id.userDate);
 
-        userNameText.setText(values.get(position).login);
-        userDateText.setText(values.get(position).date);
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).login, context));
+        userNameText.setText(values.get(position).getLogin());
+        userDateText.setText(values.get(position).getDate());
+        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
         return rowView;
     }
 }

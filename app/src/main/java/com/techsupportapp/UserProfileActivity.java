@@ -103,11 +103,11 @@ public class UserProfileActivity extends AppCompatActivity{
         Collections.sort(usersList, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
-                return lhs.login.compareTo(rhs.login);
+                return lhs.getLogin().compareTo(rhs.getLogin());
             }
         });
         for (int i = 0; i < usersList.size(); i++)
-            idList.add(usersList.get(i).login);
+            idList.add(usersList.get(i).getLogin());
         int index = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -115,11 +115,11 @@ public class UserProfileActivity extends AppCompatActivity{
             }
         });
 
-        userName.setText(usersList.get(index).login);
-        userId.setText(usersList.get(index).userId);
+        userName.setText(usersList.get(index).getLogin());
+        userId.setText(usersList.get(index).getBranchId());
         //regDate.setText(""); TODO сделать
         //workPlace.setText(""); TODO сделать
-        if (usersList.get(index).isAdmin)
+        if (usersList.get(index).getIsAdmin())
             accessLevel.setText("Администратор");
         else
             accessLevel.setText("Пользователь");
