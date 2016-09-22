@@ -1,7 +1,5 @@
 package com.techsupportapp;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -188,23 +186,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(UserActionsActivity.this);
-                builder.setTitle("Пользователь " + usersList.get(position).login);
-                String permissions;
-                if (usersList.get(position).isAdmin)
-                    permissions = "администратор";
-                else
-                    permissions = "пользователь";
-                String str = String.format("Логин: %s\nUserId: %s\nПароль: %s\nПривилегии: %s\n ", usersList.get(position).login, usersList.get(position).userId, usersList.get(position).password, permissions);
-                builder.setMessage(str);
-                builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int arg1) {
-
-                    }
-                });
-                builder.setCancelable(false);
-                AlertDialog alert = builder.create();
-                alert.show();
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
 

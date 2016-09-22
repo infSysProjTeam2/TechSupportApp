@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -37,7 +38,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
     private ImageView userImage;
 
-    private Button changePasswordBtn;
+    private Button editProfileBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +63,10 @@ public class UserProfileActivity extends AppCompatActivity{
 
         userImage = (ImageView)findViewById(R.id.userImage);
 
-        changePasswordBtn = (Button)findViewById(R.id.changePasswordBtn);
+        editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
 
         if (!mCurrUserId.equals(mUserId))
-            changePasswordBtn.setVisibility(View.INVISIBLE);
+            editProfileBtn.setVisibility(View.INVISIBLE);
     }
 
     private void setEvents(){
@@ -86,10 +87,13 @@ public class UserProfileActivity extends AppCompatActivity{
             }
         });
 
-        changePasswordBtn.setOnClickListener(new View.OnClickListener() {
+        editProfileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO todo
+                Intent intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mCurrUserId);
+                startActivity(intent);
             }
         });
     }

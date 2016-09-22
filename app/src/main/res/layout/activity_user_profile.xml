@@ -89,9 +89,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/changePasswordBtn"
+            android:id="@+id/changeDataBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Сменить пароль"/>
+            android:text="Изменить данные"/>
     </LinearLayout>
 </LinearLayout>
