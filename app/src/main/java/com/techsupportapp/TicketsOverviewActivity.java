@@ -1,6 +1,7 @@
 package com.techsupportapp;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,6 +18,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +49,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayAdapter<Ticket> adapter;
+
+    private ImageView currUserImage;
 
     private static Context cntxt;
 
@@ -94,21 +98,21 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
-        nav_menu.findItem(R.id.listOfChannels).setVisible(false);
         if (isAdmin) {
             userType.setText("Администратор");
         }
         else {
             userType.setText("Пользователь");
             nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
     }
@@ -190,6 +194,16 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 return true;
             }
         });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(TicketsOverviewActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -224,7 +238,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 startActivity(intent);
             }
         } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(TicketsOverviewActivity.this, VerifyUserActivity.class);
+            Intent intent = new Intent(TicketsOverviewActivity.this, UserActionsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -235,11 +249,33 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             GlobalsMethods.showAbout(TicketsOverviewActivity.this);
             return true;
         } else if (id == R.id.exit) {
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    exit();
+                }
+            });
+
+            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.setCancelable(false);
+            builder.setMessage("Вы действительно хотите закрыть приложение?");
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 }

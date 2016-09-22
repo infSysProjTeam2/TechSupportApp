@@ -108,14 +108,14 @@ public class ChatActivity extends AppCompatActivity {
         setTitle("Загрузка");
         cntxt = getBaseContext();
 
-        initFragment();
-        initSendBird(getIntent().getExtras());
-
         dialog = new ProgressDialog(this);
         dialog.setMessage("Загрузка...");
         dialog.setCancelable(false);
         dialog.setInverseBackgroundForced(false);
         dialog.show();
+
+        initFragment();
+        initSendBird(getIntent().getExtras());
     }
 
     @Override
@@ -350,6 +350,7 @@ public class ChatActivity extends AppCompatActivity {
             public void onAllDataReceived(SendBird.SendBirdDataType type, int count) {
                 mSendBirdMessagingAdapter.notifyDataSetChanged();
                 mSendBirdMessagingFragment.mListView.setSelection(mSendBirdMessagingAdapter.getCount() - 1);
+                dialog.dismiss();
             }
 
             @Override

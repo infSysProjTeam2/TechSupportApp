@@ -81,9 +81,10 @@ public class LetterBitmap {
         c.setBitmap(bitmap);
         c.drawColor(pickColor(key));
 
-        if (!isEnglishLetterOrDigit(firstChar)) {
+        /*if (!isEnglishLetterOrDigit(firstChar)) {
             firstChar = 'Z';
-        }
+        }*/
+
         mFirstChar[0] = Character.toUpperCase(firstChar);
         mPaint.setTextSize(mTileLetterFontSize);
         mPaint.getTextBounds(mFirstChar, 0, 1, mBounds);

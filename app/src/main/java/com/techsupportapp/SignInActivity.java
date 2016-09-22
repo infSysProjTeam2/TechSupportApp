@@ -10,10 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -160,8 +159,8 @@ public class SignInActivity extends AppCompatActivity {
 
                             intent.putExtras(args);
                             savePassAndLogin();
-
-                            startActivityForResult(intent, 201);
+                            GlobalsMethods.currUserId = userName;
+                            startActivity(intent);
                         }
                         else
                         {
@@ -215,6 +214,7 @@ public class SignInActivity extends AppCompatActivity {
         builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                savePassAndLogin();
                 SignInActivity.super.onBackPressed();
             }
         });

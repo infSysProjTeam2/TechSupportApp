@@ -10,11 +10,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -44,6 +44,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
     private TicketAdapter adapter;
     private TabHost tabHost;
+
+    private ImageView currUserImage;
 
     private String mAppId;
     private String mUserId;
@@ -81,7 +83,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.signUpUser) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, VerifyUserActivity.class);
+            Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
             intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -89,16 +91,40 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             finish();
         } else if (id == R.id.settings) {
 
-        } else if (id == R.id.about) {
+        } else if (id == R.id.listOfTickets) {
+
+        }else if (id == R.id.about) {
             GlobalsMethods.showAbout(ListOfTicketsActivity.this);
             return true;
         } else if (id == R.id.exit) {
-            android.os.Process.killProcess(android.os.Process.myPid());
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+
+            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    exit();
+                }
+            });
+
+            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+
+            builder.setCancelable(false);
+            builder.setMessage("Вы действительно хотите закрыть приложение?");
+            builder.show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 
     private void initTabHost(){
@@ -138,17 +164,14 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        ImageView userImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
-
-        Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.listOfTickets).setVisible(false);
     }
 
     private void setEvents() {
@@ -230,6 +253,16 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                         Toast.makeText(getApplicationContext(), "При смене ТАБа что-то произошло. Сообщите разработчику", Toast.LENGTH_LONG).show();
                         return;
                 }
+            }
+        });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ListOfTicketsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
     }
