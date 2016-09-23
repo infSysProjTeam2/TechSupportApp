@@ -64,6 +64,9 @@ public class UserProfileActivity extends AppCompatActivity{
         userImage = (ImageView)findViewById(R.id.userImage);
 
         editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
+
+        if (!mCurrUserId.equals(mUserId) && !GlobalsMethods.isCurrentAdmin)
+            editProfileBtn.setVisibility(View.INVISIBLE);
     }
 
     private void setEvents(){
@@ -87,7 +90,11 @@ public class UserProfileActivity extends AppCompatActivity{
         editProfileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
+                Intent intent;
+                if (mCurrUserId.equals(mUserId))
+                    intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
+                else
+                    intent = new Intent(UserProfileActivity.this, EditUserProfileActivityAlt.class);
                 intent.putExtra("userId", mUserId);
                 intent.putExtra("currUserId", mCurrUserId);
                 startActivity(intent);

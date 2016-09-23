@@ -92,6 +92,6 @@
             android:id="@+id/changeDataBtn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Изменить данные"/>
+            android:text="Управление учетной записью"/>
     </LinearLayout>
 </LinearLayout>
