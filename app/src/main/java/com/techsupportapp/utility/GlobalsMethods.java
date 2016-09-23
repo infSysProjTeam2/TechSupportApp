@@ -20,6 +20,8 @@ public class GlobalsMethods {
      */
     public static String currUserId;
 
+    public static boolean isCurrentAdmin;
+
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("О программе");
@@ -48,6 +50,17 @@ public class GlobalsMethods {
         if (inputMethodManager != null) {
             inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
         }
+    }
+
+    public static boolean isEnglishWord(String word){
+        for (int i = 0; i < word.length(); i++)
+            if (!isEnglishLetterOrDigit(word.charAt(i)))
+                return false;
+        return true;
+    }
+
+    private static boolean isEnglishLetterOrDigit(char c) {
+        return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9';
     }
 
     public static class ImageMethods {

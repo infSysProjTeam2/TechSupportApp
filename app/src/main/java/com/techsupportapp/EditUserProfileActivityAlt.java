@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class EditUserProfileActivity extends AppCompatActivity{
+public class EditUserProfileActivityAlt extends AppCompatActivity{
 
     private DatabaseReference databaseRef;
 
@@ -41,9 +41,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private boolean changedType;
 
-    private EditText userName;
-    private EditText workPlace;
-    private Button saveBtn;
     private Button changePasswordBtn;
     private Button changeUserTypeBtn;
 
@@ -54,7 +51,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
         mUserId = getIntent().getExtras().getString("userId");
         mCurrUserId = getIntent().getExtras().getString("currUserId");
 
-        setContentView(R.layout.activity_edit_user_profile);
+        setContentView(R.layout.activity_edit_user_profile_alt);
 
         initializeComponents();
         setEvents();
@@ -63,16 +60,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
     private void initializeComponents(){
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
-        userName = (EditText)findViewById(R.id.userName);
-        workPlace = (EditText)findViewById(R.id.workPlace);
-
         changePasswordBtn = (Button)findViewById(R.id.changePasswordBtn);
         changeUserTypeBtn = (Button)findViewById(R.id.changeUserTypeBtn);
 
-        saveBtn = (Button)findViewById(R.id.saveBtn);
-
         changedType = false;
-
     }
 
     private void setEvents(){
@@ -93,19 +84,26 @@ public class EditUserProfileActivity extends AppCompatActivity{
             }
         });
 
+        changePasswordBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater li = LayoutInflater.from(EditUserProfileActivity.this);
+                LayoutInflater li = LayoutInflater.from(EditUserProfileActivityAlt.this);
                 View promptsView = li.inflate(R.layout.prompts_change_user_type, null);
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditUserProfileActivity.this);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditUserProfileActivityAlt.this);
 
                 alertDialogBuilder.setView(promptsView);
 
                 final ListView typesOfUsers = (ListView) promptsView.findViewById(R.id.typesOfUsersList);
-                final String[] types = { "Пользователь"};
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditUserProfileActivity.this, android.R.layout.simple_list_item_1, types);
+                final String[] types = { "Пользователь", "Администратор" };
+                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditUserProfileActivityAlt.this, android.R.layout.simple_list_item_1, types);
                 typesOfUsers.setAdapter(adapter);
 
                 alertDialogBuilder
@@ -139,90 +137,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();
                         } else
                             Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
-
-                        if (changedType && mUserId.equals(mCurrUserId)){
-                            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(i);
-                        }
-
                     }
-                });
+                    });
 
                 alertDialog.show();
-            }
-        });
-
-        changePasswordBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LayoutInflater li = LayoutInflater.from(EditUserProfileActivity.this);
-                View promptsView = li.inflate(R.layout.prompts_change_password, null);
-
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditUserProfileActivity.this);
-
-                alertDialogBuilder.setView(promptsView);
-
-                final EditText currentPassword = (EditText) promptsView.findViewById(R.id.currentPasswordEt);
-                final EditText newPassword = (EditText) promptsView.findViewById(R.id.newPasswordEt);
-                final EditText newPasswordRepeat = (EditText) promptsView.findViewById(R.id.newPasswordRepeatEt);
-
-                alertDialogBuilder
-                        .setCancelable(true)
-                        .setTitle("Смена пароля")
-                        .setPositiveButton("Ок",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-
-                                    }
-                                })
-                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                final AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        if (currentPassword.getText().toString().equals("")) {
-                            Toast.makeText(getApplicationContext(), "Поле текущего пароля пусто", Toast.LENGTH_LONG).show();
-                        }
-                        else if (newPassword.getText().toString().equals(""))
-                            Toast.makeText(getApplicationContext(), "Поле нового пароля пусто", Toast.LENGTH_LONG).show();
-                        else if (newPasswordRepeat.getText().toString().equals(""))
-                            Toast.makeText(getApplicationContext(), "Нужно повторить пароль", Toast.LENGTH_LONG).show();
-                        else if (!currentPassword.getText().toString().equals(usersList.get(userPosition).getPassword()))
-                            Toast.makeText(getApplicationContext(), "Введен неправильный пароль", Toast.LENGTH_LONG).show();
-                        else if (!newPassword.getText().toString().equals(newPasswordRepeat.getText().toString()))
-                            Toast.makeText(getApplicationContext(), "Пароли должны совпадать", Toast.LENGTH_LONG).show();
-                        else if (newPassword.getText().toString().length() < 5 || newPasswordRepeat.getText().toString().length() < 5)
-                            Toast.makeText(getApplicationContext(), "Пароль должен быть не менее 5 символов", Toast.LENGTH_LONG).show();
-                        else if (!GlobalsMethods.isEnglishWord(newPassword.getText().toString()) || !GlobalsMethods.isEnglishWord(newPasswordRepeat.getText().toString()))
-                            Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
-                        else
-                        {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getIsAdmin());
-                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                            Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
-                            alertDialog.dismiss();
-                        }
-                    }
-                });
-            }
-        });
-
-
-
-        saveBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
             }
         });
     }
@@ -235,8 +153,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
                 return lhs.getLogin().compareTo(rhs.getLogin());
             }
         });
+
         for (int i = 0; i < usersList.size(); i++)
             idList.add(usersList.get(i).getLogin());
+
         userPosition = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -250,12 +170,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
                 return lhs.compareTo(rhs);
             }
         });
-
-        if (!GlobalsMethods.isCurrentAdmin)
-            changeUserTypeBtn.setVisibility(View.INVISIBLE);
-
-        userName.setText(usersList.get(userPosition).getLogin());
-        //workPlace.setText(usersList.get(index).workPlce); TODO сделать
 
         setTitle("Профиль " + usersList.get(userPosition).getLogin());
     }

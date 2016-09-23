@@ -112,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
         dialog.setMessage("Загрузка...");
         dialog.setCancelable(false);
         dialog.setInverseBackgroundForced(false);
-        dialog.show();
+        //dialog.show();
 
         initFragment();
         initSendBird(getIntent().getExtras());

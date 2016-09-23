@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,6 +66,8 @@ public class SignInActivity extends AppCompatActivity {
     private boolean cbState;
     private CheckBox rememberPas;
 
+    private ProgressDialog dialog;
+
     //endregion
 
     @Override
@@ -74,6 +77,12 @@ public class SignInActivity extends AppCompatActivity {
 
         setTitle("Авторизация");
         initializeComponents();
+
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Загрузка...");
+        dialog.setCancelable(false);
+        dialog.setInverseBackgroundForced(false);
+        dialog.show();
 
         setEvents();
     }
@@ -160,6 +169,7 @@ public class SignInActivity extends AppCompatActivity {
                             intent.putExtras(args);
                             savePassAndLogin();
                             GlobalsMethods.currUserId = userName;
+                            GlobalsMethods.isCurrentAdmin = userList.get(i).getIsAdmin();
                             startActivity(intent);
                         }
                         else
@@ -190,6 +200,7 @@ public class SignInActivity extends AppCompatActivity {
                     unverifiedLoginsList.add(user.getLogin());
                 }
                 isDownloaded = true;
+                dialog.dismiss();
             }
 
             @Override
@@ -270,6 +281,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         SharedPreferences settings = getPreferences(0);
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));

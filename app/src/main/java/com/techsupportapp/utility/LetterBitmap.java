@@ -97,9 +97,7 @@ public class LetterBitmap {
      * @return True if <code>c</code> is in the English alphabet or is a digit,
      * false otherwise
      */
-    private static boolean isEnglishLetterOrDigit(char c) {
-        return 'A' <= c && c <= 'Z' || 'a' <= c && c <= 'z' || '0' <= c && c <= '9';
-    }
+
 
     /**
      * @param key The key used to generate the tile color
