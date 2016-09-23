@@ -1,7 +1,5 @@
 package com.techsupportapp.databaseClasses;
 
-import com.techsupportapp.utility.TicketState;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -13,10 +11,41 @@ import java.util.Locale;
  */
 public class Ticket {
 
+    //region Constants
+
+    /**
+     * Новая, не рассмотренная заявка.
+     */
+    final static int NOT_ACCEPTED = 0;
+
+    /**
+     * Заявка, находящаяся на рассмотрении у консультанта.
+     */
+    final static int ACCEPTED = 1;
+
+    /**
+     * Заявка, переданная для других консультантов.
+     */
+    final static int SUBMITTED = 2;
+
+    /**
+     * Заявка, решение которой было подтверждено пользователем - создателем заявки.
+     */
+    final static int CONFIRMED_BY_USER = 4;
+
+    /**
+     * Решенная заявка.
+     */
+    final static int SOLVED = 8;
+
+    //endregion
+
+    //region Fields
+
     /**
      * Состояние заявки.
      */
-    private TicketState ticketState;
+    private int ticketState;
 
     /**
      * Идентификатор заявки.
@@ -48,6 +77,8 @@ public class Ticket {
      */
     private String date;
 
+    //endregion
+
     /**
      * Конструктор по-умолчанию.
      */
@@ -70,7 +101,7 @@ public class Ticket {
         this.adminId = null;
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
         this.date = formatter.format(Calendar.getInstance().getTime());
-        this.ticketState = TicketState.NotAccepted;
+        this.ticketState = Ticket.NOT_ACCEPTED;
     }
 
     /**
@@ -79,7 +110,7 @@ public class Ticket {
      */
     public void addAdmin(String adminId) {
         this.adminId = adminId;
-        this.ticketState = TicketState.Accepted;
+        this.ticketState = Ticket.ACCEPTED;
     }
 
     /**
@@ -127,7 +158,7 @@ public class Ticket {
     /**
      * @return Состояние заявки.
      */
-    public TicketState getTicketState() {
+    public int getTicketState() {
         return ticketState;
     }
 

@@ -7,6 +7,30 @@ package com.techsupportapp.databaseClasses;
  */
 public class User {
 
+    //region Constants
+
+    /**
+     * Роль простого пользователя.
+     */
+    final static int SIMPLE_USER = 0;
+
+    /**
+     * Член отдела поддержки. Роль консультанта пользователей.
+     */
+    final static int DEPARTMENT_MEMBER = 1;
+
+    /**
+     * Администратор компании, ответственен за управление базой данных. Роль консультанта пользователей.
+     */
+    final static int ADMINISTRATOR = 2;
+
+    /**
+     * Начальник отдела поддержки. Роль консультанта пользователей.
+     */
+    final static int DEPARTMENT_CHIEF = 4;
+
+    //endregion
+
     //region Fields
 
     /**
