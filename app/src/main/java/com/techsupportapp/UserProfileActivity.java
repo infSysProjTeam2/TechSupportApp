@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -37,7 +38,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
     private ImageView userImage;
 
-    private Button changePasswordBtn;
+    private Button editProfileBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,10 +63,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
         userImage = (ImageView)findViewById(R.id.userImage);
 
-        changePasswordBtn = (Button)findViewById(R.id.changePasswordBtn);
-
-        if (!mCurrUserId.equals(mUserId))
-            changePasswordBtn.setVisibility(View.INVISIBLE);
+        editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
     }
 
     private void setEvents(){
@@ -86,10 +84,13 @@ public class UserProfileActivity extends AppCompatActivity{
             }
         });
 
-        changePasswordBtn.setOnClickListener(new View.OnClickListener() {
+        editProfileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO todo
+                Intent intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mCurrUserId);
+                startActivity(intent);
             }
         });
     }
@@ -99,11 +100,11 @@ public class UserProfileActivity extends AppCompatActivity{
         Collections.sort(usersList, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
-                return lhs.login.compareTo(rhs.login);
+                return lhs.getLogin().compareTo(rhs.getLogin());
             }
         });
         for (int i = 0; i < usersList.size(); i++)
-            idList.add(usersList.get(i).login);
+            idList.add(usersList.get(i).getLogin());
         int index = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
@@ -111,11 +112,11 @@ public class UserProfileActivity extends AppCompatActivity{
             }
         });
 
-        userName.setText(usersList.get(index).login);
-        userId.setText(usersList.get(index).userId);
+        userName.setText(usersList.get(index).getLogin());
+        userId.setText(usersList.get(index).getBranchId());
         //regDate.setText(""); TODO сделать
         //workPlace.setText(""); TODO сделать
-        if (usersList.get(index).isAdmin)
+        if (usersList.get(index).getIsAdmin())
             accessLevel.setText("Администратор");
         else
             accessLevel.setText("Пользователь");

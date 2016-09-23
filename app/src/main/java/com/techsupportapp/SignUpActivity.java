@@ -113,9 +113,9 @@ public class SignUpActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loginList.clear();
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
-                    loginList.add(userRecord.getValue(User.class).login);
+                    loginList.add(userRecord.getValue(User.class).getLogin());
                 for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                    loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().login);
+                    loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().getLogin());
                 userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 

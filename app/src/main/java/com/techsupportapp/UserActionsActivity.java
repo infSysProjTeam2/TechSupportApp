@@ -1,15 +1,13 @@
 package com.techsupportapp;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -52,7 +50,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private UnverifiedUserAdapter adapter;
     private UserAdapter adapter1;
 
-    private static Context cntxt;
+    private MenuItem searchMenu;
+    private SearchView searchView;
+    private boolean search;
+
     private TabHost tabHost;
 
     private ImageView currUserImage;
@@ -62,7 +63,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_actions);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        cntxt = getBaseContext();
 
         mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
@@ -99,6 +99,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         userName.setText(mNickname);
         userType.setText("Администратор");
+        search = false;
     }
 
     private void initTabHost(){
@@ -122,24 +123,26 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                unverifiedUsersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
-                    UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
-                    unverifiedUsersList.add(user);
-                }
-                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
-                unverifiedUsersView.setAdapter(adapter);
+                if (!search) {
+                    unverifiedUsersList.clear();
+                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
+                        UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
+                        unverifiedUsersList.add(user);
+                    }
+                    adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                    unverifiedUsersView.setAdapter(adapter);
 
-                usersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
-                    User user = userRecord.getValue(User.class);
-                    usersList.add(user);
-                }
-                adapter1 = new UserAdapter(getApplicationContext(), usersList);
-                usersView.setAdapter(adapter1);
+                    usersList.clear();
+                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
+                        User user = userRecord.getValue(User.class);
+                        usersList.add(user);
+                    }
+                    adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                    usersView.setAdapter(adapter1);
 
-                adapter.notifyDataSetChanged();
-                adapter1.notifyDataSetChanged();
+                    adapter.notifyDataSetChanged();
+                    adapter1.notifyDataSetChanged();
+                }
             }
 
             @Override
@@ -153,15 +156,17 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).userId);
+                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
                 builder.setMessage("Вы действительно хотите подтвердить пользователя?");
 
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).setValue(unverifiedUsersList.get(position).verifyUser());
-                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).userId).removeValue();
+                        search = false;
+                        databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
                         Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                        searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });
 
@@ -180,23 +185,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(UserActionsActivity.this);
-                builder.setTitle("Пользователь " + usersList.get(position).login);
-                String permissions;
-                if (usersList.get(position).isAdmin)
-                    permissions = "администратор";
-                else
-                    permissions = "пользователь";
-                String str = String.format("Логин: %s\nUserId: %s\nПароль: %s\nПривилегии: %s\n ", usersList.get(position).login, usersList.get(position).userId, usersList.get(position).password, permissions);
-                builder.setMessage(str);
-                builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int arg1) {
-
-                    }
-                });
-                builder.setCancelable(false);
-                AlertDialog alert = builder.create();
-                alert.show();
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", usersList.get(position).getLogin());
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
             }
         });
 
@@ -207,6 +199,23 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 intent.putExtra("userId", mUserId);
                 intent.putExtra("currUserId", mUserId);
                 startActivity(intent);
+            }
+        });
+
+        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                searchView.setQuery("", false);
+                MenuItemCompat.collapseActionView(searchMenu);
+
+                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                unverifiedUsersView.setAdapter(adapter);
+
+                adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                usersView.setAdapter(adapter1);
+
+                adapter.notifyDataSetChanged();
+                adapter1.notifyDataSetChanged();
             }
         });
     }
@@ -270,8 +279,59 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchMenu = menu.findItem(R.id.action_search);
+        searchView = (SearchView) searchMenu.getActionView();
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            public boolean onQueryTextChange(String newText) {
+                if (!searchView.getQuery().toString().equals(""))
+                    search = true;
+                if (tabHost.getCurrentTabTag().equals("tag1")) {
+                    ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
+
+                    for (UnverifiedUser unverifiedUser: unverifiedUsersList){
+                        if (unverifiedUser.getLogin().contains(searchView.getQuery().toString()))
+                            newUnverifiedUsersList.add(unverifiedUser);
+                    }
+
+                    adapter = new UnverifiedUserAdapter(getApplicationContext(), newUnverifiedUsersList);
+                    unverifiedUsersView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
+                else
+                {
+                    ArrayList<User> newUsersList = new ArrayList<User>();
+
+                    for (User user: usersList){
+                        if (user.getLogin().contains(searchView.getQuery().toString()))
+                            newUsersList.add(user);
+                    }
+
+                    adapter1 = new UserAdapter(getApplicationContext(), newUsersList);
+                    usersView.setAdapter(adapter1);
+                    adapter1.notifyDataSetChanged();
+                }
+                return true;
+            }
+        });
+
+        MenuItemCompat.setOnActionExpandListener(searchMenu,
+                new MenuItemCompat.OnActionExpandListener() {
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        return true;
+                    }
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem menuItem) {
+                        search = false;
+                        return true;
+                    }
+                });
 
         return true;
     }
