@@ -29,6 +29,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        final String titleText;
         final String userId;
         final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.item_ticket, parent, false);
@@ -39,23 +40,47 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         TextView descText = (TextView)rowView.findViewById(R.id.ticketDesc);
 
         userId = values.get(position).userId;
-        if (values.get(position).adminId == null || values.get(position).adminId.equals(""))
-            authorText.setText(values.get(position).userId);
-        else authorText.setText(values.get(position).userId + " ✔");
+        if (values.get(position).adminId == null || values.get(position).adminId.equals("")) {
+            if (GlobalsMethods.isCurrentAdmin)
+                authorText.setText(values.get(position).userId);
+            else
+                authorText.setText("Не установлено");
+
+            titleText = authorText.getText().toString();
+        }
+        else {
+            if (GlobalsMethods.isCurrentAdmin) {
+                authorText.setText(values.get(position).userId + " ✔");
+                titleText = values.get(position).userId;
+            }
+            else {
+                authorText.setText(values.get(position).adminId + " ✔");
+                titleText = values.get(position).adminId;
+            }
+        }
 
         dateText.setText(values.get(position).date);
         topicText.setText(values.get(position).topic);
         descText.setText(values.get(position).message);
-        ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).userId, context));
+        ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
 
         ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                boolean fl = true;
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                intent.putExtra("userId", userId);
+                if (GlobalsMethods.isCurrentAdmin)
+                    intent.putExtra("userId", userId);
+                else
+                    if (titleText.equals("Не установлено"))
+                        fl = false;
+                    else
+                        intent.putExtra("userId", titleText);
+
                 intent.putExtra("currUserId", GlobalsMethods.currUserId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+                if (fl)
+                    context.startActivity(intent);
             }
         });
         return rowView;

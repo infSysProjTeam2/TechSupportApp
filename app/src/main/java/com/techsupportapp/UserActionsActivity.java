@@ -186,7 +186,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
-                intent.putExtra("userId", mUserId);
+                intent.putExtra("userId", usersList.get(position).getLogin());
                 intent.putExtra("currUserId", mUserId);
                 startActivity(intent);
             }
