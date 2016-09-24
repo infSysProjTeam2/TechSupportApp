@@ -36,7 +36,7 @@ public class UnverifiedUser {
     /**
      * Дата создания аккаунта для подтверждения.
      */
-    private String date;
+    private String registrationDate;
 
     //endregion
 
@@ -63,7 +63,7 @@ public class UnverifiedUser {
         this.password = password;
         this.isAdmin = isAdmin;
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
-        this.date = formatter.format(Calendar.getInstance().getTime());
+        this.registrationDate = formatter.format(Calendar.getInstance().getTime());
     }
 
     //endregion
@@ -75,7 +75,7 @@ public class UnverifiedUser {
      * @return Подвержденного пользователя.
      */
     public User verifyUser() {
-        return new User(this.branchId, this.login, this.password, this.isAdmin);
+        return new User(this.branchId, this.login, this.password, this.isAdmin, this.registrationDate);
     }
 
     /**
@@ -109,8 +109,8 @@ public class UnverifiedUser {
     /**
      * @return Дату создания аккаунта для подтверждения.
      */
-    public String getDate() {
-        return date;
+    public String getRegistrationDate() {
+        return registrationDate;
     }
 
     //endregion

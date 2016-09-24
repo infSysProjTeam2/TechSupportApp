@@ -59,7 +59,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             }
         }
 
-        dateText.setText(values.get(position).getDate());
+        dateText.setText(values.get(position).getCreateDate());
         topicText.setText(values.get(position).getTopic());
         descText.setText(values.get(position).getMessage());
         ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
