@@ -1,5 +1,9 @@
 package com.techsupportapp.databaseClasses;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 /**
  * Класс, агрегирующий регистрационные данные подтвержденного пользователя.
  * Основной {@link #User(String, String, String, boolean) конструктор}.
@@ -53,6 +57,11 @@ public class User {
      */
     private boolean isAdmin;
 
+    /**
+     * Дата регистрации пользователя.
+     */
+    private String registrationDate;
+
     //endregion
 
     //region Constructors
@@ -77,6 +86,24 @@ public class User {
         this.login = login;
         this.password = password;
         this.isAdmin = isAdmin;
+        SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
+        this.registrationDate = formatter.format(Calendar.getInstance().getTime());
+    }
+
+    /**
+     * Конструктор, использующийся для добавления новых подтвержденных пользователей в систему с заданием определенной даты регистрации.
+     * @param branchId Задает идентификатор узла, объединяющего данные одного объекта класса в базе данных.
+     * @param login Задает логин пользователя.
+     * @param password Задает пароль пользователя.
+     * @param isAdmin Задает флаг, показывающий, наделен ли пользователь правами администратора.
+     * @param registrationDate Задает дату регистрации пользователя.
+     */
+    public User(String branchId, String login, String password, boolean isAdmin, String registrationDate) {
+        this.branchId = branchId;
+        this.login = login;
+        this.password = password;
+        this.isAdmin = isAdmin;
+        this.registrationDate = registrationDate;
     }
 
     //endregion
@@ -109,6 +136,13 @@ public class User {
      */
     public boolean getIsAdmin() {
         return isAdmin;
+    }
+
+    /**
+     * @return Дату регистрации пользователя.
+     */
+    public String getRegistrationDate() {
+        return registrationDate;
     }
 
     //endregion

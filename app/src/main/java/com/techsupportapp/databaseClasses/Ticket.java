@@ -75,7 +75,7 @@ public class Ticket {
     /**
      * Дата создания заявки.
      */
-    private String date;
+    private String createDate;
 
     //endregion
 
@@ -100,7 +100,7 @@ public class Ticket {
         this.message = message;
         this.adminId = null;
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
-        this.date = formatter.format(Calendar.getInstance().getTime());
+        this.createDate = formatter.format(Calendar.getInstance().getTime());
         this.ticketState = Ticket.NOT_ACCEPTED;
     }
 
@@ -151,8 +151,8 @@ public class Ticket {
     /**
      * @return Дату создания заявки.
      */
-    public String getDate() {
-        return date;
+    public String getCreateDate() {
+        return createDate;
     }
 
     /**
