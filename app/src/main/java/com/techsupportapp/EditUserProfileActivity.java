@@ -124,7 +124,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
                             if (usersList.get(userPosition).getIsAdmin()) {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), false);
+                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), false, usersList.get(userPosition).getBranchId(),
+                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
                                 databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 changedType = true;
                                 alertDialog.dismiss();
@@ -132,7 +133,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             } else
                                 Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
                         } else if (!usersList.get(userPosition).getIsAdmin()) {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), true);
+                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), true, usersList.get(userPosition).getBranchId(),
+                                    usersList.get(userPosition).getLogin(), "Wayward Pines", false);
                             databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             changedType = true;
                             alertDialog.dismiss();
@@ -207,7 +209,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
                         else
                         {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getIsAdmin());
+                            User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getIsAdmin(), usersList.get(userPosition).getBranchId(),
+                                    usersList.get(userPosition).getLogin(), "Wayward Pines", false);
                             databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
                             alertDialog.dismiss();
