@@ -75,7 +75,8 @@ public class UnverifiedUser {
      * @return Подвержденного пользователя.
      */
     public User verifyUser() {
-        return new User(this.branchId, this.login, this.password, this.isAdmin, this.registrationDate);
+        return new User(this.branchId, this.login, this.password, this.isAdmin, this.branchId,
+                this.login, "Wayward Pines", false);
     }
 
     /**

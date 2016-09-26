@@ -43,6 +43,26 @@ public class User {
     private String branchId;
 
     /**
+     * Уникальный идентификатор пользователя.
+     */
+    private String userId;
+
+    /**
+     * Имя пользователя.
+     */
+    private String userName;
+
+    /**
+     * Рабочее место пользователя.
+     */
+    private String workPlace;
+
+    /**
+     * Флаг, показывающий, заблокирован ли пользователь.
+     */
+    private boolean isBlocked;
+
+    /**
      * Логин пользователя.
      */
     private String login;
@@ -80,12 +100,22 @@ public class User {
      * @param login Задает логин пользователя.
      * @param password Задает пароль пользователя.
      * @param isAdmin Задает флаг, показывающий, наделен ли пользователь правами администратора.
+     * @param userId
+     * @param userName
+     * @param workPlace
+     * @param isBlocked
      */
-    public User(String branchId, String login, String password, boolean isAdmin) {
+    public User(String branchId, String login, String password, boolean isAdmin, String userId, String userName, String workPlace, boolean isBlocked) {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
         this.isAdmin = isAdmin;
+
+        this.userId = userId;
+        this.userName = userName;
+        this.workPlace = workPlace;
+        this.isBlocked = isBlocked;
+
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
         this.registrationDate = formatter.format(Calendar.getInstance().getTime());
     }
@@ -143,6 +173,34 @@ public class User {
      */
     public String getRegistrationDate() {
         return registrationDate;
+    }
+
+    /**
+     * @return Уникальный идентификатор пользователя.
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * @return Имя пользователя.
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     * @return Рабочее место пользователя.
+     */
+    public String getWorkPlace() {
+        return workPlace;
+    }
+
+    /**
+     * @return Флаг, показывающий, заблокирован ли пользователь.
+     */
+    public boolean getIsBlocked() {
+        return isBlocked;
     }
 
     //endregion
