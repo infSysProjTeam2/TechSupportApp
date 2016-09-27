@@ -6,7 +6,8 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий регистрационные данные неподтвержденного пользователя.
- * Основной {@link #UnverifiedUser(String, String, String, boolean) конструктор}.
+ * Основной {@link #UnverifiedUser(String branchId, String login, String password, int role,
+        String userId, String userName, String workPlace, boolean isBlocked) конструктор}.
  * @author Monarch
  */
 public class UnverifiedUser {
@@ -24,6 +25,26 @@ public class UnverifiedUser {
     private String login;
 
     /**
+     * Уникальный идентификатор пользователя.
+     */
+    private String userId;
+
+    /**
+     * Имя пользователя.
+     */
+    private String userName;
+
+    /**
+     * Рабочее место пользователя.
+     */
+    private String workPlace;
+
+    /**
+     * Флаг, показывающий, заблокирован ли пользователь.
+     */
+    private boolean isBlocked;
+
+    /**
      * Пароль неподтвержденного пользователя.
      */
     private String password;
@@ -31,7 +52,7 @@ public class UnverifiedUser {
     /**
      * Флаг, показывающий, будет ли наделен неподтвержденный пользователь правами администратора после подтверждения.
      */
-    private boolean isAdmin;
+    private int role;
 
     /**
      * Дата создания аккаунта для подтверждения.
@@ -55,13 +76,24 @@ public class UnverifiedUser {
      * @param branchId Задает идентификатор узла, объединяющего данные одного объекта класса в базе данных.
      * @param login Задает логин неподтвержденного пользователя.
      * @param password Задает пароль неподтвержденного пользователя.
-     * @param isAdmin Задает флаг, показывающий, будет ли наделен неподтвержденный пользователь правами администратора после подтверждения.
+     * @param role Задает флаг, показывающий, будет ли наделен неподтвержденный пользователь правами администратора после подтверждения.
+     * @param userId
+     * @param userName
+     * @param workPlace
+     * @param isBlocked
      */
-    public UnverifiedUser(String branchId, String login, String password, boolean isAdmin) {
+    public UnverifiedUser(String branchId, String login, String password, int role,
+                          String userId, String userName, String workPlace, boolean isBlocked) {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
-        this.isAdmin = isAdmin;
+        this.role = role;
+
+        this.userId = userId;
+        this.userName = userName;
+        this.workPlace = workPlace;
+        this.isBlocked = isBlocked;
+
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
         this.registrationDate = formatter.format(Calendar.getInstance().getTime());
     }
@@ -74,9 +106,9 @@ public class UnverifiedUser {
      * Метод, переводящий данного пользователя в категорию подтвержденных.
      * @return Подвержденного пользователя.
      */
-    public User verifyUser() {
-        return new User(this.branchId, this.login, this.password, this.isAdmin, this.branchId,
-                this.login, "Wayward Pines", false);
+    public User verifyUser() throws Exception {
+        return new User(this.branchId, this.login, this.password, this.role, this.branchId,
+                this.userName, this.workPlace, this.isBlocked);
     }
 
     /**
@@ -103,8 +135,8 @@ public class UnverifiedUser {
     /**
      * @return Флаг, показывающий, будет ли наделен неподтвержденный пользователь правами администратора после подтверждения.
      */
-    public boolean isAdmin() {
-        return isAdmin;
+    public int getRole() {
+        return role;
     }
 
     /**

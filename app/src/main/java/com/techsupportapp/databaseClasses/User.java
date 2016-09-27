@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий регистрационные данные подтвержденного пользователя.
- * Основной {@link #User(String, String, String, boolean) конструктор}.
+ * Основной {@link #User(String branchId, String login, String password, int role, String userId, String userName, String workPlace, boolean isBlocked) конструктор}.
  * @author Monarch
  */
 public class User {
@@ -16,22 +16,22 @@ public class User {
     /**
      * Роль простого пользователя.
      */
-    final static int SIMPLE_USER = 0;
+    public final static int SIMPLE_USER = 0;
 
     /**
      * Член отдела поддержки. Роль консультанта пользователей.
      */
-    final static int DEPARTMENT_MEMBER = 1;
+    public final static int DEPARTMENT_MEMBER = 1;
 
     /**
      * Администратор компании, ответственен за управление базой данных. Роль консультанта пользователей.
      */
-    final static int ADMINISTRATOR = 2;
+    public final static int ADMINISTRATOR = 2;
 
     /**
      * Начальник отдела поддержки. Роль консультанта пользователей.
      */
-    final static int DEPARTMENT_CHIEF = 4;
+    public final static int DEPARTMENT_CHIEF = 4;
 
     //endregion
 
@@ -73,9 +73,9 @@ public class User {
     private String password;
 
     /**
-     * Флаг, показывающий, наделен ли пользователь правами администратора.
+     * Роль данного аккаунта в системе.
      */
-    private boolean isAdmin;
+    private int role;
 
     /**
      * Дата регистрации пользователя.
@@ -99,17 +99,20 @@ public class User {
      * @param branchId Задает идентификатор узла, объединяющего данные одного объекта класса в базе данных.
      * @param login Задает логин пользователя.
      * @param password Задает пароль пользователя.
-     * @param isAdmin Задает флаг, показывающий, наделен ли пользователь правами администратора.
+     * @param role Задает флаг, показывающий, наделен ли пользователь правами администратора.
      * @param userId
      * @param userName
      * @param workPlace
      * @param isBlocked
      */
-    public User(String branchId, String login, String password, boolean isAdmin, String userId, String userName, String workPlace, boolean isBlocked) {
+    public User(String branchId, String login, String password, int role, String userId, String userName, String workPlace, boolean isBlocked) throws Exception {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
-        this.isAdmin = isAdmin;
+        if (role != 0 || role != 1 || role != 2 || role != 4)
+            throw new Exception("asd");
+
+        this.role = role;
 
         this.userId = userId;
         this.userName = userName;
@@ -125,14 +128,14 @@ public class User {
      * @param branchId Задает идентификатор узла, объединяющего данные одного объекта класса в базе данных.
      * @param login Задает логин пользователя.
      * @param password Задает пароль пользователя.
-     * @param isAdmin Задает флаг, показывающий, наделен ли пользователь правами администратора.
+     * @param role Задает флаг, показывающий, наделен ли пользователь правами администратора.
      * @param registrationDate Задает дату регистрации пользователя.
      */
-    public User(String branchId, String login, String password, boolean isAdmin, String registrationDate) {
+    public User(String branchId, String login, String password, int role, String registrationDate) {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
-        this.isAdmin = isAdmin;
+        this.role = role;
         this.registrationDate = registrationDate;
     }
 
@@ -164,8 +167,8 @@ public class User {
     /**
      * @return Флаг, показывающий, наделен ли пользователь правами администратора.
      */
-    public boolean getIsAdmin() {
-        return isAdmin;
+    public int getRole() {
+        return role;
     }
 
     /**

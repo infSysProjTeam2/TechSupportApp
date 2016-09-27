@@ -53,12 +53,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private static Context cntxt;
 
-    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
+    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, int role) {
         Bundle args = new Bundle();
         args.putString("appKey", appKey);
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
-        args.putBoolean("isAdmin", isAdmin);
+        args.putInt("isAdmin", role);
         return args;
     }
 
