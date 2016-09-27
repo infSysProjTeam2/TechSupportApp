@@ -20,7 +20,7 @@ public class GlobalsMethods {
      */
     public static String currUserId;
 
-    public static boolean isCurrentAdmin;
+    public static int isCurrentAdmin;
 
     public static void showAbout(Context context) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);

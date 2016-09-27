@@ -12,6 +12,7 @@ import android.widget.TextView;
 import com.techsupportapp.R;
 import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
 
         userId = values.get(position).getUserId();
         if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
-            if (GlobalsMethods.isCurrentAdmin)
+            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
                 authorText.setText(values.get(position).getUserId());
             else
                 authorText.setText("Не установлено");
@@ -49,7 +50,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             titleText = authorText.getText().toString();
         }
         else {
-            if (GlobalsMethods.isCurrentAdmin) {
+            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
                 authorText.setText(values.get(position).getUserId() + " ✔");
                 titleText = values.get(position).getUserId();
             }
@@ -69,7 +70,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             public void onClick(View v) {
                 boolean fl = true;
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                if (GlobalsMethods.isCurrentAdmin)
+                if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
                     intent.putExtra("userId", userId);
                 else
                     if (titleText.equals("Не установлено"))
