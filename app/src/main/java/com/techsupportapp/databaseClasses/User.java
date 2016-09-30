@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий регистрационные данные подтвержденного пользователя.
- * Основной {@link #User(String branchId, String login, String password, int role, String userId, String userName, String workPlace, boolean isBlocked) конструктор}.
+ * Основной {@link #User(String branchId, String login, String password, int role, String userId, String workPlace, boolean isBlocked) конструктор}.
  * @author Monarch
  */
 public class User {
@@ -43,21 +43,6 @@ public class User {
     private String branchId;
 
     /**
-     * Уникальный идентификатор пользователя.
-     */
-    private String userId;
-
-    /**
-     * Имя пользователя.
-     */
-    private String userName;
-
-    /**
-     * Рабочее место пользователя.
-     */
-    private String workPlace;
-
-    /**
      * Флаг, показывающий, заблокирован ли пользователь.
      */
     private boolean isBlocked;
@@ -73,14 +58,24 @@ public class User {
     private String password;
 
     /**
+     * Дата регистрации пользователя.
+     */
+    private String registrationDate;
+
+    /**
      * Роль данного аккаунта в системе.
      */
     private int role;
 
     /**
-     * Дата регистрации пользователя.
+     * Имя пользователя.
      */
-    private String registrationDate;
+    private String userName;
+
+    /**
+     * Рабочее место пользователя.
+     */
+    private String workPlace;
 
     //endregion
 
@@ -100,21 +95,19 @@ public class User {
      * @param login Задает логин пользователя.
      * @param password Задает пароль пользователя.
      * @param role Задает флаг, показывающий, наделен ли пользователь правами администратора.
-     * @param userId
-     * @param userName
-     * @param workPlace
-     * @param isBlocked
+     * @param userName Имя пользователя.
+     * @param workPlace Рабочее место пользователя.
+     * @param isBlocked Флаг, показывающий, заблокирован ли пользователь.
      */
-    public User(String branchId, String login, String password, int role, String userId, String userName, String workPlace, boolean isBlocked) throws Exception {
+    public User(String branchId, String login, String password, int role, String userName, String workPlace, boolean isBlocked) throws Exception {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
         if (role != 0 || role != 1 || role != 2 || role != 4)
-            throw new Exception("asd");
+            throw new IllegalArgumentException("Аргумент role имеет не дозволительное значение. Используте класс User");
 
         this.role = role;
 
-        this.userId = userId;
         this.userName = userName;
         this.workPlace = workPlace;
         this.isBlocked = isBlocked;
@@ -176,13 +169,6 @@ public class User {
      */
     public String getRegistrationDate() {
         return registrationDate;
-    }
-
-    /**
-     * @return Уникальный идентификатор пользователя.
-     */
-    public String getUserId() {
-        return userId;
     }
 
     /**

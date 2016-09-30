@@ -126,18 +126,18 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
                     unverifiedUsersList.clear();
-                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
+                    /*for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
                         UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
                         unverifiedUsersList.add(user);
-                    }
+                    }*/
                     adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
 
                     usersList.clear();
-                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
+                    /*for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
                         User user = userRecord.getValue(User.class);
                         usersList.add(user);
-                    }
+                    }*/
                     adapter1 = new UserAdapter(getApplicationContext(), usersList);
                     usersView.setAdapter(adapter1);
 
@@ -164,14 +164,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         search = false;
-                        try {
+                        /*try {
                             databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
                         }
                         catch (Exception e) {
                             e.printStackTrace();
                         }
                         databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
-                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();*/
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });

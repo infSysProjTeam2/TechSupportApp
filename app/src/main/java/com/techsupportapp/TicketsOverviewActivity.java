@@ -127,7 +127,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ticketsOverviewList.clear();
                 if (isAdmin) {
-                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                    /*for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                         Ticket ticket = ticketRecord.getValue(Ticket.class);
                         if (ticket.getAdminId().equals(mUserId))
                             ticketsOverviewList.add(ticket);
@@ -144,7 +144,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                         Ticket unMarkedTicket = unMarkedTicketRecord.getValue(Ticket.class);
                         if (unMarkedTicket.getUserId().equals(mUserId))
                             ticketsOverviewList.add(unMarkedTicket);
-                    }
+                    }*/
                     adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
                     ticketsOverview.setAdapter(adapter);
                 }
@@ -186,9 +186,9 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     //что-то
                 } else {
                     //TODO вы точно хотите отозвать тикет
-                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
+                    /*if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
                         databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).getTicketId()).removeValue();
-                    else; //TODO проблема решена
+                    else; //TODO проблема решена*/
                 }
                 return true;
             }

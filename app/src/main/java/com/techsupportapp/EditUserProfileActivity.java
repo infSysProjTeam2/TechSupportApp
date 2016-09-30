@@ -76,7 +76,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
     }
 
     private void setEvents(){
-        databaseRef.addValueEventListener(new ValueEventListener() {
+       /* databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList.clear();
@@ -91,7 +91,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,7 +119,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
                 final AlertDialog alertDialog = alertDialogBuilder.create();
 
-                typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                /*typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
@@ -162,7 +162,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         }
 
                     }
-                });
+                });*/
 
                 alertDialog.show();
             }
@@ -222,7 +222,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
                         else
                         {
-                            try {
+                      /*      try {
                                 User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getRole(), usersList.get(userPosition).getBranchId(),
                                         usersList.get(userPosition).getLogin(), "Wayward Pines", false);
                                 databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
@@ -231,7 +231,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 e.printStackTrace();
                             }
                             Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
-                            alertDialog.dismiss();
+                            alertDialog.dismiss();*/
                         }
                     }
                 });

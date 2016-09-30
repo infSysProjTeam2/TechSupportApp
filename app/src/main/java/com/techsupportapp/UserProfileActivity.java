@@ -74,10 +74,10 @@ public class UserProfileActivity extends AppCompatActivity{
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
+                /*for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
                     User user = userRecord.getValue(User.class);
                     usersList.add(user);
-                }
+                }*/
                 setData();
             }
 

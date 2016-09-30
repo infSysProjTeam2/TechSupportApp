@@ -7,7 +7,7 @@ import java.util.Locale;
 /**
  * Класс, агрегирующий регистрационные данные неподтвержденного пользователя.
  * Основной {@link #UnverifiedUser(String branchId, String login, String password, int role,
-        String userId, String userName, String workPlace, boolean isBlocked) конструктор}.
+        String userName, String workPlace, boolean isBlocked) конструктор}.
  * @author Monarch
  */
 public class UnverifiedUser {
@@ -23,11 +23,6 @@ public class UnverifiedUser {
      * Логин неподтвержденного пользователя.
      */
     private String login;
-
-    /**
-     * Уникальный идентификатор пользователя.
-     */
-    private String userId;
 
     /**
      * Имя пользователя.
@@ -77,19 +72,17 @@ public class UnverifiedUser {
      * @param login Задает логин неподтвержденного пользователя.
      * @param password Задает пароль неподтвержденного пользователя.
      * @param role Задает флаг, показывающий, будет ли наделен неподтвержденный пользователь правами администратора после подтверждения.
-     * @param userId
-     * @param userName
-     * @param workPlace
-     * @param isBlocked
+     * @param userName Имя пользователя.
+     * @param workPlace Рабочее место пользователя.
+     * @param isBlocked Флаг, показывающий, заблокирован ли пользователь.
      */
     public UnverifiedUser(String branchId, String login, String password, int role,
-                          String userId, String userName, String workPlace, boolean isBlocked) {
+                          String userName, String workPlace, boolean isBlocked) {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
         this.role = role;
 
-        this.userId = userId;
         this.userName = userName;
         this.workPlace = workPlace;
         this.isBlocked = isBlocked;
@@ -107,7 +100,7 @@ public class UnverifiedUser {
      * @return Подвержденного пользователя.
      */
     public User verifyUser() throws Exception {
-        return new User(this.branchId, this.login, this.password, this.role, this.branchId,
+        return new User(this.branchId, this.login, this.password, this.role,
                 this.userName, this.workPlace, this.isBlocked);
     }
 

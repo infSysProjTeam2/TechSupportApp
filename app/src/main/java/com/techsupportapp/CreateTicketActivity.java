@@ -150,7 +150,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     }
 
     private void setEvents() {
-        createBut.setOnClickListener(new View.OnClickListener() {
+        /*createBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
@@ -175,7 +175,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override

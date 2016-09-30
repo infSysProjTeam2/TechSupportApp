@@ -64,7 +64,7 @@ public class EditUserProfileActivityAlt extends AppCompatActivity{
     }
 
     private void setEvents(){
-        databaseRef.addValueEventListener(new ValueEventListener() {
+       /* databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList.clear();
@@ -79,7 +79,7 @@ public class EditUserProfileActivityAlt extends AppCompatActivity{
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
 
         changePasswordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +114,7 @@ public class EditUserProfileActivityAlt extends AppCompatActivity{
 
                 final AlertDialog alertDialog = alertDialogBuilder.create();
 
-                typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+              /*  typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
@@ -148,7 +148,7 @@ public class EditUserProfileActivityAlt extends AppCompatActivity{
                         } else
                             Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
                     }
-                    });
+                    });*/
 
                 alertDialog.show();
             }

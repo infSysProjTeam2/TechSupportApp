@@ -15,6 +15,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,16 +29,16 @@ public class SignUpActivity extends AppCompatActivity {
 
     //region Fields
 
-    DatabaseReference databaseReference;
-    ArrayList<String> loginList = new ArrayList<String>();
-    int userCount;
+    private DatabaseReference databaseReference;
+    private ArrayList<String> loginList = new ArrayList<String>();
+    private int userCount;
 
     //endregion
 
     //region Composite Controls
 
-    private Button returnBut;
-    private Button signUpBut;
+    private Button returnBtn;
+    private Button signUpBtn;
 
     private EditText loginET;
 
@@ -55,6 +56,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         setTitle("Регистрация");
+
         initializeComponents();
 
         setEvents();
@@ -64,8 +66,8 @@ public class SignUpActivity extends AppCompatActivity {
      * Инициализация переменных и элементов макета
      */
     private void initializeComponents() {
-        returnBut = (Button)findViewById(R.id.returnButton);
-        signUpBut = (Button)findViewById(R.id.signUpButton);
+        returnBtn = (Button)findViewById(R.id.returnButton);
+        signUpBtn = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         userNameET = (EditText)findViewById(R.id.userNameET);
@@ -80,14 +82,14 @@ public class SignUpActivity extends AppCompatActivity {
      * Создание методов для событий
      */
     private void setEvents() {
-        returnBut.setOnClickListener(new View.OnClickListener() {
+        returnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SignUpActivity.super.finish();
             }
         });
 
-        signUpBut.setOnClickListener(new View.OnClickListener() {
+        signUpBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int index = Collections.binarySearch(loginList, loginET.getText().toString(), new Comparator<String>() {
@@ -96,30 +98,43 @@ public class SignUpActivity extends AppCompatActivity {
                         return lhs.compareTo(rhs);
                     }
                 });
-                if (loginET.getText().toString().equals(""))
+                if (loginET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Поле логина пусто", Toast.LENGTH_LONG).show();
-                else if (userNameET.getText().toString().equals(""))
+                    loginET.requestFocus();
+                }
+                else if (userNameET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Поле имени пользователя пусто", Toast.LENGTH_LONG).show();
-                else if (workPlaceET.getText().toString().equals(""))
+                    userNameET.requestFocus();
+                }
+                else if (workPlaceET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Поле рабочего места пользователя пусто", Toast.LENGTH_LONG).show();
-                else if (passwordET.getText().toString().equals(""))
+                    workPlaceET.requestFocus();
+                }
+                else if (passwordET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Поле пароля пусто", Toast.LENGTH_LONG).show();
-                else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString()))
+                    passwordET.requestFocus();
+                }
+                else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString())) {
+                    passwordET.requestFocus();
                     Toast.makeText(getApplicationContext(), "Пароли не совпадают", Toast.LENGTH_LONG).show();
+                    passwordET.setText("");
+                    repeatPasswordET.setText("");
+                }
                 else if (index >= 0) {
                     loginET.setText("");
                     Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
                 } else {
-                    try {
-                        databaseReference.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                    try { //TODO Определение прав нового пользователя.
+                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
                                 .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(),
-                                        passwordET.getText().toString(), User.SIMPLE_USER, "user_" + userCount, userNameET.getText().toString(),
+                                        passwordET.getText().toString(), User.SIMPLE_USER, userNameET.getText().toString(),
                                         workPlaceET.getText().toString(), false));
                     }
                     catch (Exception e) {
                         e.printStackTrace();
                     }
-                    databaseReference.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
+                    databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
+                    GlobalsMethods.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
                     SignUpActivity.super.finish();
                 }
             }
@@ -129,16 +144,12 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loginList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
+
+            /*    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
                     loginList.add(userRecord.getValue(User.class).getLogin());
-                try {
-                    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                        loginList.add(userRecord.getValue(UnverifiedUser.class).verifyUser().getLogin());
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-                userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
+                    loginList.add(userRecord.getValue(UnverifiedUser.class).getLogin());
+                userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);*/
             }
 
             @Override
