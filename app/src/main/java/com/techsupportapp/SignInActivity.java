@@ -39,7 +39,6 @@ public class SignInActivity extends AppCompatActivity {
     /**
      *
      */
-    private static final String appId = "E78031C1-13EA-4B71-A80A-53120BD37E3F";
 
     //endregion
 
@@ -164,7 +163,7 @@ public class SignInActivity extends AppCompatActivity {
                                 intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
                             }
 
-                            Bundle args = TicketsOverviewActivity.makeSendBirdArgs(appId, getId(userName), userName, userList.get(i).getIsAdmin());
+                            Bundle args = TicketsOverviewActivity.makeArgs(getId(userName), userName, userList.get(i).getIsAdmin());
 
                             intent.putExtras(args);
                             savePassAndLogin();
@@ -213,9 +212,7 @@ public class SignInActivity extends AppCompatActivity {
         signUpBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //startActivity(new Intent(SignInActivity.this, SignUpActivity.class)); TODO вернуть
-                startActivity(new Intent(SignInActivity.this, MessagingActivity.class));
-
+                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
             }
         });
     }

@@ -1,13 +1,13 @@
 package com.techsupportapp;
 
 import android.app.ListActivity;
-import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,33 +19,44 @@ import com.firebase.client.ValueEventListener;
 import com.techsupportapp.chat.Chat;
 import com.techsupportapp.chat.ChatListAdapter;
 
-import java.util.Random;
-
 public class MessagingActivity extends ListActivity {
 
     // TODO: change this to your own Firebase URL
     private static final String FIREBASE_URL = "https://infsysprojteam2-abbdf.firebaseio.com/";
 
-    private String mUsername;
     private Firebase mFirebaseRef;
     private ValueEventListener mConnectedListener;
     private ChatListAdapter mChatListAdapter;
+
+    private String mCurrUsername;
+    private String mUsername;
+    private String mChatRoom;
+
+    private EditText inputText;
+    private ImageButton sendBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        // Make sure we have a mUsername
-        setupUsername();
+        mCurrUsername = getIntent().getExtras().getString("currUserName");
+        mUsername = getIntent().getExtras().getString("userName");
+        mChatRoom = getIntent().getExtras().getString("chatRoom");
 
-        setTitle("Chatting as " + mUsername);
+        initializeComponents();
+        setEvents();
+    }
 
-        // Setup our Firebase mFirebaseRef
-        mFirebaseRef = new Firebase(FIREBASE_URL).child("chat").child("room1");
+    private void initializeComponents() {
+        mFirebaseRef = new Firebase(FIREBASE_URL).child("chat").child(mChatRoom);
+        inputText = (EditText) findViewById(R.id.messageInput);
+        sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
-        // Setup our input methods. Enter key on the keyboard or pushing the send button
-        EditText inputText = (EditText) findViewById(R.id.messageInput);
+        setTitle("Чат с " + mUsername);
+    }
+
+    private void setEvents(){
         inputText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
@@ -56,22 +67,21 @@ public class MessagingActivity extends ListActivity {
             }
         });
 
-        findViewById(R.id.sendButton).setOnClickListener(new View.OnClickListener() {
+        sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 sendMessage();
             }
         });
-
     }
 
-    @Override
+        @Override
     public void onStart() {
         super.onStart();
         // Setup our view and list adapter. Ensure it scrolls to the bottom as data changes
         final ListView listView = getListView();
         // Tell our list adapter that we only want 50 messages at a time
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this, R.layout.item_message, mUsername);
+        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this, R.layout.item_message, mCurrUsername);
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -107,23 +117,12 @@ public class MessagingActivity extends ListActivity {
         mChatListAdapter.cleanup();
     }
 
-    private void setupUsername() {
-        SharedPreferences prefs = getApplication().getSharedPreferences("ChatPrefs", 0);
-        mUsername = prefs.getString("username", null);
-        if (mUsername == null) {
-            Random r = new Random();
-            // Assign a random user name if we don't have one saved.
-            mUsername = "JavaUser" + r.nextInt(100000);
-            prefs.edit().putString("username", mUsername).commit();
-        }
-    }
-
     private void sendMessage() {
         EditText inputText = (EditText) findViewById(R.id.messageInput);
         String input = inputText.getText().toString();
         if (!input.equals("")) {
             // Create our 'model', a Chat object
-            Chat chat = new Chat(input, mUsername);
+            Chat chat = new Chat(input, mCurrUsername);
             // Create a new, auto-generated child of that chat location, and save our chat data there
             mFirebaseRef.push().setValue(chat);
             inputText.setText("");

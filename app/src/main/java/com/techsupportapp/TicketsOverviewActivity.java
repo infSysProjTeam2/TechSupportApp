@@ -1,10 +1,8 @@
 package com.techsupportapp;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,7 +16,6 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +25,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.sendbird.android.SendBird;
 import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
@@ -40,11 +36,9 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private ListView ticketsOverview;
 
-    private String mAppId;
     private String mUserId;
     private String mNickname;
     private boolean isAdmin;
-    private String mGcmRegToken;
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
@@ -52,11 +46,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private ImageView currUserImage;
 
-    private static Context cntxt;
-
-    public static Bundle makeSendBirdArgs(String appKey, String uuid, String nickname, boolean isAdmin) {
+    public static Bundle makeArgs(String uuid, String nickname, boolean isAdmin) {
         Bundle args = new Bundle();
-        args.putString("appKey", appKey);
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
         args.putBoolean("isAdmin", isAdmin);
@@ -68,17 +59,13 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tickets_overview);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        cntxt = getBaseContext();
 
-        mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
         isAdmin = getIntent().getExtras().getBoolean("isAdmin");
-        mGcmRegToken = PreferenceManager.getDefaultSharedPreferences(TicketsOverviewActivity.this).getString("SendBirdGCMToken", "");
 
         initializeComponents();
         setEvents();
-        initSendBird();
     }
 
     private void initializeComponents(){
@@ -115,11 +102,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
-    }
-
-    private void initSendBird() {
-        SendBird.init(this, mAppId);
-        SendBird.login(SendBird.LoginOption.build(mUserId).setUserName(mNickname).setGCMRegToken(mGcmRegToken));
     }
 
     private void setEvents() {
@@ -162,21 +144,23 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent;
                 if (isAdmin) {
-                    intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                    Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).userId);
-                    intent.putExtras(args);
+                    intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                    intent.putExtra("currUserName", mNickname);
+                    intent.putExtra("userName", ticketsOverviewList.get(position).userId);
+                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).ticketId);
                 } else {
                     if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals("")) {
                         Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
                         return;
                     }
                     else {
-                        intent = new Intent(TicketsOverviewActivity.this, ChatActivity.class);
-                        Bundle args = ChatActivity.makeMessagingStartArgs(mAppId, mUserId, mNickname, ticketsOverviewList.get(position).adminId);
-                        intent.putExtras(args);
+                        intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                        intent.putExtra("currUserName", mNickname);
+                        intent.putExtra("userName", ticketsOverviewList.get(position).adminId);
+                        intent.putExtra("chatRoom", ticketsOverviewList.get(position).ticketId);
                     }
                 }
-                startActivityForResult(intent, 210);
+                startActivity(intent);
             }
         });
 
@@ -224,7 +208,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         if (id == R.id.listOfTickets) {
             if (isAdmin) {
                 Intent intent = new Intent(TicketsOverviewActivity.this, ListOfTicketsActivity.class);
-                intent.putExtra("appKey", mAppId);
                 intent.putExtra("uuid", mUserId);
                 intent.putExtra("nickname", mNickname);
                 startActivity(intent);
@@ -232,14 +215,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             else
             {
                 Intent intent = new Intent(TicketsOverviewActivity.this, CreateTicketActivity.class);
-                intent.putExtra("appKey", mAppId);
                 intent.putExtra("uuid", mUserId);
                 intent.putExtra("nickname", mNickname);
                 startActivity(intent);
             }
         } else if (id == R.id.signUpUser) {
             Intent intent = new Intent(TicketsOverviewActivity.this, UserActionsActivity.class);
-            intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);

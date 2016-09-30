@@ -40,7 +40,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private ListView unverifiedUsersView;
     private ListView usersView;
 
-    private String mAppId;
     private String mUserId;
     private String mNickname;
 
@@ -64,7 +63,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         setContentView(R.layout.activity_user_actions);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
@@ -240,7 +238,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             finish();
         } else if (id == R.id.listOfTickets) {
             Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
-            intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
