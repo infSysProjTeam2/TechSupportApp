@@ -18,10 +18,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.sendbird.android.shadow.okhttp3.internal.DiskLruCache;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.io.IOException;
@@ -50,8 +47,6 @@ public class SignInActivity extends AppCompatActivity {
     private ArrayList<String> unverifiedLoginList = new ArrayList<String>();
 
     private DatabaseReference databaseReference;
-
-    private boolean isDownloaded = false;
 
     //endregion
 
@@ -93,7 +88,7 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     private void closeLoadingDialog(){
-
+        loadingDialog.dismiss();
     }
 
     /**
@@ -179,28 +174,24 @@ public class SignInActivity extends AppCompatActivity {
                         }
                     }
                 }
-                else
-                {
-                    Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
-                }
+                else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
             }
         });
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                userList.clear();
                 unverifiedLoginList.clear();
-                userList.addAll(GlobalsMethods.downloadVerifiedUserList(dataSnapshot));
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                    unverifiedLoginList.add(userRecord.getValue(UnverifiedUser.class).getLogin());
-                loadingDialog.dismiss();
+
+                userList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
+                unverifiedLoginList = GlobalsMethods.Downloads.getUnverifiedLogins(dataSnapshot);
+
+                closeLoadingDialog();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. " +
-                        "Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
         });
 

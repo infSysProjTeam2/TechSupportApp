@@ -150,15 +150,15 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     }
 
     private void setEvents() {
-        /*createBut.setOnClickListener(new View.OnClickListener() {
+        createBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Заполните поля", Toast.LENGTH_LONG).show();
                 } else {
                     Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, topicET.getText().toString(), messageET.getText().toString());
-                    databaseReference.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
-                    databaseReference.child(DatabaseVariables.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
+                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
+                    databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                 }
                 Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
                 finish();
@@ -168,14 +168,14 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ticketCount = dataSnapshot.child(DatabaseVariables.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
+                ticketCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });*/
+        });
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override

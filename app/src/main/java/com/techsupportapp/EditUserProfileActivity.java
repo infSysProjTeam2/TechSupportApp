@@ -76,14 +76,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
     }
 
     private void setEvents(){
-       /* databaseRef.addValueEventListener(new ValueEventListener() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList.clear();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
-                    User user = userRecord.getValue(User.class);
-                    usersList.add(user);
-                }
+                usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
                 setData();
             }
 
@@ -91,7 +87,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });*/
+        });
 
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,16 +115,17 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
                 final AlertDialog alertDialog = alertDialogBuilder.create();
 
-                /*typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         if (types[position].equals("Пользователь")) {
                             if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
                                 User chUser;
                                 try {
-                                    chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.SIMPLE_USER, usersList.get(userPosition).getBranchId(),
-                                            usersList.get(userPosition).getLogin(), "Wayward Pines", false);
-                                    databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                            User.SIMPLE_USER, usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
                                 }
                                 catch (Exception e) {
                                     e.printStackTrace();
@@ -142,9 +139,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
                             User chUser;
                             try {
-                                chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(), User.ADMINISTRATOR, usersList.get(userPosition).getBranchId(),
-                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
-                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                        User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -162,7 +160,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         }
 
                     }
-                });*/
+                });
 
                 alertDialog.show();
             }
@@ -222,16 +220,24 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
                         else
                         {
-                      /*      try {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(), usersList.get(userPosition).getRole(), usersList.get(userPosition).getBranchId(),
-                                        usersList.get(userPosition).getLogin(), "Wayward Pines", false);
-                                databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            try {
+                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(),
+                                        usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                if (chUser.getRole() == User.ADMINISTRATOR)
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                else if (chUser.getRole() == User.SIMPLE_USER)
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
                             }
                             Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
-                            alertDialog.dismiss();*/
+                            alertDialog.dismiss();
                         }
                     }
                 });

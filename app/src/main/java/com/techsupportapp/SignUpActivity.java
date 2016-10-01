@@ -124,15 +124,12 @@ public class SignUpActivity extends AppCompatActivity {
                     loginET.setText("");
                     Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
                 } else {
-                    try { //TODO Определение прав нового пользователя.
-                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
-                                .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(),
-                                        passwordET.getText().toString(), User.SIMPLE_USER, userNameET.getText().toString(),
-                                        workPlaceET.getText().toString(), false));
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                     //TODO Определение прав нового пользователя.
+                    databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                            .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(),
+                                    passwordET.getText().toString(), User.SIMPLE_USER, userNameET.getText().toString(),
+                                    workPlaceET.getText().toString(), false));
+
                     databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
                     GlobalsMethods.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
                     SignUpActivity.super.finish();
@@ -143,13 +140,8 @@ public class SignUpActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                loginList.clear();
-
-            /*    for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren())
-                    loginList.add(userRecord.getValue(User.class).getLogin());
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                    loginList.add(userRecord.getValue(UnverifiedUser.class).getLogin());
-                userCount = dataSnapshot.child(DatabaseVariables.DATABASE_USER_INDEX_COUNTER).getValue(int.class);*/
+                loginList = GlobalsMethods.Downloads.getAllLogins(dataSnapshot);
+                userCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 
             @Override

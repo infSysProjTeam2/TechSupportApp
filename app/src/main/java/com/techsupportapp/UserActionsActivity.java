@@ -11,7 +11,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -125,19 +124,11 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList.clear();
-                    /*for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).getChildren()) {
-                        UnverifiedUser user = userRecord.getValue(UnverifiedUser.class);
-                        unverifiedUsersList.add(user);
-                    }*/
+                    unverifiedUsersList = GlobalsMethods.Downloads.getUnverifiedUserList(dataSnapshot);
                     adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
 
-                    usersList.clear();
-                    /*for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).getChildren()) {
-                        User user = userRecord.getValue(User.class);
-                        usersList.add(user);
-                    }*/
+                    usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
                     adapter1 = new UserAdapter(getApplicationContext(), usersList);
                     usersView.setAdapter(adapter1);
 
@@ -163,15 +154,17 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        //TODO определение ролей
                         search = false;
-                        /*try {
-                            databaseRef.child(DatabaseVariables.DATABASE_VERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                        try {
+                            databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE)
+                                    .child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
                         }
                         catch (Exception e) {
                             e.printStackTrace();
                         }
-                        databaseRef.child(DatabaseVariables.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
-                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();*/
+                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
+                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });
