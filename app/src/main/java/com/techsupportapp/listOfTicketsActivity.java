@@ -46,7 +46,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private ImageView currUserImage;
 
-    private String mAppId;
     private String mUserId;
     private String mNickname;
 
@@ -55,7 +54,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
 
-        mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
@@ -83,7 +81,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             finish();
         } else if (id == R.id.signUpUser) {
             Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
@@ -177,21 +174,14 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                listOfAvailableTickets.clear();
+                listOfAvailableTickets = GlobalsMethods.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+                listOfSolvedTickets = GlobalsMethods.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
                 listOfMyClosedTickets.clear();
-                listOfSolvedTickets.clear();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
-                    Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    listOfAvailableTickets.add(ticket);
-                }
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_SOLVED_TICKET_TABLE).getChildren()) {
-                    Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    listOfSolvedTickets.add(ticket);
-                }
-                for (Ticket ticket : listOfSolvedTickets) {
+
+                for (Ticket ticket : listOfSolvedTickets)
                     if (ticket.getAdminId().equals(mUserId))
                         listOfMyClosedTickets.add(ticket);
-                }
+
                 if (adapter == null) {
                     adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
                     viewOfAvailableTickets.setAdapter(adapter);
@@ -217,8 +207,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 listOfAvailableTickets.get(position).addAdmin(mUserId);
-                                databaseRef.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                                databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
+                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
                             }
                         });
 
