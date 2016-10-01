@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -47,7 +46,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private ImageView currUserImage;
 
-    private String mAppId;
     private String mUserId;
     private String mNickname;
 
@@ -56,7 +54,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
 
-        mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
@@ -84,7 +81,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             finish();
         } else if (id == R.id.signUpUser) {
             Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("appKey", mAppId);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
