@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
@@ -38,7 +39,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private String mUserId;
     private String mNickname;
-    private boolean isAdmin;
+    private int role;
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
@@ -46,11 +47,11 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private ImageView currUserImage;
 
-    public static Bundle makeArgs(String uuid, String nickname, boolean isAdmin) {
+    public static Bundle makeArgs(String uuid, String nickname, int role) {
         Bundle args = new Bundle();
         args.putString("uuid", uuid);
         args.putString("nickname", nickname);
-        args.putBoolean("isAdmin", isAdmin);
+        args.putInt("role", role);
         return args;
     }
 
@@ -62,7 +63,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
-        isAdmin = getIntent().getExtras().getBoolean("isAdmin");
+        role = getIntent().getExtras().getInt("role");
 
         initializeComponents();
         setEvents();
@@ -93,8 +94,15 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
-        if (isAdmin) {
+        if (role == User.ADMINISTRATOR) {
+            //TODO ограничения/дозволения
             userType.setText("Администратор");
+        }
+        else if (role == User.DEPARTMENT_CHIEF) {
+            //TODO ограничения/дозволения
+        }
+        else if (role == User.DEPARTMENT_MEMBER){
+            //TODO ограничения/дозволения
         }
         else {
             userType.setText("Пользователь");
@@ -108,26 +116,13 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ticketsOverviewList.clear();
-                if (isAdmin) {
-                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
-                        Ticket ticket = ticketRecord.getValue(Ticket.class);
-                        if (ticket.adminId.equals(mUserId))
-                            ticketsOverviewList.add(ticket);
-                    }
+                if (role == User.ADMINISTRATOR) {
+                    ticketsOverviewList = GlobalsMethods.Downloads.getAdminTicketList(dataSnapshot, mUserId);
                     adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
                     ticketsOverview.setAdapter(adapter);
                 } else {
-                    for (DataSnapshot markedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
-                        Ticket markedTicket = markedTicketRecord.getValue(Ticket.class);
-                        if (markedTicket.userId.equals(mUserId))
-                            ticketsOverviewList.add(markedTicket);
-                    }
-                    for (DataSnapshot unMarkedTicketRecord : dataSnapshot.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).getChildren()) {
-                        Ticket unMarkedTicket = unMarkedTicketRecord.getValue(Ticket.class);
-                        if (unMarkedTicket.userId.equals(mUserId))
-                            ticketsOverviewList.add(unMarkedTicket);
-                    }
+                    ticketsOverviewList = GlobalsMethods.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
+                    ticketsOverviewList.addAll(GlobalsMethods.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
                     adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
                     ticketsOverview.setAdapter(adapter);
                 }
@@ -142,22 +137,25 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         ticketsOverview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent;
-                if (isAdmin) {
-                    intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                if (role == User.ADMINISTRATOR) {
                     intent.putExtra("currUserName", mNickname);
-                    intent.putExtra("userName", ticketsOverviewList.get(position).userId);
-                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).ticketId);
-                } else {
-                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals("")) {
+                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserId());
+                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
+                } else if (role == User.DEPARTMENT_CHIEF) {
+                    //TODO Что открывается
+                } else if (role == User.DEPARTMENT_MEMBER){
+                    //TODO Что открывается
+                }
+                else {
+                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
                         Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
                         return;
                     }
                     else {
-                        intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                         intent.putExtra("currUserName", mNickname);
-                        intent.putExtra("userName", ticketsOverviewList.get(position).adminId);
-                        intent.putExtra("chatRoom", ticketsOverviewList.get(position).ticketId);
+                        intent.putExtra("userName", ticketsOverviewList.get(position).getAdminId());
+                        intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                     }
                 }
                 startActivity(intent);
@@ -167,12 +165,17 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         ticketsOverview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (isAdmin){
-                    //что-то
-                } else {
+                if (role == User.ADMINISTRATOR){
+                    //TODO Что делается
+                } else if (role == User.DEPARTMENT_CHIEF) {
+                    //TODO Что делается
+                } else if (role == User.DEPARTMENT_MEMBER){
+                    //TODO Что делается
+                }
+                else {
                     //TODO вы точно хотите отозвать тикет
-                    if (ticketsOverviewList.get(position).adminId == null || ticketsOverviewList.get(position).adminId.equals(""))
-                        databaseRef.child(DatabaseVariables.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).ticketId).removeValue();
+                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
+                        databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).getTicketId()).removeValue();
                     else; //TODO проблема решена
                 }
                 return true;
@@ -206,11 +209,15 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         int id = item.getItemId();
 
         if (id == R.id.listOfTickets) {
-            if (isAdmin) {
+            if (role == User.ADMINISTRATOR) {
                 Intent intent = new Intent(TicketsOverviewActivity.this, ListOfTicketsActivity.class);
                 intent.putExtra("uuid", mUserId);
                 intent.putExtra("nickname", mNickname);
                 startActivity(intent);
+            } else if (role == User.DEPARTMENT_CHIEF) {
+                //TODO Что открывается
+            } else if (role == User.DEPARTMENT_MEMBER){
+                //TODO Что открывается
             }
             else
             {
