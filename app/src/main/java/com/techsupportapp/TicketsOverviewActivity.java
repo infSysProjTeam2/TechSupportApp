@@ -137,12 +137,11 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         ticketsOverview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent;
+                Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                 if (role == User.ADMINISTRATOR) {
-                    intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                     intent.putExtra("currUserName", mNickname);
-                    intent.putExtra("userName", ticketsOverviewList.get(position).userId);
-                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).ticketId);
+                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserId());
+                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                 } else if (role == User.DEPARTMENT_CHIEF) {
                     //TODO Что открывается
                 } else if (role == User.DEPARTMENT_MEMBER){
@@ -154,7 +153,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                         return;
                     }
                     else {
-                        intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                         intent.putExtra("currUserName", mNickname);
                         intent.putExtra("userName", ticketsOverviewList.get(position).getAdminId());
                         intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());

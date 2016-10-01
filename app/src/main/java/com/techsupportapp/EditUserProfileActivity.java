@@ -100,7 +100,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                 alertDialogBuilder.setView(promptsView);
 
                 final ListView typesOfUsers = (ListView) promptsView.findViewById(R.id.typesOfUsersList);
-                final String[] types = { "Пользователь"};
+                final String[] types = {"Пользователь"};
                 final ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditUserProfileActivity.this, android.R.layout.simple_list_item_1, types);
                 typesOfUsers.setAdapter(adapter);
 

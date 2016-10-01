@@ -154,7 +154,7 @@ public class SignInActivity extends AppCompatActivity {
 
                             intent.putExtras(args);
                             savePassAndLogin();
-                            GlobalsMethods.currUserId = userName;
+                            GlobalsMethods.currUserId = login;
                             GlobalsMethods.isCurrentAdmin = userList.get(i).getRole();
                             startActivity(intent);
                         }

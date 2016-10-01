@@ -139,6 +139,28 @@ public class UnverifiedUser {
         return registrationDate;
     }
 
+    /**
+     * @return Рабочее место пользователя.
+     */
+    public String getWorkPlace() {
+        return workPlace;
+    }
+
+    /**
+     * @return Флаг, показывающий, заблокирован ли пользователь.
+     */
+    public boolean getIsBlocked() {
+        return isBlocked;
+    }
+
+    /**
+     * @return Имя пользователя.
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+
     //endregion
 
 }
