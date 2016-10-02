@@ -1,8 +1,10 @@
 package com.techsupportapp;
 
-import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -18,10 +20,14 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.techsupportapp.chat.Chat;
 import com.techsupportapp.chat.ChatListAdapter;
+import com.techsupportapp.utility.GlobalsMethods;
 
-public class MessagingActivity extends ListActivity {
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
-    // TODO: change this to your own Firebase URL
+public class MessagingActivity extends AppCompatActivity {
+
     private static final String FIREBASE_URL = "https://infsysprojteam2-abbdf.firebaseio.com/";
 
     private Firebase mFirebaseRef;
@@ -35,6 +41,8 @@ public class MessagingActivity extends ListActivity {
     private EditText inputText;
     private ImageButton sendBtn;
 
+    private ProgressDialog loadingDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,11 +52,13 @@ public class MessagingActivity extends ListActivity {
         mUsername = getIntent().getExtras().getString("userName");
         mChatRoom = getIntent().getExtras().getString("chatRoom");
 
+        showLoadingDialog();
         initializeComponents();
         setEvents();
     }
 
     private void initializeComponents() {
+        mFirebaseRef.setAndroidContext(MessagingActivity.this);
         mFirebaseRef = new Firebase(FIREBASE_URL).child("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
@@ -75,13 +85,20 @@ public class MessagingActivity extends ListActivity {
         });
     }
 
+    private void showLoadingDialog(){
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("Загрузка...");
+        loadingDialog.setCancelable(false);
+        loadingDialog.setInverseBackgroundForced(false);
+        loadingDialog.show();
+    }
+
         @Override
     public void onStart() {
         super.onStart();
-        // Setup our view and list adapter. Ensure it scrolls to the bottom as data changes
-        final ListView listView = getListView();
+        final ListView listView = (ListView)findViewById(R.id.listChat);
         // Tell our list adapter that we only want 50 messages at a time
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this, R.layout.item_message, mCurrUsername);
+        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this, R.layout.item_message, mCurrUsername);//TODO 50 сообщений - норм?
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -91,15 +108,13 @@ public class MessagingActivity extends ListActivity {
             }
         });
 
-        // Finally, a little indication of connection status
         mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
                 if (connected) {
-                    Toast.makeText(MessagingActivity.this, "Connected to Firebase", Toast.LENGTH_SHORT).show();
+                    loadingDialog.dismiss();
                 } else {
-                    Toast.makeText(MessagingActivity.this, "Disconnected from Firebase", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -120,10 +135,12 @@ public class MessagingActivity extends ListActivity {
     private void sendMessage() {
         EditText inputText = (EditText) findViewById(R.id.messageInput);
         String input = inputText.getText().toString();
+        String messageTime;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+        messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
-            // Create our 'model', a Chat object
-            Chat chat = new Chat(input, mCurrUsername);
-            // Create a new, auto-generated child of that chat location, and save our chat data there
+            Chat chat = new Chat(input, mCurrUsername, GlobalsMethods.currUserId, messageTime);
             mFirebaseRef.push().setValue(chat);
             inputText.setText("");
         }
