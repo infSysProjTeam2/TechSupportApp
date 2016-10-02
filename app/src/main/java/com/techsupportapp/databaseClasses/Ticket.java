@@ -62,6 +62,10 @@ public class Ticket {
      */
     private String adminId;
 
+    private String adminName;
+
+    private String userName;
+
     /**
      * Тема заявки.
      */
@@ -93,9 +97,10 @@ public class Ticket {
      * @param topic Тема заявки.
      * @param message Сообщение - описание проблемы в заявке.
      */
-    public Ticket(String ticketId, String userId, String topic, String message) {
+    public Ticket(String ticketId, String userId, String userName, String topic, String message) {
         this.ticketId = ticketId;
         this.userId = userId;
+        this.userName = userName;
         this.topic = topic;
         this.message = message;
         this.adminId = null;
@@ -108,8 +113,9 @@ public class Ticket {
      * Метод, задающий администратора, который будет решать проблему.
      * @param adminId
      */
-    public void addAdmin(String adminId) {
+    public void addAdmin(String adminId, String adminName) {
         this.adminId = adminId;
+        this.adminName = adminName;
         this.ticketState = Ticket.ACCEPTED;
     }
 
@@ -160,6 +166,16 @@ public class Ticket {
      */
     public int getTicketState() {
         return ticketState;
+    }
+
+
+    public String getUserName() {
+        return userName;
+    }
+
+
+    public String getAdminName() {
+        return adminName;
     }
 
 }

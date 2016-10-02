@@ -206,7 +206,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                listOfAvailableTickets.get(position).addAdmin(mUserId);
+                                listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
                                 databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
                                 databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
                             }
