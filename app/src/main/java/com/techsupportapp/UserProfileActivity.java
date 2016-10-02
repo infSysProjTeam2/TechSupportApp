@@ -27,6 +27,7 @@ public class UserProfileActivity extends AppCompatActivity{
     private ArrayList<User> usersList = new ArrayList<User>();
 
     private String mUserId;
+    private String mUserLogin;
     private String mCurrUserId;
 
     private TextView userName;
@@ -45,6 +46,7 @@ public class UserProfileActivity extends AppCompatActivity{
         setContentView(R.layout.activity_user_profile);
 
         mUserId = getIntent().getExtras().getString("userId");
+        mUserLogin = getIntent().getExtras().getString("userLogin");
         mCurrUserId = getIntent().getExtras().getString("currUserId");
 
         initializeComponents();

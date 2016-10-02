@@ -156,7 +156,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Заполните поля", Toast.LENGTH_LONG).show();
                 } else {
-                    Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, topicET.getText().toString(), messageET.getText().toString());
+                    Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
                     databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
                     databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                 }
