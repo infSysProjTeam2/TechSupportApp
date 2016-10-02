@@ -48,5 +48,6 @@ public class UserAdapter extends ArrayAdapter<User> {
             }
         });
         return rowView;
+        //TODO сделать показ роли ListView
     }
 }
