@@ -1,22 +1,20 @@
 package com.techsupportapp.chat;
 
-/**
- * @author greg
- * @since 6/21/13
- */
 public class Chat {
 
     private String message;
     private String author;
+    private String messageTime;
+    private String userId;
 
-    // Required default constructor for Firebase object mapping
-    @SuppressWarnings("unused")
     private Chat() {
     }
 
-    public Chat(String message, String author) {
+    public Chat(String message, String author, String userId, String messageTime) {
         this.message = message;
         this.author = author;
+        this.userId = userId;
+        this.messageTime = messageTime;
     }
 
     public String getMessage() {
@@ -26,4 +24,11 @@ public class Chat {
     public String getAuthor() {
         return author;
     }
+
+    public String getMessageTime() {
+        return messageTime;
+    }
+
+    public String getUserId() { return userId; }
+
 }
