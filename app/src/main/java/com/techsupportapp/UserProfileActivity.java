@@ -116,10 +116,10 @@ public class UserProfileActivity extends AppCompatActivity{
             }
         });
 
-        userName.setText(usersList.get(index).getLogin());
-        userId.setText(usersList.get(index).getBranchId());
-        //regDate.setText(""); TODO сделать
-        //workPlace.setText(""); TODO сделать
+        userName.setText(usersList.get(index).getUserName());
+        userId.setText(usersList.get(index).getLogin());
+        regDate.setText(usersList.get(index).getRegistrationDate());
+        workPlace.setText(usersList.get(index).getWorkPlace());
         if (usersList.get(index).getRole() == User.ADMINISTRATOR)
             accessLevel.setText("Администратор");
         else if (usersList.get(index).getRole() == User.SIMPLE_USER)

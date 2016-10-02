@@ -17,8 +17,8 @@ public class ChatListAdapter extends FirebaseListAdapter<Chat> {
     private String mUsername;
     private Context context;
 
-    public ChatListAdapter(Query ref, Activity activity, int layout, String mUsername) {
-        super(ref, Chat.class, layout, activity);
+    public ChatListAdapter(Query ref, Activity activity, String mUsername) {
+        super(ref, Chat.class, activity);
         this.mUsername = mUsername;
         this.context = activity.getApplicationContext();
     }
@@ -26,13 +26,23 @@ public class ChatListAdapter extends FirebaseListAdapter<Chat> {
     @Override
     protected void populateView(View view, final Chat chat) {
         final String author = chat.getAuthor();
-        TextView authorText = (TextView) view.findViewById(R.id.messageAuthor);
-        ImageView userImage = (ImageView) view.findViewById(R.id.userImage);
-        authorText.setText(author + ": ");
+        ViewHolder holder;
 
-        ((TextView) view.findViewById(R.id.messageText)).setText(chat.getMessage());
-        ((TextView) view.findViewById(R.id.messageTime)).setText(chat.getMessageTime());
-        userImage.setOnClickListener(new View.OnClickListener() {
+        if (view == null) {
+            holder = new ViewHolder();
+            holder.authorText = (TextView) view.findViewById(R.id.messageAuthor);
+            holder.messageText = (TextView) view.findViewById(R.id.messageText);
+            holder.messageTime = (TextView) view.findViewById(R.id.messageTime);
+            holder.userImage = (ImageView) view.findViewById(R.id.userImage);
+            view.setTag(holder);
+        } else {
+            holder = (ViewHolder) view.getTag();
+        }
+
+        holder.authorText.setText(author + ": ");
+        holder.messageText.setText(chat.getMessage());
+        holder.messageTime.setText(chat.getMessageTime());
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, UserProfileActivity.class);
@@ -42,6 +52,13 @@ public class ChatListAdapter extends FirebaseListAdapter<Chat> {
                 context.startActivity(intent);
             }
         });
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(author,context)));
+        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(author,context)));
+    }
+
+    static class ViewHolder {
+        private TextView authorText;
+        private TextView messageText;
+        private TextView messageTime;
+        private ImageView userImage;
     }
 }

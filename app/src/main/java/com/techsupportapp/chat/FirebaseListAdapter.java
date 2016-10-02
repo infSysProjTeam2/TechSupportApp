@@ -1,56 +1,65 @@
 package com.techsupportapp.chat;
 
 import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
+
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
+import com.techsupportapp.R;
+import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
+    private static final int TYPE_1 = 0;
+    private static final int TYPE_2 = 1;
+
     private Query mRef;
     private Class<T> mModelClass;
-    private int mLayout;
     private LayoutInflater mInflater;
     private List<T> mModels;
     private List<String> mKeys;
     private ChildEventListener mListener;
+    private List<Chat> mMessages;
 
-    public FirebaseListAdapter(Query mRef, Class<T> mModelClass, int mLayout, Activity activity) {
+    public FirebaseListAdapter(Query mRef, Class<T> mModelClass, Activity activity) {
         this.mRef = mRef;
         this.mModelClass = mModelClass;
-        this.mLayout = mLayout;
         mInflater = activity.getLayoutInflater();
         mModels = new ArrayList<T>();
         mKeys = new ArrayList<String>();
+        mMessages = new ArrayList<Chat>();
         mListener = this.mRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-
                 T model = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 String key = dataSnapshot.getKey();
 
                 if (previousChildName == null) {
                     mModels.add(0, model);
                     mKeys.add(0, key);
+                    mMessages.add(0, dataSnapshot.getValue(Chat.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(model);
                         mKeys.add(key);
+                        mMessages.add(dataSnapshot.getValue(Chat.class));
                     } else {
                         mModels.add(nextIndex, model);
                         mKeys.add(nextIndex, key);
+                        mMessages.add(nextIndex, dataSnapshot.getValue(Chat.class));
                     }
                 }
 
@@ -64,6 +73,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 int index = mKeys.indexOf(key);
 
                 mModels.set(index, newModel);
+                mMessages.add(index, dataSnapshot.getValue(Chat.class));
 
                 notifyDataSetChanged();
             }
@@ -76,6 +86,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
                 mKeys.remove(index);
                 mModels.remove(index);
+                mMessages.remove(index);
 
                 notifyDataSetChanged();
             }
@@ -83,26 +94,30 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
 
-                // A model changed position in the list. Update our list accordingly
                 String key = dataSnapshot.getKey();
                 T newModel = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 int index = mKeys.indexOf(key);
                 mModels.remove(index);
                 mKeys.remove(index);
+                mMessages.remove(index);
                 if (previousChildName == null) {
                     mModels.add(0, newModel);
                     mKeys.add(0, key);
+                    mMessages.add(0, dataSnapshot.getValue(Chat.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(newModel);
                         mKeys.add(key);
+                        mMessages.add(dataSnapshot.getValue(Chat.class));
                     } else {
                         mModels.add(nextIndex, newModel);
                         mKeys.add(nextIndex, key);
+                        mMessages.add(nextIndex, dataSnapshot.getValue(Chat.class));
                     }
                 }
+
                 notifyDataSetChanged();
             }
 
@@ -118,6 +133,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
         mRef.removeEventListener(mListener);
         mModels.clear();
         mKeys.clear();
+        mMessages.clear();
     }
 
     @Override
@@ -137,14 +153,44 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        if (view == null) {
-            view = mInflater.inflate(mLayout, viewGroup, false);
+
+        Log.e("FirebaseListAdapter", "---------------------------------------------------------");
+        Log.e("FirebaseListAdapter", String.valueOf(i));
+        Log.e("FirebaseListAdapter", GlobalsMethods.currUserId);
+        Log.e("FirebaseListAdapter", mMessages.get(i).getUserId() + " - " + mMessages.get(i).getMessage());
+
+        int type = getItemViewType(i);
+        View v = view;
+
+        switch (type) {
+            case TYPE_1:
+                v = mInflater.inflate(R.layout.item_message_left, null);
+                break;
+            case TYPE_2:
+                v = mInflater.inflate(R.layout.item_message_right, null);
+                break;
+            default:
         }
 
         T model = mModels.get(i);
-        populateView(view, model);
-        return view;
+        populateView(v, model);
+        return v;
     }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        if ((mMessages.get(position).getUserId().equals(GlobalsMethods.currUserId)))
+            return TYPE_1;
+        else
+            return TYPE_2;
+    }
+
+    @Override
+    public int getViewTypeCount() {
+        return 2;
+    }
+
 
     protected abstract void populateView(View v, T model);
 }

@@ -75,7 +75,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(mUserId);
+        toolbar.setTitle(mNickname);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -140,7 +140,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                 Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                 if (role == User.ADMINISTRATOR) {
                     intent.putExtra("currUserName", mNickname);
-                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserId());
+                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
                     intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                 } else if (role == User.DEPARTMENT_CHIEF) {
                     //TODO Что открывается
@@ -154,7 +154,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     }
                     else {
                         intent.putExtra("currUserName", mNickname);
-                        intent.putExtra("userName", ticketsOverviewList.get(position).getAdminId());
+                        intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
                         intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                     }
                 }

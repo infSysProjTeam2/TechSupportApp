@@ -1,7 +1,6 @@
 package com.techsupportapp;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,7 +11,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -20,6 +18,7 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.techsupportapp.chat.Chat;
 import com.techsupportapp.chat.ChatListAdapter;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.text.SimpleDateFormat;
@@ -27,8 +26,6 @@ import java.util.Calendar;
 import java.util.Locale;
 
 public class MessagingActivity extends AppCompatActivity {
-
-    private static final String FIREBASE_URL = "https://infsysprojteam2-abbdf.firebaseio.com/";
 
     private Firebase mFirebaseRef;
     private ValueEventListener mConnectedListener;
@@ -59,7 +56,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private void initializeComponents() {
         mFirebaseRef.setAndroidContext(MessagingActivity.this);
-        mFirebaseRef = new Firebase(FIREBASE_URL).child("chat").child(mChatRoom);
+        mFirebaseRef = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
@@ -97,8 +94,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         final ListView listView = (ListView)findViewById(R.id.listChat);
-        // Tell our list adapter that we only want 50 messages at a time
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this, R.layout.item_message, mCurrUsername);//TODO 50 сообщений - норм?
+        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this,  mCurrUsername);//TODO 50 сообщений - норм?
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -137,7 +133,7 @@ public class MessagingActivity extends AppCompatActivity {
         String input = inputText.getText().toString();
         String messageTime;
 
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
             Chat chat = new Chat(input, mCurrUsername, GlobalsMethods.currUserId, messageTime);

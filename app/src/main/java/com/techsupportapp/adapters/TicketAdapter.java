@@ -33,42 +33,50 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         final String titleText;
         final String userId;
         final String adminId;
-        final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.item_ticket, parent, false);
-        ImageView ticketImage = (ImageView) rowView.findViewById(R.id.ticketImage);
-        final TextView authorText = (TextView)rowView.findViewById(R.id.ticketAuthor);
-        TextView dateText = (TextView)rowView.findViewById(R.id.ticketDate);
-        TextView topicText = (TextView)rowView.findViewById(R.id.ticketTopic);
-        TextView descText = (TextView)rowView.findViewById(R.id.ticketDesc);
+        ViewHolder holder;
+
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.item_ticket, parent, false);
+            holder = new ViewHolder();
+            holder.ticketImage = (ImageView) convertView.findViewById(R.id.ticketImage);
+            holder.authorText = (TextView) convertView.findViewById(R.id.ticketAuthor);
+            holder.dateText = (TextView) convertView.findViewById(R.id.ticketDate);
+            holder.topicText = (TextView) convertView.findViewById(R.id.ticketTopic);
+            holder.descText = (TextView) convertView.findViewById(R.id.ticketDesc);
+            convertView.setTag(holder);
+        } else{
+            holder = (ViewHolder) convertView.getTag();
+        }
 
         userId = values.get(position).getUserId();
         adminId = values.get(position).getAdminId();
 
         if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
             if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
-                authorText.setText(values.get(position).getUserName());
+                holder.authorText.setText(values.get(position).getUserName());
             else
-                authorText.setText("Не установлено");
+                holder.authorText.setText("Не установлено");
 
-            titleText = authorText.getText().toString();
+            titleText = holder.authorText.getText().toString();
         }
         else {
             if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
-                authorText.setText(values.get(position).getUserName() + " ✔");
+                holder.authorText.setText(values.get(position).getUserName() + " ✔");
                 titleText = values.get(position).getUserName();
             }
             else {
-                authorText.setText(values.get(position).getAdminName() + " ✔");
+                holder.authorText.setText(values.get(position).getAdminName() + " ✔");
                 titleText = values.get(position).getAdminName();
             }
         }
 
-        dateText.setText(values.get(position).getCreateDate());
-        topicText.setText(values.get(position).getTopic());
-        descText.setText(values.get(position).getMessage());
-        ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
+        holder.dateText.setText(values.get(position).getCreateDate());
+        holder.topicText.setText(values.get(position).getTopic());
+        holder.descText.setText(values.get(position).getMessage());
+        holder.ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
 
-        ticketImage.setOnClickListener(new View.OnClickListener() {
+        holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean fl = true;
@@ -88,6 +96,14 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
                     context.startActivity(intent);
             }
         });
-        return rowView;
+        return convertView;
+    }
+
+    static class ViewHolder {
+        private TextView authorText;
+        private TextView dateText;
+        private TextView topicText;
+        private TextView descText;
+        private ImageView ticketImage;
     }
 }

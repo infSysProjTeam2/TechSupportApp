@@ -28,26 +28,40 @@ public class UserAdapter extends ArrayAdapter<User> {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.item_user, parent, false);
-        ImageView userImage = (ImageView) rowView.findViewById(R.id.userImage);
-        final TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
 
-        userNameText.setText(values.get(position).getLogin());
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.item_user, parent, false);
+            holder = new ViewHolder();
 
-        userImage.setOnClickListener(new View.OnClickListener() {
+            holder.userImage = (ImageView) convertView.findViewById(R.id.userImage);
+            holder.userNameText = (TextView) convertView.findViewById(R.id.userName);
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        holder.userNameText.setText(values.get(position).getUserName());
+        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
+
+        holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                intent.putExtra("userId", userNameText.getText().toString());
+                intent.putExtra("userId", values.get(position).getLogin());
                 intent.putExtra("currUserId", GlobalsMethods.currUserId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
-        return rowView;
+        return convertView;
         //TODO сделать показ роли ListView
+    }
+
+    static class ViewHolder {
+        private ImageView userImage;
+        private TextView userNameText;
     }
 }
