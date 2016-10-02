@@ -153,12 +153,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-
-        Log.e("FirebaseListAdapter", "---------------------------------------------------------");
-        Log.e("FirebaseListAdapter", String.valueOf(i));
-        Log.e("FirebaseListAdapter", GlobalsMethods.currUserId);
-        Log.e("FirebaseListAdapter", mMessages.get(i).getUserId() + " - " + mMessages.get(i).getMessage());
-
         int type = getItemViewType(i);
         View v = view;
 
@@ -180,7 +174,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     @Override
     public int getItemViewType(int position)
     {
-        if ((mMessages.get(position).getUserId().equals(GlobalsMethods.currUserId)))
+        if (!(mMessages.get(position).getUserId().equals(GlobalsMethods.currUserId)))
             return TYPE_1;
         else
             return TYPE_2;
@@ -190,7 +184,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     public int getViewTypeCount() {
         return 2;
     }
-
 
     protected abstract void populateView(View v, T model);
 }
