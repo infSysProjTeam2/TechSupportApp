@@ -32,6 +32,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
     public View getView(int position, View convertView, ViewGroup parent) {
         final String titleText;
         final String userId;
+        final String adminId;
         final LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View rowView = inflater.inflate(R.layout.item_ticket, parent, false);
         ImageView ticketImage = (ImageView) rowView.findViewById(R.id.ticketImage);
@@ -41,9 +42,11 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         TextView descText = (TextView)rowView.findViewById(R.id.ticketDesc);
 
         userId = values.get(position).getUserId();
+        adminId = values.get(position).getAdminId();
+
         if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
             if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
-                authorText.setText(values.get(position).getUserId());
+                authorText.setText(values.get(position).getUserName());
             else
                 authorText.setText("Не установлено");
 
@@ -51,12 +54,12 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         }
         else {
             if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
-                authorText.setText(values.get(position).getUserId() + " ✔");
-                titleText = values.get(position).getUserId();
+                authorText.setText(values.get(position).getUserName() + " ✔");
+                titleText = values.get(position).getUserName();
             }
             else {
-                authorText.setText(values.get(position).getAdminId() + " ✔");
-                titleText = values.get(position).getAdminId();
+                authorText.setText(values.get(position).getAdminName() + " ✔");
+                titleText = values.get(position).getAdminName();
             }
         }
 
@@ -70,13 +73,14 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             public void onClick(View v) {
                 boolean fl = true;
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
+                if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
                     intent.putExtra("userId", userId);
+                }
                 else
                     if (titleText.equals("Не установлено"))
                         fl = false;
                     else
-                        intent.putExtra("userId", titleText);
+                        intent.putExtra("userId", adminId);
 
                 intent.putExtra("currUserId", GlobalsMethods.currUserId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
