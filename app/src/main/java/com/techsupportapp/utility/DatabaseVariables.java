@@ -2,6 +2,8 @@ package com.techsupportapp.utility;
 
 public class DatabaseVariables {
 
+    public static final String FIREBASE_URL = "https://infsysprojteam2-abbdf.firebaseio.com/";
+
     public static class Users {
         public static final String DATABASE_UNVERIFIED_USER_TABLE = "user_table/unverified_table";
 
