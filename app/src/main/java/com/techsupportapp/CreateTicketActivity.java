@@ -165,6 +165,13 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             }
         });
 
+        cancelBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

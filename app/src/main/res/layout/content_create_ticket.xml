@@ -1,4 +1,4 @@
-<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -7,25 +7,40 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/app_bar_ticket_create">
 
-    <EditText
-        android:id="@+id/message_topic_text"
+    <LinearLayout
+        android:id="@+id/top"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Тема"
-        android:maxLines="1"/>
+        android:orientation="vertical">
+        <EditText
+            android:id="@+id/message_topic_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Тема"
+            android:paddingTop="30dp"
+            android:maxLines="1"/>
 
-    <EditText
-        android:id="@+id/message_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Описание проблемы"
-        android:nestedScrollingEnabled="true"
-        android:lines="5"
-        android:linksClickable="true" />
+        <TextView
+            android:text="Описание проблемы:"
+            android:textSize="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/message_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="50"
+            android:maxLength="2000"
+            android:linksClickable="true" />
+    </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/listFooter"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:orientation="horizontal">
 
         <Button
@@ -41,6 +56,5 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Создать"/>
-
     </LinearLayout>
-</LinearLayout>
+</RelativeLayout>

@@ -53,7 +53,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
         mUserId = getIntent().getExtras().getString("userId");
         mCurrUserId = getIntent().getExtras().getString("currUserId");
-
         setContentView(R.layout.activity_edit_user_profile);
 
         initializeComponents();

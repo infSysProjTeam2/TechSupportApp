@@ -3,9 +3,11 @@ package com.techsupportapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -66,8 +68,10 @@ public class UserProfileActivity extends AppCompatActivity{
 
         editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
 
+        LinearLayout ln = (LinearLayout)findViewById(R.id.changeDataLayout);
+
         if (!mCurrUserId.equals(mUserId) && GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
-            editProfileBtn.setVisibility(View.INVISIBLE);
+            ln.setVisibility(View.GONE);
     }
 
     private void setEvents(){
