@@ -133,7 +133,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
         currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
@@ -145,6 +144,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
         Menu nav_menu = navigationView.getMenu();
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.charts).setVisible(false);
         nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
     }
 
