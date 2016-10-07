@@ -2,6 +2,7 @@ package com.techsupportapp;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -13,19 +14,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -33,6 +34,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private String mNickname;
 
     private ImageView currUserImage;
+
+    private SeekBar seekBar1;
+    private SeekBar seekBar2;
+    private TextView label;
 
     private PieChart pieChart;
 
@@ -45,13 +50,15 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         mNickname = getIntent().getExtras().getString("nickname");
 
         initializeComponents();
-        initChart();
         setEvents();
     }
 
     private void initializeComponents(){
+        configSeekbar();
+        initChart();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(mNickname);
+        toolbar.setTitle("Статистика");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -73,17 +80,50 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         userType.setText("Администратор");
     }
 
+    private void configSeekbar(){
+        seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
+        seekBar2 = (SeekBar)findViewById(R.id.seekBar2);
+        label = (TextView)findViewById(R.id.label);
+    }
+
     private void initChart(){
         pieChart = (PieChart)findViewById(R.id.chart);
 
+        pieChart.setDragDecelerationFrictionCoef(0.95f);
+        pieChart.setExtraOffsets(5, 10, 5, 5);
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleColor(Color.WHITE);
+        pieChart.setTransparentCircleColor(Color.WHITE);
+        pieChart.setTransparentCircleAlpha(110);
+        pieChart.setHoleRadius(58f);
+        pieChart.setTransparentCircleRadius(61f);
+        pieChart.setDrawCenterText(true);
+
+        pieChart.setRotationAngle(0);
+        pieChart.setRotationEnabled(true);
+        pieChart.setHighlightPerTapEnabled(true);
+
+        pieChart.animateXY(1000, 1000, Easing.EasingOption.EaseOutCirc, Easing.EasingOption.EaseOutCirc);
+
+        pieChart.setDescription("");
+
+        pieChart.setDrawEntryLabels(false);
+
+        Legend l = pieChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        l.setOrientation(Legend.LegendOrientation.VERTICAL);
+        l.setTextSize(15f);
+        l.setDrawInside(false);
+        l.setXEntrySpace(7f);
+        l.setYEntrySpace(0f);
+        l.setYOffset(0f);
+
+        //Сюда посылаются значения
         ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
-        ArrayList<String> labels = new ArrayList<String>();
-        entries.add(new PieEntry(2, "Принятые"));
-        labels.add("Принятые");
-        entries.add(new PieEntry(3, "Не принятые"));
-        labels.add("Не принятые");
-        entries.add(new PieEntry(4, "Закрытые"));
-        labels.add("Закрытые");
+        entries.add(new PieEntry(10, "Создано"));
+        entries.add(new PieEntry(5, "Принято"));
+        entries.add(new PieEntry(3, "Решено"));
 
         PieDataSet dataSet = new PieDataSet(entries, "Заявки");
 
@@ -91,18 +131,15 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
         PieData data = new PieData(dataSet);
 
+        data.setValueTextColor(Color.WHITE);
+        data.setValueTextSize(16f);
+
         pieChart.setData(data);
-        pieChart.setDescription("Статистика заявок");
+        pieChart.invalidate();
     }
 
     private ArrayList<Integer> getColors(){
         ArrayList<Integer> colors = new ArrayList<Integer>();
-
-        for (int c : ColorTemplate.VORDIPLOM_COLORS)
-            colors.add(c);
-
-        for (int c : ColorTemplate.JOYFUL_COLORS)
-            colors.add(c);
 
         for (int c : ColorTemplate.COLORFUL_COLORS)
             colors.add(c);
