@@ -3,9 +3,11 @@ package com.techsupportapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -66,8 +68,10 @@ public class UserProfileActivity extends AppCompatActivity{
 
         editProfileBtn = (Button)findViewById(R.id.changeDataBtn);
 
+        LinearLayout ln = (LinearLayout)findViewById(R.id.changeDataLayout);
+
         if (!mCurrUserId.equals(mUserId) && GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
-            editProfileBtn.setVisibility(View.INVISIBLE);
+            ln.setVisibility(View.GONE);
     }
 
     private void setEvents(){
@@ -88,10 +92,7 @@ public class UserProfileActivity extends AppCompatActivity{
             @Override
             public void onClick(View v) {
                 Intent intent;
-                if (mCurrUserId.equals(mUserId))
-                    intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
-                else
-                    intent = new Intent(UserProfileActivity.this, EditUserProfileActivityAlt.class);
+                intent = new Intent(UserProfileActivity.this, EditUserProfileActivity.class);
                 intent.putExtra("userId", mUserId);
                 intent.putExtra("currUserId", mCurrUserId);
                 startActivity(intent);
@@ -118,13 +119,13 @@ public class UserProfileActivity extends AppCompatActivity{
 
         userName.setText(usersList.get(index).getUserName());
         userId.setText(usersList.get(index).getLogin());
-        regDate.setText(usersList.get(index).getRegistrationDate());
-        workPlace.setText(usersList.get(index).getWorkPlace());
+        regDate.setText("Дата регистрации: " + usersList.get(index).getRegistrationDate());
+        workPlace.setText("Рабочее место: " + usersList.get(index).getWorkPlace());
         if (usersList.get(index).getRole() == User.ADMINISTRATOR)
-            accessLevel.setText("Администратор");
+            accessLevel.setText("Права: администратор");
         else if (usersList.get(index).getRole() == User.SIMPLE_USER)
-            accessLevel.setText("Пользователь");
+            accessLevel.setText("Права: пользователь");
         userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(userName.getText().toString(), UserProfileActivity.this)));
-        setTitle("Профиль " + userName.getText().toString());
+        //setTitle("Профиль " + userName.getText().toString());
     }
 }

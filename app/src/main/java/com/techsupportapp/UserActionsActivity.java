@@ -337,8 +337,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         int id = item.getItemId();
         if (id == R.id.action_search) {
             return true;
-        } else if (id == R.id.action_sort) {
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
