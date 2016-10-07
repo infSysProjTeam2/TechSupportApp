@@ -240,6 +240,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
+        } else if (id == R.id.charts) {
+            Intent intent = new Intent(UserActionsActivity.this, ChartsActivity.class);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {

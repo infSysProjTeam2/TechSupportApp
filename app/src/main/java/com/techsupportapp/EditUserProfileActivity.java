@@ -284,7 +284,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
         if (GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
             changeUserTypeBtn.setEnabled(false);
 
-        userName.setText(usersList.get(userPosition).getLogin());
+        userName.setText(usersList.get(userPosition).getUserName());
         workPlace.setText(usersList.get(userPosition).getWorkPlace());
 
         setTitle("Профиль " + usersList.get(userPosition).getLogin());
