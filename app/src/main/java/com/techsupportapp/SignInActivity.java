@@ -7,6 +7,10 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -45,7 +49,6 @@ public class SignInActivity extends AppCompatActivity {
 
     private Button closeAppBut;
     private Button signInBut;
-    private Button signUpBut;
 
     private EditText loginET;
     private EditText passwordET;
@@ -53,7 +56,6 @@ public class SignInActivity extends AppCompatActivity {
     private CheckBox rememberPasCB;
 
     private ProgressDialog loadingDialog;
-
     //endregion
 
     @Override
@@ -88,7 +90,6 @@ public class SignInActivity extends AppCompatActivity {
     private void initializeComponents() {
         closeAppBut = (Button)findViewById(R.id.closeAppButton);
         signInBut = (Button)findViewById(R.id.signInButton);
-        signUpBut = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
@@ -185,13 +186,6 @@ public class SignInActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
         });
-
-        signUpBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
-            }
-        });
     }
 
     @Override
@@ -253,5 +247,22 @@ public class SignInActivity extends AppCompatActivity {
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
         rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_sign_in, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_sign_up) {
+            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

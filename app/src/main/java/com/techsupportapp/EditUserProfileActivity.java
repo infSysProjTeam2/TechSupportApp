@@ -71,8 +71,12 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
         saveBtn = (Button)findViewById(R.id.saveBtn);
 
+        if (!mUserId.equals(mCurrUserId)) {
+            userName.setEnabled(false);
+            workPlace.setEnabled(false);
+            changePasswordBtn.setEnabled(false);
+        }
         changedType = false;
-
     }
 
     private void setEvents(){
@@ -279,10 +283,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
         });
 
         if (GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
-            changeUserTypeBtn.setVisibility(View.INVISIBLE);
+            changeUserTypeBtn.setEnabled(false);
 
         userName.setText(usersList.get(userPosition).getLogin());
-        //workPlace.setText(usersList.get(index).workPlce); TODO сделать
+        workPlace.setText(usersList.get(userPosition).getWorkPlace());
 
         setTitle("Профиль " + usersList.get(userPosition).getLogin());
     }
