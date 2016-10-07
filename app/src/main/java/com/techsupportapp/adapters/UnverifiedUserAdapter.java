@@ -27,15 +27,30 @@ public class UnverifiedUserAdapter extends ArrayAdapter<UnverifiedUser> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View rowView = inflater.inflate(R.layout.item_user_unverified, parent, false);
-        ImageView userImage = (ImageView) rowView.findViewById(R.id.userImage);
-        TextView userNameText = (TextView)rowView.findViewById(R.id.userName);
-        TextView userDateText = (TextView)rowView.findViewById(R.id.userDate);
+        ViewHolder holder;
 
-        userNameText.setText(values.get(position).getLogin());
-        userDateText.setText(values.get(position).getRegistrationDate());
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
-        return rowView;
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.item_user_unverified, parent, false);
+            holder = new ViewHolder();
+            holder.userImage = (ImageView) convertView.findViewById(R.id.userImage);
+            holder.userNameText = (TextView) convertView.findViewById(R.id.userName);
+            holder.userDateText = (TextView) convertView.findViewById(R.id.userDate);
+            convertView.setTag(holder);
+        } else{
+            holder = (ViewHolder) convertView.getTag();
+        }
+
+        holder.userNameText.setText(values.get(position).getUserName());
+        holder.userDateText.setText(values.get(position).getRegistrationDate());
+        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
+
+        return convertView;
+    }
+
+    static class ViewHolder {
+        private ImageView userImage;
+        private TextView userNameText;
+        private TextView userDateText;
     }
 }
