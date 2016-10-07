@@ -55,6 +55,7 @@ public class SignInActivity extends AppCompatActivity {
     private CheckBox rememberPasCB;
 
     private ProgressDialog loadingDialog;
+
     //endregion
 
     @Override
@@ -62,15 +63,22 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
+        dataConstruction();
+    }
+
+    /**
+     * Назначение начальних данных и параметров программы.
+     */
+    private void dataConstruction(){
         setTitle("Авторизация");
-
         initializeComponents();
-
         showLoadingDialog();
-
         setEvents();
     }
 
+    /**
+     * Отображение окна загрузки.
+     */
     private void showLoadingDialog(){
         loadingDialog = new ProgressDialog(this);
         loadingDialog.setMessage("Загрузка...");
@@ -79,6 +87,9 @@ public class SignInActivity extends AppCompatActivity {
         loadingDialog.show();
     }
 
+    /**
+     * Закрытие окна загрузки.
+     */
     private void closeLoadingDialog(){
         loadingDialog.dismiss();
     }
@@ -99,6 +110,80 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     /**
+     * Проверка полей логина и пароля, проверка подтверждения заявки на получение аккаунта.
+     * @return true - если поля заполнены и аккаунт не находится на рассмотрении на добавление.
+     * false - если хотя бы одно поле не заплонено или аккаунт пользователя находится на
+     * рассмотрении на добавление в систему.
+     */
+    private boolean checkFields() {
+        int index = Collections.binarySearch(unverifiedLoginList, loginET.getText().toString(), new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+        if (loginET.getText().toString().equals("")) {
+            loginET.requestFocus();
+            Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
+            return false;
+        } else if (passwordET.getText().toString().equals("")) {
+            passwordET.requestFocus();
+            Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
+            return false;
+        } else if (index >= 0) {
+            Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
+                    "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
+            return false;
+        } else return true;
+    }
+
+    /**
+     * Проверка правильности логина и соответствия пароля. При успешном сопоставлении выполняется
+     * вход в систему.
+     */
+    private void checkVerificationData() {
+        int i = 0;
+        while (!loginET.getText().toString().equals(userList.get(i).getLogin())
+                && ++i < userList.size()); //TODO binarySearch
+        if (i >= userList.size()) {
+            passwordET.setText("");
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. " +
+                    "Повторите попытку", Toast.LENGTH_LONG).show();
+        }
+        else if (loginET.getText().toString().equals(userList.get(i).getLogin()) &&
+                passwordET.getText().toString().equals(userList.get(i).getPassword()))
+            signIn(userList.get(i));
+        else {
+            passwordET.setText("");
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Вход в систему под определенным пользователем.
+     * @param user Данные пользователя для входа в систему.
+     */
+    private void signIn(User user){
+        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
+
+        Intent intent;
+        String login;
+
+        login = loginET.getText().toString();
+
+        intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
+
+        Bundle args = TicketsOverviewActivity.makeArgs(login,
+                user.getUserName(), user.getRole());
+
+        intent.putExtras(args);
+        savePassAndLogin();
+        GlobalsMethods.currUserId = login;
+        GlobalsMethods.isCurrentAdmin = user.getRole();
+        startActivity(intent);
+    }
+
+    /**
      * Создание методов для событий.
      */
     private void setEvents() {
@@ -113,57 +198,9 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (hasConnection()) {
-                    int index = Collections.binarySearch(unverifiedLoginList, loginET.getText().toString(), new Comparator<String>() {
-                        @Override
-                        public int compare(String lhs, String rhs) {
-                            return lhs.compareTo(rhs);
-                        }
-                    });
-
-                    if (loginET.getText().toString().equals("")) {
-                        loginET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
-                    } else if (passwordET.getText().toString().equals("")) {
-                        passwordET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
-                    } else if (index >= 0) {
-                        Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
-                                "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
-                    } else {
-                        int i = 0;
-                        while (!loginET.getText().toString().equals(userList.get(i).getLogin())
-                                && ++i < userList.size()); //TODO binarySearch
-                        if (i >= userList.size()) {
-                            passwordET.setText("");
-                            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. " +
-                                    "Повторите попытку", Toast.LENGTH_LONG).show();
-                        }
-                        else if (loginET.getText().toString().equals(userList.get(i).getLogin()) &&
-                                passwordET.getText().toString().equals(userList.get(i).getPassword()))
-                        {
-                            Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
-
-                            Intent intent;
-                            String login;
-
-                            login = loginET.getText().toString();
-
-                            intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
-
-                            Bundle args = TicketsOverviewActivity.makeArgs(login, userList.get(i).getUserName(), userList.get(i).getRole());
-
-                            intent.putExtras(args);
-                            savePassAndLogin();
-                            GlobalsMethods.currUserId = login;
-                            GlobalsMethods.isCurrentAdmin = userList.get(i).getRole();
-                            startActivity(intent);
-                        }
-                        else
-                        {
-                            passwordET.setText("");
-                            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
-                        }
-                    }
+                    if (!checkFields())
+                        return;
+                    checkVerificationData();
                 }
                 else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
             }
@@ -211,6 +248,10 @@ public class SignInActivity extends AppCompatActivity {
         builder.show();
     }
 
+    /**
+     * Проверка наличия подключения к Интернету.
+     * @return true - если подключение есть. false - если подключение отсутствует.
+     */
     private boolean hasConnection() {
         Runtime runtime = Runtime.getRuntime();
         try {
@@ -223,6 +264,9 @@ public class SignInActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * Сохранение данных логина и пароля для повторного входа.
+     */
     private void savePassAndLogin(){
         SharedPreferences settings = getPreferences(0);
         SharedPreferences.Editor editor = settings.edit();
