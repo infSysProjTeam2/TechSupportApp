@@ -85,6 +85,12 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
+        } else if (id == R.id.charts) {
+            Intent intent = new Intent(ListOfTicketsActivity.this, ChartsActivity.class);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.listOfTickets) {

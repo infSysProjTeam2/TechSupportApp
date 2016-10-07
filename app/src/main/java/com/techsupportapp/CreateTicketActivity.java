@@ -3,7 +3,9 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -34,7 +36,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private DatabaseReference databaseReference;
 
     private int ticketCount;
-    private String mAppId;
     private String mUserId;
     private String mNickname;
 
@@ -45,8 +46,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private EditText topicET;
     private EditText messageET;
 
-    private Button createBut;
-    private Button cancelBut;
+    private FloatingActionButton fab;
 
     private ImageView currUserImage;
 
@@ -57,7 +57,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_ticket);
 
-        mAppId = getIntent().getExtras().getString("appKey");
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
         initializeComponents();
@@ -118,10 +117,9 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         topicET = (EditText)findViewById(R.id.message_topic_text);
         messageET = (EditText)findViewById(R.id.message_text);
 
-        createBut = (Button)findViewById(R.id.create_but);
-        cancelBut = (Button)findViewById(R.id.cancel_but);
-
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Создать заявку");
@@ -146,31 +144,26 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
         Menu nav_menu = navigationView.getMenu();
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.charts).setVisible(false);
         nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
     }
 
     private void setEvents() {
-        createBut.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Заполните поля", Toast.LENGTH_LONG).show();
                 } else {
                     Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
                     databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
                     databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
+                    Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
+                    finish();
                 }
-                Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
-                finish();
             }
         });
 
-        cancelBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
 
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -193,10 +186,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                 startActivity(intent);
             }
         });
-    }
-
-    private void resizeTextComponents() {
-
     }
 
     private void exit(){

@@ -107,6 +107,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         else {
             userType.setText("Пользователь");
             nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.charts).setVisible(false);
             nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
@@ -231,6 +232,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
+        } else if (id == R.id.charts) {
+            Intent intent = new Intent(TicketsOverviewActivity.this, ChartsActivity.class);
+            intent.putExtra("uuid", mUserId);
+            intent.putExtra("nickname", mNickname);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
