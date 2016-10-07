@@ -15,8 +15,17 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -24,6 +33,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private String mNickname;
 
     private ImageView currUserImage;
+
+    private PieChart pieChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +45,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         mNickname = getIntent().getExtras().getString("nickname");
 
         initializeComponents();
-
+        initChart();
         setEvents();
     }
 
@@ -60,6 +71,50 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
         userType.setText("Администратор");
+    }
+
+    private void initChart(){
+        pieChart = (PieChart)findViewById(R.id.chart);
+
+        ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
+        ArrayList<String> labels = new ArrayList<String>();
+        entries.add(new PieEntry(2, "Принятые"));
+        labels.add("Принятые");
+        entries.add(new PieEntry(3, "Не принятые"));
+        labels.add("Не принятые");
+        entries.add(new PieEntry(4, "Закрытые"));
+        labels.add("Закрытые");
+
+        PieDataSet dataSet = new PieDataSet(entries, "Заявки");
+
+        dataSet.setColors(getColors());
+
+        PieData data = new PieData(dataSet);
+
+        pieChart.setData(data);
+        pieChart.setDescription("Статистика заявок");
+    }
+
+    private ArrayList<Integer> getColors(){
+        ArrayList<Integer> colors = new ArrayList<Integer>();
+
+        for (int c : ColorTemplate.VORDIPLOM_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.JOYFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.COLORFUL_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.LIBERTY_COLORS)
+            colors.add(c);
+
+        for (int c : ColorTemplate.PASTEL_COLORS)
+            colors.add(c);
+
+        colors.add(ColorTemplate.getHoloBlue());
+        return colors;
     }
 
     private void setEvents(){
