@@ -15,7 +15,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,11 +153,11 @@ public class SignUpActivity extends AppCompatActivity {
                                         passwordET.getText().toString(), checkRole(), userNameET.getText().toString(),
                                         workPlaceET.getText().toString()));
                     } catch (Exception e) {
-                        GlobalsMethods.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
+                        Globals.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
                     }
 
                     databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
-                    GlobalsMethods.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
+                    Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
                     SignUpActivity.super.finish();
                 }
             }
@@ -166,7 +166,7 @@ public class SignUpActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                loginList = GlobalsMethods.Downloads.getAllLogins(dataSnapshot);
+                loginList = Globals.Downloads.getAllLogins(dataSnapshot);
                 userCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 

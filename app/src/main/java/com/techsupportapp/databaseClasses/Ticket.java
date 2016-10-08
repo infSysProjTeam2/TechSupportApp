@@ -119,6 +119,12 @@ public class Ticket {
         this.ticketState = Ticket.ACCEPTED;
     }
 
+    public void removeAdmin(){
+        this.adminId = null;
+        this.adminName = null;
+        this.ticketState = Ticket.NOT_ACCEPTED;
+    }
+
     /**
      * @return Идентификатор заявки.
      */

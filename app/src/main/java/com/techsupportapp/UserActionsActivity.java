@@ -31,7 +31,7 @@ import com.techsupportapp.adapters.UnverifiedUserAdapter;
 import com.techsupportapp.adapters.UserAdapter;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
@@ -92,7 +92,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -149,11 +149,11 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList = GlobalsMethods.Downloads.getUnverifiedUserList(dataSnapshot);
+                    unverifiedUsersList = Globals.Downloads.getUnverifiedUserList(dataSnapshot);
                     adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
 
-                    usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
+                    usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                     adapter1 = new UserAdapter(getApplicationContext(), usersList);
                     usersView.setAdapter(adapter1);
 
@@ -179,7 +179,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     builder.setMessage(getLogInMessage(selectedUser));
                 }
                 catch (Exception e) {
-                    GlobalsMethods.showLongTimeToast(getApplicationContext(),
+                    Globals.showLongTimeToast(getApplicationContext(),
                             "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
                 }
 
@@ -227,7 +227,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     public void onClick(DialogInterface dialog, int which) {
                         search = false;
                         databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
-                        GlobalsMethods.showLongTimeToast(getApplicationContext(), "Заявка пользователя была успешно удалена");
+                        Globals.showLongTimeToast(getApplicationContext(), "Заявка пользователя была успешно удалена");
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });
@@ -315,7 +315,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(UserActionsActivity.this);
+            Globals.showAbout(UserActionsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);

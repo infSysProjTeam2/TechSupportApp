@@ -22,7 +22,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -264,8 +264,8 @@ public class SignInActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 unverifiedLoginList.clear();
 
-                userList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
-                unverifiedLoginList = GlobalsMethods.Downloads.getUnverifiedLogins(dataSnapshot);
+                userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                unverifiedLoginList = Globals.Downloads.getUnverifiedLogins(dataSnapshot);
 
                 closeLoadingDialog();
             }
@@ -295,21 +295,10 @@ public class SignInActivity extends AppCompatActivity {
     private void signIn(User user){
         Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
 
-        Intent intent;
-        String login;
-
-        login = loginET.getText().toString();
-
-        intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
-
-        Bundle args = TicketsOverviewActivity.makeArgs(login,
-                user.getUserName(), user.getRole());
-
-        intent.putExtras(args);
         savePassAndLogin();
-        GlobalsMethods.currUserId = login;
-        GlobalsMethods.isCurrentAdmin = user.getRole();
-        startActivity(intent);
+
+        Globals.currentUser = user;
+        startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));
     }
 
 }

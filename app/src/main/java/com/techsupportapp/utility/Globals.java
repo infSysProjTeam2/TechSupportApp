@@ -19,11 +19,9 @@ import com.techsupportapp.databaseClasses.User;
 
 import java.util.ArrayList;
 
-public class GlobalsMethods {
+public class Globals {
 
-    public static String currUserId;
-
-    public static int isCurrentAdmin;
+    public static User currentUser;
 
     /**
      * Метод, вызывающий информацию о приложении.
@@ -184,11 +182,11 @@ public class GlobalsMethods {
             return resultList;
         }
 
-        public static ArrayList<Ticket> getAdminTicketList(DataSnapshot dataSnapshot, String adminLogin){
+        public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin){
             ArrayList<Ticket> resultList = new ArrayList<Ticket>();
             for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                 Ticket ticket = ticketRecord.getValue(Ticket.class);
-                if (ticket.getAdminId().equals(adminLogin))
+                if (ticket.getAdminId().equals(overseerLogin))
                     resultList.add(ticket);
             }
             return resultList;

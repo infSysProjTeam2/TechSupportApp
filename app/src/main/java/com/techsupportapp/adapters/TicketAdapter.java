@@ -13,7 +13,7 @@ import com.techsupportapp.R;
 import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
@@ -53,7 +53,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         adminId = values.get(position).getAdminId();
 
         if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
-            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR)
+            if (Globals.currentUser.getRole() == User.ADMINISTRATOR)
                 holder.authorText.setText(values.get(position).getUserName());
             else
                 holder.authorText.setText("Не установлено");
@@ -61,7 +61,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
             titleText = holder.authorText.getText().toString();
         }
         else {
-            if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
+            if (Globals.currentUser.getRole() == User.ADMINISTRATOR) {
                 holder.authorText.setText(values.get(position).getUserName() + " ✔");
                 titleText = values.get(position).getUserName();
             }
@@ -74,14 +74,14 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
         holder.dateText.setText(values.get(position).getCreateDate());
         holder.topicText.setText(values.get(position).getTopic());
         holder.descText.setText(values.get(position).getMessage());
-        holder.ticketImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(titleText, context));
+        holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean fl = true;
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                if (GlobalsMethods.isCurrentAdmin == User.ADMINISTRATOR) {
+                if (Globals.currentUser.getRole() == User.ADMINISTRATOR) {
                     intent.putExtra("userId", userId);
                 }
                 else
@@ -90,7 +90,7 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
                     else
                         intent.putExtra("userId", adminId);
 
-                intent.putExtra("currUserId", GlobalsMethods.currUserId);
+                intent.putExtra("currUserId", Globals.currentUser.getLogin());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 if (fl)
                     context.startActivity(intent);

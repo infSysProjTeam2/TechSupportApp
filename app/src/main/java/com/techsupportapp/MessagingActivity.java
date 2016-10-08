@@ -19,7 +19,7 @@ import com.firebase.client.ValueEventListener;
 import com.techsupportapp.chat.Chat;
 import com.techsupportapp.chat.ChatListAdapter;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -136,7 +136,7 @@ public class MessagingActivity extends AppCompatActivity {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
-            Chat chat = new Chat(input, mCurrUsername, GlobalsMethods.currUserId, messageTime);
+            Chat chat = new Chat(input, mCurrUsername, Globals.currentUser.getLogin(), messageTime);
             mFirebaseRef.push().setValue(chat);
             inputText.setText("");
         }

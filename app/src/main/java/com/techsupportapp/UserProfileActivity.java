@@ -3,7 +3,6 @@ package com.techsupportapp;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -16,7 +15,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +69,7 @@ public class UserProfileActivity extends AppCompatActivity{
 
         LinearLayout ln = (LinearLayout)findViewById(R.id.changeDataLayout);
 
-        if (!mCurrUserId.equals(mUserId) && GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
+        if (!mCurrUserId.equals(mUserId) && Globals.currentUser.getRole() == User.SIMPLE_USER)
             ln.setVisibility(View.GONE);
     }
 
@@ -78,7 +77,7 @@ public class UserProfileActivity extends AppCompatActivity{
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
+                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                 setData();
             }
 
@@ -125,7 +124,7 @@ public class UserProfileActivity extends AppCompatActivity{
             accessLevel.setText("Права: администратор");
         else if (usersList.get(index).getRole() == User.SIMPLE_USER)
             accessLevel.setText("Права: пользователь");
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(userName.getText().toString(), UserProfileActivity.this)));
+        userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(userName.getText().toString(), UserProfileActivity.this)));
         //setTitle("Профиль " + userName.getText().toString());
     }
 }
