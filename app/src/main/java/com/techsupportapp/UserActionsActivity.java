@@ -29,7 +29,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.UnverifiedUserAdapter;
 import com.techsupportapp.adapters.UserAdapter;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
@@ -44,7 +43,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private String mNickname;
 
     private DatabaseReference databaseRef;
-    private ArrayList<UnverifiedUser> unverifiedUsersList = new ArrayList<UnverifiedUser>();
+    private ArrayList<User> unverifiedUsersList = new ArrayList<User>();
     private ArrayList<User> usersList = new ArrayList<User>();
     private UnverifiedUserAdapter adapter;
     private UserAdapter adapter1;
@@ -117,6 +116,34 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         tabHost.addTab(tabSpec);
     }
 
+    private String getLogInMessage(User unVerifiedUser) throws Exception {
+        int role = unVerifiedUser.getRole();
+        String resultString = "Вы действительно хотите создать аккаунт " + unVerifiedUser.getLogin()
+                + " и дать ему права ";
+        if (role == User.SIMPLE_USER)
+            return resultString + "ПОЛЬЗОВАТЕЛЯ";
+        else if (role == User.DEPARTMENT_MEMBER)
+            return resultString + "РАБОТНИКА ОТДЕЛА";
+        else if (role == User.ADMINISTRATOR)
+            return resultString + "АДМИНИСТРАТОРА";
+        else if (role == User.DEPARTMENT_CHIEF)
+            return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
+        else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
+    }
+
+    private String getDatabaseUserPath(User unVerifiedUser) throws Exception {
+        int role = unVerifiedUser.getRole();
+        if (role == User.SIMPLE_USER)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
+        else if (role == User.DEPARTMENT_MEMBER)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE;
+        else if (role == User.ADMINISTRATOR)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+        else if (role == User.DEPARTMENT_CHIEF)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE;
+        else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
+    }
+
     private void setEvents() {
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -143,25 +170,31 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         unverifiedUsersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final User selectedUser = unverifiedUsersList.get(position);
                 android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
-                builder.setMessage("Вы действительно хотите подтвердить пользователя?");
+                builder.setTitle("Подтвердить пользователя " + selectedUser.getBranchId());
+                try {
+                    builder.setMessage(getLogInMessage(selectedUser));
+                }
+                catch (Exception e) {
+                    GlobalsMethods.showLongTimeToast(getApplicationContext(),
+                            "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
+                }
 
                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //TODO определение ролей
                         search = false;
                         try {
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE)
-                                    .child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                            databaseRef.child(getDatabaseUserPath(selectedUser))
+                                    .child(selectedUser.getBranchId()).setValue(selectedUser);
                         }
                         catch (Exception e) {
                             e.printStackTrace();
                         }
-                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
+                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                         Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                         searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
@@ -176,6 +209,39 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
                 builder.setCancelable(false);
                 builder.show();
+            }
+        });
+
+        unverifiedUsersView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final User selectedUser = unverifiedUsersList.get(position);
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
+
+                builder.setTitle("Удалить заявку пользователя " + selectedUser.getBranchId());
+                builder.setMessage("Вы действительно хотите удалить заявку пользователя "
+                        + selectedUser.getLogin() + " на регистрацию?" );
+
+                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        search = false;
+                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                        GlobalsMethods.showLongTimeToast(getApplicationContext(), "Заявка пользователя была успешно удалена");
+                        searchView.setQuery(searchView.getQuery().toString() + "", false);
+                    }
+                });
+
+                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.setCancelable(false);
+                builder.show();
+                return true;
             }
         });
 
@@ -294,9 +360,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 if (!searchView.getQuery().toString().equals(""))
                     search = true;
                 if (tabHost.getCurrentTabTag().equals("tag1")) {
-                    ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
+                    ArrayList<User> newUnverifiedUsersList = new ArrayList<User>();
 
-                    for (UnverifiedUser unverifiedUser: unverifiedUsersList){
+                    for (User unverifiedUser: unverifiedUsersList){
                         if (unverifiedUser.getLogin().contains(searchView.getQuery().toString()))
                             newUnverifiedUsersList.add(unverifiedUser);
                     }

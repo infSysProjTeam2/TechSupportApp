@@ -9,17 +9,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.techsupportapp.R;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class UnverifiedUserAdapter extends ArrayAdapter<UnverifiedUser> {
+public class UnverifiedUserAdapter extends ArrayAdapter<User> {
 
     private final Context context;
-    private final ArrayList<UnverifiedUser> values;
+    private final ArrayList<User> values;
 
-    public UnverifiedUserAdapter(Context context, ArrayList<UnverifiedUser> values) {
+    public UnverifiedUserAdapter(Context context, ArrayList<User> values) {
         super(context, R.layout.item_ticket, values);
         this.context = context;
         this.values = values;

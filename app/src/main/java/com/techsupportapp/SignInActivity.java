@@ -58,56 +58,67 @@ public class SignInActivity extends AppCompatActivity {
 
     //endregion
 
+    //region Override Methods
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                savePassAndLogin();
+                SignInActivity.super.onBackPressed();
+            }
+        });
+
+        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.setCancelable(false);
+        builder.setMessage("Вы действительно хотите закрыть приложение?");
+        builder.show();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-
         dataConstruction();
     }
 
-    /**
-     * Назначение начальних данных и параметров программы.
-     */
-    private void dataConstruction(){
-        setTitle("Авторизация");
-        initializeComponents();
-        showLoadingDialog();
-        setEvents();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_sign_in, menu);
+        return true;
     }
 
-    /**
-     * Отображение окна загрузки.
-     */
-    private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_sign_up) {
+            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * Закрытие окна загрузки.
-     */
-    private void closeLoadingDialog(){
-        loadingDialog.dismiss();
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences settings = getPreferences(0);
+        loginET.setText(settings.getString("Login",""));
+        passwordET.setText(settings.getString("Password",""));
+        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
     }
 
-    /**
-     * Инициализация переменных и элементов макета.
-     */
-    private void initializeComponents() {
-        closeAppBut = (Button)findViewById(R.id.closeAppButton);
-        signInBut = (Button)findViewById(R.id.signInButton);
-
-        loginET = (EditText)findViewById(R.id.loginET);
-        passwordET = (EditText)findViewById(R.id.passwordET);
-
-        rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
-
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-    }
+    //endregion
 
     /**
      * Проверка полей логина и пароля, проверка подтверждения заявки на получение аккаунта.
@@ -160,27 +171,69 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     /**
-     * Вход в систему под определенным пользователем.
-     * @param user Данные пользователя для входа в систему.
+     * Закрытие окна загрузки.
      */
-    private void signIn(User user){
-        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
+    private void closeLoadingDialog(){
+        loadingDialog.dismiss();
+    }
 
-        Intent intent;
-        String login;
+    /**
+     * Назначение начальних данных и параметров программы.
+     */
+    private void dataConstruction(){
+        setTitle("Авторизация");
+        initializeComponents();
+        showLoadingDialog();
+        setEvents();
+    }
 
-        login = loginET.getText().toString();
+    /**
+     * Проверка наличия подключения к Интернету.
+     * @return true - если подключение есть. false - если подключение отсутствует.
+     */
+    private boolean hasConnection() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
 
-        intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
+        return false;
+    }
 
-        Bundle args = TicketsOverviewActivity.makeArgs(login,
-                user.getUserName(), user.getRole());
+    /**
+     * Инициализация переменных и элементов макета.
+     */
+    private void initializeComponents() {
+        closeAppBut = (Button)findViewById(R.id.closeAppButton);
+        signInBut = (Button)findViewById(R.id.signInButton);
 
-        intent.putExtras(args);
-        savePassAndLogin();
-        GlobalsMethods.currUserId = login;
-        GlobalsMethods.isCurrentAdmin = user.getRole();
-        startActivity(intent);
+        loginET = (EditText)findViewById(R.id.loginET);
+        passwordET = (EditText)findViewById(R.id.passwordET);
+
+        rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+    }
+
+    /**
+     * Сохранение данных логина и пароля для повторного входа.
+     */
+    private void savePassAndLogin(){
+        SharedPreferences settings = getPreferences(0);
+        SharedPreferences.Editor editor = settings.edit();
+        if (rememberPasCB.isChecked()) {
+            String login = loginET.getText().toString();
+            String password = passwordET.getText().toString();
+            editor.putString("Login", login);
+            editor.putString("Password", password);
+            editor.putBoolean("cbState", true);
+        }
+        else
+            editor.clear();
+        editor.commit();
     }
 
     /**
@@ -224,88 +277,39 @@ public class SignInActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-
-        builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                savePassAndLogin();
-                SignInActivity.super.onBackPressed();
-            }
-        });
-
-        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.setCancelable(false);
-        builder.setMessage("Вы действительно хотите закрыть приложение?");
-        builder.show();
+    /**
+     * Отображение окна загрузки.
+     */
+    private void showLoadingDialog(){
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("Загрузка...");
+        loadingDialog.setCancelable(false);
+        loadingDialog.setInverseBackgroundForced(false);
+        loadingDialog.show();
     }
 
     /**
-     * Проверка наличия подключения к Интернету.
-     * @return true - если подключение есть. false - если подключение отсутствует.
+     * Вход в систему под определенным пользователем.
+     * @param user Данные пользователя для входа в систему.
      */
-    private boolean hasConnection() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        } catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
+    private void signIn(User user){
+        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
 
-        return false;
+        Intent intent;
+        String login;
+
+        login = loginET.getText().toString();
+
+        intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
+
+        Bundle args = TicketsOverviewActivity.makeArgs(login,
+                user.getUserName(), user.getRole());
+
+        intent.putExtras(args);
+        savePassAndLogin();
+        GlobalsMethods.currUserId = login;
+        GlobalsMethods.isCurrentAdmin = user.getRole();
+        startActivity(intent);
     }
 
-    /**
-     * Сохранение данных логина и пароля для повторного входа.
-     */
-    private void savePassAndLogin(){
-        SharedPreferences settings = getPreferences(0);
-        SharedPreferences.Editor editor = settings.edit();
-        if (rememberPasCB.isChecked()) {
-            String login = loginET.getText().toString();
-            String password = passwordET.getText().toString();
-            editor.putString("Login", login);
-            editor.putString("Password", password);
-            editor.putBoolean("cbState", true);
-        }
-        else
-            editor.clear();
-        editor.commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        SharedPreferences settings = getPreferences(0);
-        loginET.setText(settings.getString("Login",""));
-        passwordET.setText(settings.getString("Password",""));
-        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_sign_in, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_sign_up) {
-            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

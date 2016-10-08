@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 
 import java.util.ArrayList;
@@ -147,10 +146,10 @@ public class GlobalsMethods {
             return resultList;
         }
 
-        public static ArrayList<UnverifiedUser> getUnverifiedUserList(DataSnapshot dataSnapshot) {
-            ArrayList<UnverifiedUser> resultList = new ArrayList<UnverifiedUser>();
+        public static ArrayList<User> getUnverifiedUserList(DataSnapshot dataSnapshot) {
+            ArrayList<User> resultList = new ArrayList<User>();
             for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                resultList.add(userRecord.getValue(UnverifiedUser.class));
+                resultList.add(userRecord.getValue(User.class));
             return resultList;
         }
 
@@ -162,7 +161,7 @@ public class GlobalsMethods {
         public static ArrayList<String> getUnverifiedLogins(DataSnapshot dataSnapshot) {
             ArrayList<String> resultList = new ArrayList<String>();
             for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                resultList.add(userRecord.getValue(UnverifiedUser.class).getLogin());
+                resultList.add(userRecord.getValue(User.class).getLogin());
             return resultList;
         }
 
