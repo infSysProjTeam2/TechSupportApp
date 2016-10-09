@@ -62,8 +62,6 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
 
-        setTitle("Авторизация");
-
         initializeComponents();
 
         showLoadingDialog();
@@ -96,6 +94,8 @@ public class SignInActivity extends AppCompatActivity {
         rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        setTitle("Авторизация");
     }
 
     /**

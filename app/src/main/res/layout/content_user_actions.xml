@@ -30,11 +30,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" >
 
-                <ListView
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/listOfUnverifiedUsers"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                </ListView>
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:scrollbars="vertical">
+                </android.support.v7.widget.RecyclerView>
 
             </LinearLayout>
 
@@ -43,11 +45,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" >
 
-                <ListView
+                <android.support.v7.widget.RecyclerView
                     android:id="@+id/listOfUsers"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-                </ListView>
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:scrollbars="vertical">
+                </android.support.v7.widget.RecyclerView>
             </LinearLayout>
 
         </FrameLayout>

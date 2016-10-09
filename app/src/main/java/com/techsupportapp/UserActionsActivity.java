@@ -9,6 +9,8 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -27,18 +29,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.UnverifiedUserAdapter;
-import com.techsupportapp.adapters.UserAdapter;
+import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
+import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
 public class UserActionsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private ListView unverifiedUsersView;
-    private ListView usersView;
+    private RecyclerView unverifiedUsersView;
+    private RecyclerView usersView;
 
     private String mUserId;
     private String mNickname;
@@ -46,8 +49,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private DatabaseReference databaseRef;
     private ArrayList<UnverifiedUser> unverifiedUsersList = new ArrayList<UnverifiedUser>();
     private ArrayList<User> usersList = new ArrayList<User>();
-    private UnverifiedUserAdapter adapter;
-    private UserAdapter adapter1;
+    private UnverifiedUserRecyclerAdapter adapter;
+    private UserRecyclerAdapter adapter1;
 
     private MenuItem searchMenu;
     private SearchView searchView;
@@ -72,8 +75,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     private void initializeComponents(){
-        unverifiedUsersView = (ListView)findViewById(R.id.listOfUnverifiedUsers);
-        usersView = (ListView)findViewById(R.id.listOfUsers);
+        unverifiedUsersView = (RecyclerView)findViewById(R.id.listOfUnverifiedUsers);
+        usersView = (RecyclerView)findViewById(R.id.listOfUsers);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -123,11 +126,21 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
                     unverifiedUsersList = GlobalsMethods.Downloads.getUnverifiedUserList(dataSnapshot);
-                    adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                    adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
+
+                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                    unverifiedUsersView.setLayoutManager(mLayoutManager);
+                    unverifiedUsersView.setHasFixedSize(false);
+
                     unverifiedUsersView.setAdapter(adapter);
 
                     usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
-                    adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                    adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
+
+                    mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                    usersView.setLayoutManager(mLayoutManager);
+                    usersView.setHasFixedSize(false);
+
                     usersView.setAdapter(adapter1);
 
                     adapter.notifyDataSetChanged();
@@ -141,53 +154,52 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
         });
 
-        unverifiedUsersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
-
-                builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
-                builder.setMessage("Вы действительно хотите подтвердить пользователя?");
-
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+        ItemClickSupport.addTo(unverifiedUsersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        //TODO определение ролей
-                        search = false;
-                        try {
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE)
-                                    .child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
-                        }
-                        catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
-                        Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
-                        searchView.setQuery(searchView.getQuery().toString() + "", false);
+                    public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
+                        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
+
+                        builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
+                        builder.setMessage("Вы действительно хотите подтвердить пользователя?");
+
+                        builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //TODO определение ролей
+                                search = false;
+                                try {
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE)
+                                            .child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
+                                Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                                searchView.setQuery(searchView.getQuery().toString() + "", false);
+                            }
+                        });
+
+                        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        });
+
+                        builder.setCancelable(false);
+                        builder.show();
                     }
                 });
-
-                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+        ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                        intent.putExtra("userId", usersList.get(position).getLogin());
+                        intent.putExtra("currUserId", mUserId);
+                        startActivity(intent);
                     }
                 });
-
-                builder.setCancelable(false);
-                builder.show();
-            }
-        });
-
-        usersView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
-                intent.putExtra("userId", usersList.get(position).getLogin());
-                intent.putExtra("currUserId", mUserId);
-                startActivity(intent);
-            }
-        });
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,10 +217,20 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 searchView.setQuery("", false);
                 MenuItemCompat.collapseActionView(searchMenu);
 
-                adapter = new UnverifiedUserAdapter(getApplicationContext(), unverifiedUsersList);
+                adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
+
+                LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                unverifiedUsersView.setLayoutManager(mLayoutManager);
+                unverifiedUsersView.setHasFixedSize(false);
+
                 unverifiedUsersView.setAdapter(adapter);
 
-                adapter1 = new UserAdapter(getApplicationContext(), usersList);
+                adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
+
+                mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                usersView.setLayoutManager(mLayoutManager);
+                usersView.setHasFixedSize(false);
+
                 usersView.setAdapter(adapter1);
 
                 adapter.notifyDataSetChanged();
@@ -301,7 +323,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
-                    adapter = new UnverifiedUserAdapter(getApplicationContext(), newUnverifiedUsersList);
+                    adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), newUnverifiedUsersList);
+
+                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                    unverifiedUsersView.setLayoutManager(mLayoutManager);
+                    unverifiedUsersView.setHasFixedSize(false);
+
                     unverifiedUsersView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
                 }
@@ -314,7 +341,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             newUsersList.add(user);
                     }
 
-                    adapter1 = new UserAdapter(getApplicationContext(), newUsersList);
+                    adapter1 = new UserRecyclerAdapter(getApplicationContext(), newUsersList);
+
+                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
+                    usersView.setLayoutManager(mLayoutManager);
+                    usersView.setHasFixedSize(false);
+
                     usersView.setAdapter(adapter1);
                     adapter1.notifyDataSetChanged();
                 }

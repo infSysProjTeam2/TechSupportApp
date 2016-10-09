@@ -8,15 +8,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,17 +24,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketAdapter;
+import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
 public class TicketsOverviewActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ListView ticketsOverview;
+    private RecyclerView ticketsOverview;
+    private LinearLayoutManager mLayoutManager;
 
     private String mUserId;
     private String mNickname;
@@ -43,7 +44,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
-    private ArrayAdapter<Ticket> adapter;
+    private TicketRecyclerAdapter adapter;
 
     private ImageView currUserImage;
 
@@ -70,7 +71,9 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     }
 
     private void initializeComponents(){
-        ticketsOverview = (ListView)findViewById(R.id.ticketsOverview);
+        ticketsOverview = (RecyclerView)findViewById(R.id.ticketsOverview);
+
+        mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -119,12 +122,16 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (role == User.ADMINISTRATOR) {
                     ticketsOverviewList = GlobalsMethods.Downloads.getAdminTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setLayoutManager(mLayoutManager);
+                    ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
                     ticketsOverviewList = GlobalsMethods.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
                     ticketsOverviewList.addAll(GlobalsMethods.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketAdapter(getApplicationContext(), ticketsOverviewList);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList);
+                    ticketsOverview.setLayoutManager(mLayoutManager);
+                    ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 }
             }
@@ -134,54 +141,53 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
             }
         });
-
-        ticketsOverview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
-                if (role == User.ADMINISTRATOR) {
-                    intent.putExtra("currUserName", mNickname);
-                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
-                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                } else if (role == User.DEPARTMENT_CHIEF) {
-                    //TODO Что открывается
-                } else if (role == User.DEPARTMENT_MEMBER){
-                    //TODO Что открывается
-                }
-                else {
-                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
-                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
-                        return;
+        ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                        Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                        if (role == User.ADMINISTRATOR) {
+                            intent.putExtra("currUserName", mNickname);
+                            intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
+                            intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
+                        } else if (role == User.DEPARTMENT_CHIEF) {
+                            //TODO Что открывается
+                        } else if (role == User.DEPARTMENT_MEMBER){
+                            //TODO Что открывается
+                        }
+                        else {
+                            if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
+                                Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                            else {
+                                intent.putExtra("currUserName", mNickname);
+                                intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
+                                intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
+                            }
+                        }
+                        startActivity(intent);
                     }
-                    else {
-                        intent.putExtra("currUserName", mNickname);
-                        intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
-                        intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                    }
-                }
-                startActivity(intent);
-            }
-        });
+                });
 
-        ticketsOverview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (role == User.ADMINISTRATOR){
-                    //TODO Что делается
-                } else if (role == User.DEPARTMENT_CHIEF) {
-                    //TODO Что делается
-                } else if (role == User.DEPARTMENT_MEMBER){
-                    //TODO Что делается
-                }
-                else {
-                    //TODO вы точно хотите отозвать тикет
-                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
-                        databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).getTicketId()).removeValue();
-                    else; //TODO проблема решена
-                }
-                return true;
-            }
-        });
+        ItemClickSupport.addTo(ticketsOverview).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener () {
+                    @Override
+                    public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+                        if (role == User.ADMINISTRATOR){
+                            //TODO Что делается
+                        } else if (role == User.DEPARTMENT_CHIEF) {
+                            //TODO Что делается
+                        } else if (role == User.DEPARTMENT_MEMBER){
+                            //TODO Что делается
+                        }
+                        else {
+                            //TODO вы точно хотите отозвать тикет
+                            if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals(""))
+                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(ticketsOverviewList.get(position).getTicketId()).removeValue();
+                            else; //TODO проблема решена
+                        }
+                        return true;
+                    }
+                });
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override

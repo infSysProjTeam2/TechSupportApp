@@ -9,12 +9,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,24 +24,25 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketAdapter;
+import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private ListView viewOfAvailableTickets;
-    private ListView viewOfMyClosedTickets;
-    private ListView viewOfClosedTickets;
+    private RecyclerView viewOfAvailableTickets;
+    private RecyclerView viewOfMyClosedTickets;
+    private RecyclerView viewOfClosedTickets;
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
     private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
     private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
-    private TicketAdapter adapter;
+    private TicketRecyclerAdapter adapter;
     private TabHost tabHost;
 
     private ImageView currUserImage;
@@ -148,9 +149,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void initializeComponents() {
-        viewOfAvailableTickets = (ListView)findViewById(R.id.listOfAvailableTickets);
-        viewOfMyClosedTickets = (ListView)findViewById(R.id.listOfMyClosedTickets);
-        viewOfClosedTickets = (ListView)findViewById(R.id.listOfClosedTickets);
+        viewOfAvailableTickets = (RecyclerView)findViewById(R.id.listOfAvailableTickets);
+        viewOfMyClosedTickets = (RecyclerView)findViewById(R.id.listOfMyClosedTickets);
+        viewOfClosedTickets = (RecyclerView)findViewById(R.id.listOfClosedTickets);
 
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
@@ -189,7 +190,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                         listOfMyClosedTickets.add(ticket);
 
                 if (adapter == null) {
-                    adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfAvailableTickets);
+                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
+                    viewOfAvailableTickets.setLayoutManager(mLayoutManager);
+                    viewOfAvailableTickets.setHasFixedSize(false);
                     viewOfAvailableTickets.setAdapter(adapter);
                 }
                 adapter.notifyDataSetChanged();
@@ -201,15 +205,15 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             }
         });
 
-        viewOfAvailableTickets.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(ListOfTicketsActivity.this);
+        ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                    @Override
+                    public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(ListOfTicketsActivity.this);
 
-                builder.setTitle("Принять заявку");
-                builder.setMessage("Вы действительно хотите принять заявку?");
+                        builder.setTitle("Принять заявку");
+                        builder.setMessage("Вы действительно хотите принять заявку?");
 
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                        builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
@@ -218,30 +222,40 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             }
                         });
 
-                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.cancel();
                             }
                         });
-                builder.show();
-            }
-        });
+                        builder.show();
+                    }
+                });
 
         tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
             @Override
             public void onTabChanged(String tabId) {
+                LinearLayoutManager mLayoutManager;
                 switch (tabId){
                     case "tag1":
-                        adapter = new TicketAdapter(getApplicationContext(), listOfAvailableTickets);
+                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfAvailableTickets);
+                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
+                        viewOfAvailableTickets.setLayoutManager(mLayoutManager);
+                        viewOfAvailableTickets.setHasFixedSize(false);
                         viewOfAvailableTickets.setAdapter(adapter);
                         return;
                     case "tag2":
-                        adapter = new TicketAdapter(getApplicationContext(), listOfMyClosedTickets);
+                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfMyClosedTickets);
+                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
+                        viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
+                        viewOfMyClosedTickets.setHasFixedSize(false);
                         viewOfMyClosedTickets.setAdapter(adapter);
                         return;
                     case "tag3":
-                        adapter = new TicketAdapter(getApplicationContext(), listOfSolvedTickets);
+                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfSolvedTickets);
+                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
+                        viewOfClosedTickets.setLayoutManager(mLayoutManager);
+                        viewOfClosedTickets.setHasFixedSize(false);
                         viewOfClosedTickets.setAdapter(adapter);
                         return;
                     default:
