@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий регистрационные данные подтвержденного пользователя.
- * Основной {@link #User(String branchId, String login, String password, int role, String userId, String workPlace, boolean isBlocked) конструктор}.
+ * Основной {@link #User(String branchId, boolean isBlocked, String login, String password, int role, String userName, String workPlace) конструктор}.
  * @author Monarch
  */
 public class User {

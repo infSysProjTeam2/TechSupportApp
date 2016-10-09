@@ -183,7 +183,6 @@ public class SignInActivity extends AppCompatActivity {
      * Назначение начальних данных и параметров программы.
      */
     private void dataConstruction(){
-        setTitle("Авторизация");
         initializeComponents();
         showLoadingDialog();
         setEvents();
@@ -218,6 +217,8 @@ public class SignInActivity extends AppCompatActivity {
         rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        setTitle("Авторизация");
     }
 
     /**

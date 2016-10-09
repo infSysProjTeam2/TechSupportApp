@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий данные заявки пользователя.
- * Основной {@link #Ticket(String, String, String, String) конструктор}.
+ * Основной {@link #Ticket(String ticketId, String userId, String userName, String topic, String message) конструктор}.
  * @author Monarch
  */
 public class Ticket {
