@@ -1,24 +1,33 @@
 package com.techsupportapp;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,28 +42,30 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
-import com.techsupportapp.utility.ItemClickSupport.OnItemLongClickListener;
 
 import java.util.ArrayList;
 
 public class UserActionsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private RecyclerView unverifiedUsersView;
-    private RecyclerView usersView;
-
-    private String mUserId;
+    private static String mUserId;
     private String mNickname;
 
-    private DatabaseReference databaseRef;
-    private ArrayList<User> unverifiedUsersList = new ArrayList<User>();
-    private ArrayList<User> usersList = new ArrayList<User>();
-    private UnverifiedUserRecyclerAdapter adapter;
-    private UserRecyclerAdapter adapter1;
+    private static Context context;
+
+    private static ViewPager viewPager;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+
+    private static RecyclerView unverifiedUsersView;
+    private static RecyclerView usersView;
+
+    private static DatabaseReference databaseRef;
+    private static ArrayList<User> unverifiedUsersList = new ArrayList<User>();
+    private static ArrayList<User> usersList = new ArrayList<User>();
+    private static UnverifiedUserRecyclerAdapter adapter;
+    private static UserRecyclerAdapter adapter1;
 
     private MenuItem searchMenu;
-    private SearchView searchView;
-    private boolean search;
-
-    private TabHost tabHost;
+    private static SearchView searchView;
+    private static boolean search;
 
     private ImageView currUserImage;
 
@@ -64,18 +75,17 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         setContentView(R.layout.activity_user_actions);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
+        context = UserActionsActivity.this;
+
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
-        initTabHost();
+        supportInvalidateOptionsMenu();
         initializeComponents();
         setEvents();
     }
 
     private void initializeComponents(){
-        unverifiedUsersView = (RecyclerView)findViewById(R.id.listOfUnverifiedUsers);
-        usersView = (RecyclerView)findViewById(R.id.listOfUsers);
-
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -96,30 +106,23 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
         userName.setText(mNickname);
         userType.setText("Администратор");
         navigationView.getMenu().findItem(R.id.charts).setVisible(false);
+
         search = false;
     }
 
-    private void initTabHost(){
-        tabHost = (TabHost) findViewById(R.id.tabHost);
-        tabHost.setup();
-
-        initTabSpec("tag1", R.id.tab1, "Авторизация");
-        initTabSpec("tag2", R.id.tab2, "Все");
-
-        tabHost.setCurrentTab(0);
-    }
-
-    private void initTabSpec(String tag, int viewId, String label) {
-        TabHost.TabSpec tabSpec = tabHost.newTabSpec(tag);
-        tabSpec.setContent(viewId);
-        tabSpec.setIndicator(label);
-        tabHost.addTab(tabSpec);
-    }
-
-    private String getLogInMessage(User unVerifiedUser) throws Exception {
+    private static String getLogInMessage(User unVerifiedUser) throws Exception {
         int role = unVerifiedUser.getRole();
         String resultString = "Вы действительно хотите создать аккаунт " + unVerifiedUser.getLogin()
                 + " и дать ему права ";
@@ -134,7 +137,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
     }
 
-    private String getDatabaseUserPath(User unVerifiedUser) throws Exception {
+    private static String getDatabaseUserPath(User unVerifiedUser) throws Exception {
         int role = unVerifiedUser.getRole();
         if (role == User.SIMPLE_USER)
             return DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
@@ -154,23 +157,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 if (!search) {
                     unverifiedUsersList = Globals.Downloads.getUnverifiedUserList(dataSnapshot);
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
-
-                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                    unverifiedUsersView.setLayoutManager(mLayoutManager);
-                    unverifiedUsersView.setHasFixedSize(false);
-
                     unverifiedUsersView.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
 
                     usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                     adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
-
-                    mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                    usersView.setLayoutManager(mLayoutManager);
-                    usersView.setHasFixedSize(false);
-
                     usersView.setAdapter(adapter1);
-
-                    adapter.notifyDataSetChanged();
                     adapter1.notifyDataSetChanged();
                 }
             }
@@ -178,93 +170,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        ItemClickSupport.addTo(unverifiedUsersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
-                        final User selectedUser = unverifiedUsersList.get(position);
-                        android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
-
-                        builder.setTitle("Подтвердить пользователя " + selectedUser.getBranchId());
-                        try {
-                            builder.setMessage(getLogInMessage(selectedUser));
-                        }
-                        catch (Exception e) {
-                            Globals.showLongTimeToast(getApplicationContext(),
-                                    "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
-                        }
-
-                        builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                search = false;
-                                try {
-                                    databaseRef.child(getDatabaseUserPath(selectedUser))
-                                            .child(selectedUser.getBranchId()).setValue(selectedUser);
-                                }
-                                catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
-                                Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
-                                searchView.setQuery(searchView.getQuery().toString() + "", false);
-                            }
-                        });
-
-                        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                builder.setCancelable(false);
-                builder.show();
-            }
-        });
-
-        ItemClickSupport.addTo(unverifiedUsersView).setOnItemLongClickListener(new OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                final User selectedUser = unverifiedUsersList.get(position);
-                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
-
-                builder.setTitle("Удалить заявку пользователя " + selectedUser.getBranchId());
-                builder.setMessage("Вы действительно хотите удалить заявку пользователя "
-                        + selectedUser.getLogin() + " на регистрацию?" );
-
-                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        search = false;
-                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
-                        Globals.showLongTimeToast(getApplicationContext(), "Заявка пользователя была успешно удалена");
-                        searchView.setQuery(searchView.getQuery().toString() + "", false);
-                    }
-                });
-
-                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                builder.setCancelable(false);
-                builder.show();
-                return true;
-            }
-        });
-
-        ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
-                intent.putExtra("userId", usersList.get(position).getLogin());
-                intent.putExtra("currUserId", mUserId);
-                startActivity(intent);
             }
         });
 
@@ -278,30 +183,31 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
         });
 
-        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onTabChanged(String tabId) {
-                searchView.setQuery("", false);
-                MenuItemCompat.collapseActionView(searchMenu);
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (search)
+                    MenuItemCompat.collapseActionView(searchMenu);
 
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
-
-                LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                unverifiedUsersView.setLayoutManager(mLayoutManager);
-                unverifiedUsersView.setHasFixedSize(false);
-
                 unverifiedUsersView.setAdapter(adapter);
 
                 adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
-
-                mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                usersView.setLayoutManager(mLayoutManager);
-                usersView.setHasFixedSize(false);
-
                 usersView.setAdapter(adapter1);
 
                 adapter.notifyDataSetChanged();
                 adapter1.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
             }
         });
     }
@@ -368,6 +274,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        search = false;
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         searchMenu = menu.findItem(R.id.action_search);
@@ -380,21 +292,16 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
 
             public boolean onQueryTextChange(String newText) {
-                if (!searchView.getQuery().toString().equals(""))
-                    search = true;
-                if (tabHost.getCurrentTabTag().equals("tag1")) {
+                search = true;
+                if (viewPager.getCurrentItem() == 0) {
                     ArrayList<User> newUnverifiedUsersList = new ArrayList<User>();
 
-                    for (User unverifiedUser: unverifiedUsersList){
+                    for (User unverifiedUser : unverifiedUsersList) {
                         if (unverifiedUser.getUserName().toLowerCase().contains(searchView.getQuery().toString().toLowerCase()))
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), newUnverifiedUsersList);
-
-                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                    unverifiedUsersView.setLayoutManager(mLayoutManager);
-                    unverifiedUsersView.setHasFixedSize(false);
 
                     unverifiedUsersView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
@@ -410,10 +317,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
                     adapter1 = new UserRecyclerAdapter(getApplicationContext(), newUsersList);
 
-                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
-                    usersView.setLayoutManager(mLayoutManager);
-                    usersView.setHasFixedSize(false);
-
                     usersView.setAdapter(adapter1);
                     adapter1.notifyDataSetChanged();
                 }
@@ -421,10 +324,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
         });
 
-        MenuItemCompat.setOnActionExpandListener(searchMenu,
-                new MenuItemCompat.OnActionExpandListener() {
+        MenuItemCompat.setOnActionExpandListener(searchMenu, new MenuItemCompat.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        search = true;
                         return true;
                     }
                     @Override
@@ -448,5 +351,174 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     private void exit(){
         this.finishAffinity();
+    }
+
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0)
+                return FirstFragment.newInstance();
+            else
+                return SecondFragment.newInstance();
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Не авторизованные";
+                case 1:
+                    return "Все";
+            }
+            return null;
+        }
+    }
+
+    public static class FirstFragment extends Fragment {
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+
+            unverifiedUsersView = (RecyclerView) v.findViewById(R.id.recycler);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
+
+            adapter = new UnverifiedUserRecyclerAdapter(context, unverifiedUsersList);
+
+            unverifiedUsersView.setLayoutManager(mLayoutManager);
+            unverifiedUsersView.setHasFixedSize(false);
+
+            unverifiedUsersView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
+            ItemClickSupport.addTo(unverifiedUsersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                @Override
+                public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
+                    final User selectedUser = unverifiedUsersList.get(position);
+                    AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+
+                    builder.setTitle("Подтвердить пользователя " + selectedUser.getBranchId());
+                    try {
+                        builder.setMessage(getLogInMessage(selectedUser));
+                    }
+                    catch (Exception e) {
+                        Globals.showLongTimeToast(context, "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
+                    }
+
+                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            search = false;
+                            try {
+                                databaseRef.child(getDatabaseUserPath(selectedUser))
+                                        .child(selectedUser.getBranchId()).setValue(selectedUser);
+                            }
+                            catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                            Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                            searchView.setQuery(searchView.getQuery().toString() + "", false);
+                        }
+                    });
+
+                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    builder.setCancelable(false);
+                    builder.show();
+                }
+            });
+
+            ItemClickSupport.addTo(unverifiedUsersView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+                    final User selectedUser = unverifiedUsersList.get(position);
+                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+
+                    builder.setTitle("Отклонить заявку пользователя " + selectedUser.getBranchId());
+                    builder.setMessage("Вы действительно хотите отклонить заявку пользователя "
+                            + selectedUser.getLogin() + " на регистрацию?" );
+
+                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            search = false;
+                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                            Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
+                            searchView.setQuery(searchView.getQuery().toString() + "", false);
+                        }
+                    });
+
+                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+
+                    builder.setCancelable(false);
+                    builder.show();
+                    return true;
+                }
+            });
+
+            return v;
+        }
+
+        public static FirstFragment newInstance() {
+            FirstFragment f = new FirstFragment();
+            return f;
+        }
+    }
+
+    public static class SecondFragment extends Fragment {
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+
+            usersView = (RecyclerView) v.findViewById(R.id.recycler);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
+
+            adapter1 = new UserRecyclerAdapter(context, usersList);
+
+            usersView.setLayoutManager(mLayoutManager);
+            usersView.setHasFixedSize(false);
+
+            usersView.setAdapter(adapter1);
+            adapter1.notifyDataSetChanged();
+
+            ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                @Override
+                public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                    Intent intent = new Intent(context, UserProfileActivity.class);
+                    intent.putExtra("userId", usersList.get(position).getLogin());
+                    intent.putExtra("currUserId", mUserId);
+                    startActivity(intent);
+                }
+            });
+
+            return v;
+        }
+
+        public static SecondFragment newInstance() {
+            SecondFragment f = new SecondFragment();
+            return f;
+        }
     }
 }
