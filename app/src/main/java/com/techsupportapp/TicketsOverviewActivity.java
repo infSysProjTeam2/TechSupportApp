@@ -183,7 +183,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     builder.setCancelable(false);
                     builder.show();
                 }
-                else {
+                else if (role == User.SIMPLE_USER){
                     final Ticket selectedTicket = ticketsOverviewList.get(position);
                     if (selectedTicket.getAdminId() == null || selectedTicket.getAdminId().equals("")) {
                         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(TicketsOverviewActivity.this);

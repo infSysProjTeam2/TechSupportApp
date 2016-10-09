@@ -144,6 +144,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
         nav_menu.findItem(R.id.charts).setVisible(false);
         nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
+        nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
     }
 
     private void setEvents() {

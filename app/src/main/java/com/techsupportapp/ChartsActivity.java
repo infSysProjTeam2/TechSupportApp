@@ -58,7 +58,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
-        userType.setText("Администратор");
+        userType.setText("Начальник отдела");
+        nav_menu.findItem(R.id.signUpUser).setVisible(false);
     }
 
     private void setEvents(){

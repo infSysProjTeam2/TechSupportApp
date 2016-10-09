@@ -27,7 +27,8 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:minWidth="200dp"
-                android:hint="Логин"/>
+                android:hint="Логин"
+                android:inputType="text" />
 
             <EditText
                 android:id="@+id/userNameET"
@@ -36,7 +37,8 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:minWidth="200dp"
-                android:hint="Отображаемое имя"/>
+                android:hint="Отображаемое имя"
+                android:inputType="textCapWords" />
 
             <EditText
                 android:id="@+id/workPlaceET"
@@ -45,7 +47,8 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:minWidth="200dp"
-                android:hint="Рабочее место"/>
+                android:hint="Рабочее место"
+                android:inputType="textCapWords" />
 
             <RadioGroup
                 android:layout_width="wrap_content"

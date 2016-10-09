@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.TicketAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -173,7 +175,23 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
 
         userName.setText(mNickname);
-        userType.setText("Администратор");
+        Menu nav_menu = navigationView.getMenu();
+
+        int role = Globals.currentUser.getRole();
+
+        if (role == User.ADMINISTRATOR) {
+            userType.setText("Администратор");
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_CHIEF) {
+            userType.setText("Начальник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_MEMBER){
+            userType.setText("Работник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
     }
 
     private void setEvents() {

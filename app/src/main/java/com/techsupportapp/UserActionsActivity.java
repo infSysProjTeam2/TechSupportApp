@@ -96,6 +96,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         userName.setText(mNickname);
         userType.setText("Администратор");
+        navigationView.getMenu().findItem(R.id.charts).setVisible(false);
         search = false;
     }
 
