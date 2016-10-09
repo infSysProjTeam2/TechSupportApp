@@ -319,7 +319,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
 
                     for (UnverifiedUser unverifiedUser: unverifiedUsersList){
-                        if (unverifiedUser.getLogin().contains(searchView.getQuery().toString()))
+                        if (unverifiedUser.getUserName().toLowerCase().contains(searchView.getQuery().toString().toLowerCase()))
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
@@ -337,7 +337,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     ArrayList<User> newUsersList = new ArrayList<User>();
 
                     for (User user: usersList){
-                        if (user.getLogin().contains(searchView.getQuery().toString()))
+                        if (user.getUserName().toLowerCase().contains(searchView.getQuery().toString().toLowerCase()))
                             newUsersList.add(user);
                     }
 
