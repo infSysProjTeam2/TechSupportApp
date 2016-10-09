@@ -15,35 +15,42 @@
         android:layout_centerHorizontal="true">
 
         <LinearLayout
+            android:paddingTop="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
-            <EditText
-                android:id="@+id/loginET"
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxLines="1"
-                android:minWidth="200dp"
-                android:hint="Логин"/>
+                android:orientation="vertical">
+                <EditText
+                    android:id="@+id/loginET"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:minWidth="200dp"
+                    android:hint="Логин"/>
 
-            <EditText
-                android:id="@+id/passwordET"
-                android:gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                android:minWidth="200dp"
-                android:hint="Пароль"/>
+                <EditText
+                    android:id="@+id/passwordET"
+                    android:gravity="center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:minWidth="200dp"
+                    android:hint="Пароль"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"

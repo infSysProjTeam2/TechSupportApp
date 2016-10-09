@@ -1,11 +1,13 @@
 package com.techsupportapp.adapters;
 
+
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,33 +18,38 @@ import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class UserAdapter extends ArrayAdapter<User> {
+public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapter.ViewHolder> {
 
-    private final Context context;
+    private Context context;
     private final ArrayList<User> values;
 
-    public UserAdapter(Context context, ArrayList<User> values) {
-        super(context, R.layout.item_ticket, values);
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public ImageView userImage;
+        public TextView userNameText;
+
+        public ViewHolder(View view) {
+            super(view);
+            userImage = (ImageView) view.findViewById(R.id.userImage);
+            userNameText = (TextView) view.findViewById(R.id.userName);
+        }
+    }
+
+
+    public UserRecyclerAdapter(Context context, ArrayList<User> values) {
         this.context = context;
         this.values = values;
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_user, parent, false);
 
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_user, parent, false);
-            holder = new ViewHolder();
+        return new ViewHolder(itemView);
+    }
 
-            holder.userImage = (ImageView) convertView.findViewById(R.id.userImage);
-            holder.userNameText = (TextView) convertView.findViewById(R.id.userName);
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
+    @Override
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.userNameText.setText(values.get(position).getUserName());
         holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
 
@@ -56,12 +63,10 @@ public class UserAdapter extends ArrayAdapter<User> {
                 context.startActivity(intent);
             }
         });
-        return convertView;
-        //TODO сделать показ роли ListView
     }
 
-    static class ViewHolder {
-        private ImageView userImage;
-        private TextView userNameText;
+    @Override
+    public int getItemCount() {
+        return values.size();
     }
 }

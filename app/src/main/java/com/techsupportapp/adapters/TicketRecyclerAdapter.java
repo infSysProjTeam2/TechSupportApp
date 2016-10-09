@@ -2,12 +2,14 @@ package com.techsupportapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.techsupportapp.R;
 import com.techsupportapp.UserProfileActivity;
@@ -17,37 +19,44 @@ import com.techsupportapp.utility.GlobalsMethods;
 
 import java.util.ArrayList;
 
-public class TicketAdapter extends ArrayAdapter<Ticket> {
+public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAdapter.ViewHolder>{
 
-    private final Context context;
+    private Context context;
     private final ArrayList<Ticket> values;
 
-    public TicketAdapter(Context context, ArrayList<Ticket> values) {
-        super(context, R.layout.item_ticket, values);
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView authorText;
+        public TextView dateText;
+        public TextView topicText;
+        public TextView descText;
+        public ImageView ticketImage;
+
+        public ViewHolder(View view) {
+            super(view);
+            ticketImage = (ImageView) view.findViewById(R.id.ticketImage);
+            authorText = (TextView) view.findViewById(R.id.ticketAuthor);
+            dateText = (TextView) view.findViewById(R.id.ticketDate);
+            topicText = (TextView) view.findViewById(R.id.ticketTopic);
+            descText = (TextView) view.findViewById(R.id.ticketDesc);
+        }
+    }
+
+    public TicketRecyclerAdapter(Context context, ArrayList<Ticket> values) {
         this.context = context;
         this.values = values;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_ticket, parent, false);
+        return new ViewHolder(itemView);
+    }
+
+    @Override
+    public void onBindViewHolder(final ViewHolder holder, int position) {
         final String titleText;
         final String userId;
         final String adminId;
-        ViewHolder holder;
-
-        if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.item_ticket, parent, false);
-            holder = new ViewHolder();
-            holder.ticketImage = (ImageView) convertView.findViewById(R.id.ticketImage);
-            holder.authorText = (TextView) convertView.findViewById(R.id.ticketAuthor);
-            holder.dateText = (TextView) convertView.findViewById(R.id.ticketDate);
-            holder.topicText = (TextView) convertView.findViewById(R.id.ticketTopic);
-            holder.descText = (TextView) convertView.findViewById(R.id.ticketDesc);
-            convertView.setTag(holder);
-        } else{
-            holder = (ViewHolder) convertView.getTag();
-        }
 
         userId = values.get(position).getUserId();
         adminId = values.get(position).getAdminId();
@@ -85,10 +94,10 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
                     intent.putExtra("userId", userId);
                 }
                 else
-                    if (titleText.equals("Не установлено"))
-                        fl = false;
-                    else
-                        intent.putExtra("userId", adminId);
+                if (titleText.equals("Не установлено"))
+                    fl = false;
+                else
+                    intent.putExtra("userId", adminId);
 
                 intent.putExtra("currUserId", GlobalsMethods.currUserId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -96,14 +105,10 @@ public class TicketAdapter extends ArrayAdapter<Ticket> {
                     context.startActivity(intent);
             }
         });
-        return convertView;
     }
 
-    static class ViewHolder {
-        private TextView authorText;
-        private TextView dateText;
-        private TextView topicText;
-        private TextView descText;
-        private ImageView ticketImage;
+    @Override
+    public int getItemCount() {
+        return values.size();
     }
 }
