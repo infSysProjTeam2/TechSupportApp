@@ -80,6 +80,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
+        supportInvalidateOptionsMenu();
         initializeComponents();
         setEvents();
     }
@@ -191,7 +192,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
             @Override
             public void onPageSelected(int position) {
-                MenuItemCompat.collapseActionView(searchMenu);
+                if (search)
+                    MenuItemCompat.collapseActionView(searchMenu);
 
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
@@ -272,6 +274,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        search = false;
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         searchMenu = menu.findItem(R.id.action_search);
@@ -284,8 +292,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
 
             public boolean onQueryTextChange(String newText) {
-                if (!searchView.getQuery().toString().equals(""))
-                    search = true;
+                search = true;
                 if (viewPager.getCurrentItem() == 0) {
                     ArrayList<User> newUnverifiedUsersList = new ArrayList<User>();
 
@@ -317,10 +324,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             }
         });
 
-        MenuItemCompat.setOnActionExpandListener(searchMenu,
-                new MenuItemCompat.OnActionExpandListener() {
+        MenuItemCompat.setOnActionExpandListener(searchMenu, new MenuItemCompat.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
+                        search = true;
                         return true;
                     }
                     @Override
@@ -354,7 +361,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         @Override
         public Fragment getItem(int position) {
-            Log.e("MyTAG", String.valueOf(position));
             if (position == 0)
                 return FirstFragment.newInstance();
             else
