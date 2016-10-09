@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.firebase.client.Query;
 import com.techsupportapp.R;
 import com.techsupportapp.UserProfileActivity;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 public class ChatListAdapter extends FirebaseListAdapter<Chat> {
 
@@ -40,11 +40,11 @@ public class ChatListAdapter extends FirebaseListAdapter<Chat> {
             public void onClick(View v) {
                 Intent intent = new Intent(context, UserProfileActivity.class);
                 intent.putExtra("userId", chat.getUserId());
-                intent.putExtra("currUserId", GlobalsMethods.currUserId);
+                intent.putExtra("currUserId", Globals.currentUser.getLogin());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
             }
         });
-        userImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(author,context)));
+        userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(author,context)));
     }
 }

@@ -21,7 +21,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -82,7 +82,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
+                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                 setData();
             }
 
@@ -125,8 +125,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
                                 User chUser;
                                 try {
-                                    chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                            User.SIMPLE_USER, usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                    chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                            User.SIMPLE_USER, usersList.get(userPosition).getLogin(), "Wayward Pines");
                                     databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                     databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
                                 }
@@ -142,8 +142,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
                             User chUser;
                             try {
-                                chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                        User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                        User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), "Wayward Pines");
                                 databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                             }
@@ -219,13 +219,13 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), "Пароли должны совпадать", Toast.LENGTH_LONG).show();
                         else if (newPassword.getText().toString().length() < 5 || newPasswordRepeat.getText().toString().length() < 5)
                             Toast.makeText(getApplicationContext(), "Пароль должен быть не менее 5 символов", Toast.LENGTH_LONG).show();
-                        else if (!GlobalsMethods.isEnglishWord(newPassword.getText().toString()) || !GlobalsMethods.isEnglishWord(newPasswordRepeat.getText().toString()))
+                        else if (!Globals.isEnglishWord(newPassword.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeat.getText().toString()))
                             Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
                         else
                         {
                             try {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(),
-                                        usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), "Wayward Pines", false);
+                                User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(),
+                                        usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), "Wayward Pines");
                                 if (chUser.getRole() == User.ADMINISTRATOR)
                                     databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 else if (chUser.getRole() == User.SIMPLE_USER)
@@ -281,7 +281,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
             }
         });
 
-        if (GlobalsMethods.isCurrentAdmin == User.SIMPLE_USER)
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER)
             changeUserTypeBtn.setEnabled(false);
 
         userName.setText(usersList.get(userPosition).getUserName());

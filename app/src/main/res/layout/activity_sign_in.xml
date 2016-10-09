@@ -26,6 +26,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical">
+
                 <EditText
                     android:id="@+id/loginET"
                     android:gravity="center"
@@ -33,7 +34,8 @@
                     android:layout_height="wrap_content"
                     android:maxLines="1"
                     android:minWidth="200dp"
-                    android:hint="Логин"/>
+                    android:hint="Логин"
+                    android:inputType="text" />
 
                 <EditText
                     android:id="@+id/passwordET"
@@ -50,6 +52,7 @@
                     android:layout_height="wrap_content"
                     android:textAlignment="center"
                     android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
+
             </LinearLayout>
 
             <LinearLayout

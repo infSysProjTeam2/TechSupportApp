@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -22,7 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,137 +57,10 @@ public class SignInActivity extends AppCompatActivity {
     private CheckBox rememberPasCB;
 
     private ProgressDialog loadingDialog;
+
     //endregion
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_in);
-
-        initializeComponents();
-
-        showLoadingDialog();
-
-        setEvents();
-    }
-
-    private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
-    }
-
-    private void closeLoadingDialog(){
-        loadingDialog.dismiss();
-    }
-
-    /**
-     * Инициализация переменных и элементов макета.
-     */
-    private void initializeComponents() {
-        closeAppBut = (Button)findViewById(R.id.closeAppButton);
-        signInBut = (Button)findViewById(R.id.signInButton);
-
-        loginET = (EditText)findViewById(R.id.loginET);
-        passwordET = (EditText)findViewById(R.id.passwordET);
-
-        rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
-
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-
-        setTitle("Авторизация");
-    }
-
-    /**
-     * Создание методов для событий.
-     */
-    private void setEvents() {
-        closeAppBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
-        signInBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (hasConnection()) {
-                    int index = Collections.binarySearch(unverifiedLoginList, loginET.getText().toString(), new Comparator<String>() {
-                        @Override
-                        public int compare(String lhs, String rhs) {
-                            return lhs.compareTo(rhs);
-                        }
-                    });
-
-                    if (loginET.getText().toString().equals("")) {
-                        loginET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
-                    } else if (passwordET.getText().toString().equals("")) {
-                        passwordET.requestFocus();
-                        Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
-                    } else if (index >= 0) {
-                        Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
-                                "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
-                    } else {
-                        int i = 0;
-                        while (!loginET.getText().toString().equals(userList.get(i).getLogin())
-                                && ++i < userList.size()); //TODO binarySearch
-                        if (i >= userList.size()) {
-                            passwordET.setText("");
-                            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. " +
-                                    "Повторите попытку", Toast.LENGTH_LONG).show();
-                        }
-                        else if (loginET.getText().toString().equals(userList.get(i).getLogin()) &&
-                                passwordET.getText().toString().equals(userList.get(i).getPassword()))
-                        {
-                            Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
-
-                            Intent intent;
-                            String login;
-
-                            login = loginET.getText().toString();
-
-                            intent = new Intent(SignInActivity.this, TicketsOverviewActivity.class);
-
-                            Bundle args = TicketsOverviewActivity.makeArgs(login, userList.get(i).getUserName(), userList.get(i).getRole());
-
-                            intent.putExtras(args);
-                            savePassAndLogin();
-                            GlobalsMethods.currUserId = login;
-                            GlobalsMethods.isCurrentAdmin = userList.get(i).getRole();
-                            startActivity(intent);
-                        }
-                        else
-                        {
-                            passwordET.setText("");
-                            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }
-                else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
-            }
-        });
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                unverifiedLoginList.clear();
-
-                userList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
-                unverifiedLoginList = GlobalsMethods.Downloads.getUnverifiedLogins(dataSnapshot);
-
-                closeLoadingDialog();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
+    //region Override Methods
 
     @Override
     public void onBackPressed() {
@@ -211,41 +86,11 @@ public class SignInActivity extends AppCompatActivity {
         builder.show();
     }
 
-    private boolean hasConnection() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        } catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
-
-        return false;
-    }
-
-    private void savePassAndLogin(){
-        SharedPreferences settings = getPreferences(0);
-        SharedPreferences.Editor editor = settings.edit();
-        if (rememberPasCB.isChecked()) {
-            String login = loginET.getText().toString();
-            String password = passwordET.getText().toString();
-            editor.putString("Login", login);
-            editor.putString("Password", password);
-            editor.putBoolean("cbState", true);
-        }
-        else
-            editor.clear();
-        editor.commit();
-    }
-
     @Override
-    protected void onResume() {
-        super.onResume();
-
-        SharedPreferences settings = getPreferences(0);
-        loginET.setText(settings.getString("Login",""));
-        passwordET.setText(settings.getString("Password",""));
-        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sign_in);
+        dataConstruction();
     }
 
     @Override
@@ -264,4 +109,215 @@ public class SignInActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences settings = getPreferences(0);
+        loginET.setText(settings.getString("Login",""));
+        passwordET.setText(settings.getString("Password",""));
+        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+    }
+
+    //endregion
+
+    /**
+     * Проверка полей логина и пароля, проверка подтверждения заявки на получение аккаунта.
+     * @return true - если поля заполнены и аккаунт не находится на рассмотрении на добавление.
+     * false - если хотя бы одно поле не заплонено или аккаунт пользователя находится на
+     * рассмотрении на добавление в систему.
+     */
+    private boolean checkFields() {
+        int index = Collections.binarySearch(unverifiedLoginList, loginET.getText().toString(), new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+        if (loginET.getText().toString().equals("")) {
+            loginET.requestFocus();
+            Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
+            return false;
+        } else if (passwordET.getText().toString().equals("")) {
+            passwordET.requestFocus();
+            Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
+            return false;
+        } else if (index >= 0) {
+            Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
+                    "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
+            return false;
+        } else return true;
+    }
+
+    /**
+     * Проверка правильности логина и соответствия пароля. При успешном сопоставлении выполняется
+     * вход в систему.
+     */
+    private void checkVerificationData() {
+        int i = 0;
+        while (!loginET.getText().toString().equals(userList.get(i).getLogin())
+                && ++i < userList.size()); //TODO binarySearch
+        if (i >= userList.size()) {
+            passwordET.setText("");
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. " +
+                    "Повторите попытку", Toast.LENGTH_LONG).show();
+        }
+        else if (loginET.getText().toString().equals(userList.get(i).getLogin()) &&
+                passwordET.getText().toString().equals(userList.get(i).getPassword()))
+            signIn(userList.get(i));
+        else {
+            passwordET.setText("");
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    /**
+     * Закрытие окна загрузки.
+     */
+    private void closeLoadingDialog(){
+        loadingDialog.dismiss();
+    }
+
+    /**
+     * Назначение начальних данных и параметров программы.
+     */
+    private void dataConstruction(){
+        initializeComponents();
+        showLoadingDialog();
+        setEvents();
+    }
+
+    /**
+     * Проверка наличия подключения к Интернету.
+     * @return true - если подключение есть. false - если подключение отсутствует.
+     */
+    private boolean hasConnection() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e)          { e.printStackTrace(); }
+        catch (InterruptedException e) { e.printStackTrace(); }
+
+        return false;
+    }
+
+    /**
+     * Инициализация переменных и элементов макета.
+     */
+    private void initializeComponents() {
+        closeAppBut = (Button)findViewById(R.id.closeAppButton);
+        signInBut = (Button)findViewById(R.id.signInButton);
+
+        loginET = (EditText)findViewById(R.id.loginET);
+        passwordET = (EditText)findViewById(R.id.passwordET);
+
+        rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
+
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        setTitle("Авторизация");
+    }
+
+    /**
+     * Сохранение данных логина и пароля для повторного входа.
+     */
+    private void savePassAndLogin(){
+        SharedPreferences settings = getPreferences(0);
+        SharedPreferences.Editor editor = settings.edit();
+        if (rememberPasCB.isChecked()) {
+            String login = loginET.getText().toString();
+            String password = passwordET.getText().toString();
+            editor.putString("Login", login);
+            editor.putString("Password", password);
+            editor.putBoolean("cbState", true);
+        }
+        else
+            editor.clear();
+        editor.commit();
+    }
+
+    /**
+     * Создание методов для событий.
+     */
+    private void setEvents() {
+        closeAppBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
+        signInBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasConnection()) {
+                    if (!checkFields())
+                        return;
+                    checkVerificationData();
+                }
+                else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                unverifiedLoginList.clear();
+
+                userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                unverifiedLoginList = Globals.Downloads.getUnverifiedLogins(dataSnapshot);
+
+                closeLoadingDialog();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+            }
+        });
+
+        passwordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (hasConnection()) {
+                    if (!checkFields())
+                        return false;
+                    checkVerificationData();
+                    return true;
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+        });
+    }
+
+    /**
+     * Отображение окна загрузки.
+     */
+    private void showLoadingDialog(){
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setMessage("Загрузка...");
+        loadingDialog.setCancelable(false);
+        loadingDialog.setInverseBackgroundForced(false);
+        loadingDialog.show();
+    }
+
+    /**
+     * Вход в систему под определенным пользователем.
+     * @param user Данные пользователя для входа в систему.
+     */
+    private void signIn(User user){
+        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
+
+        savePassAndLogin();
+
+        Globals.currentUser = user;
+        startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));
+    }
+
 }

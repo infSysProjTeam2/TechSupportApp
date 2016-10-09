@@ -15,16 +15,13 @@ import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 
 import java.util.ArrayList;
 
-public class GlobalsMethods {
+public class Globals {
 
-    public static String currUserId;
-
-    public static int isCurrentAdmin;
+    public static User currentUser;
 
     /**
      * Метод, вызывающий информацию о приложении.
@@ -147,10 +144,10 @@ public class GlobalsMethods {
             return resultList;
         }
 
-        public static ArrayList<UnverifiedUser> getUnverifiedUserList(DataSnapshot dataSnapshot) {
-            ArrayList<UnverifiedUser> resultList = new ArrayList<UnverifiedUser>();
+        public static ArrayList<User> getUnverifiedUserList(DataSnapshot dataSnapshot) {
+            ArrayList<User> resultList = new ArrayList<User>();
             for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                resultList.add(userRecord.getValue(UnverifiedUser.class));
+                resultList.add(userRecord.getValue(User.class));
             return resultList;
         }
 
@@ -162,7 +159,7 @@ public class GlobalsMethods {
         public static ArrayList<String> getUnverifiedLogins(DataSnapshot dataSnapshot) {
             ArrayList<String> resultList = new ArrayList<String>();
             for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                resultList.add(userRecord.getValue(UnverifiedUser.class).getLogin());
+                resultList.add(userRecord.getValue(User.class).getLogin());
             return resultList;
         }
 
@@ -185,11 +182,11 @@ public class GlobalsMethods {
             return resultList;
         }
 
-        public static ArrayList<Ticket> getAdminTicketList(DataSnapshot dataSnapshot, String adminLogin){
+        public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin){
             ArrayList<Ticket> resultList = new ArrayList<Ticket>();
             for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                 Ticket ticket = ticketRecord.getValue(Ticket.class);
-                if (ticket.getAdminId().equals(adminLogin))
+                if (ticket.getAdminId().equals(overseerLogin))
                     resultList.add(ticket);
             }
             return resultList;

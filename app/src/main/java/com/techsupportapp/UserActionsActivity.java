@@ -17,9 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +29,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
 import com.techsupportapp.adapters.UserRecyclerAdapter;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
+import com.techsupportapp.utility.ItemClickSupport.OnItemLongClickListener;
 
 import java.util.ArrayList;
 
@@ -47,7 +45,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private String mNickname;
 
     private DatabaseReference databaseRef;
-    private ArrayList<UnverifiedUser> unverifiedUsersList = new ArrayList<UnverifiedUser>();
+    private ArrayList<User> unverifiedUsersList = new ArrayList<User>();
     private ArrayList<User> usersList = new ArrayList<User>();
     private UnverifiedUserRecyclerAdapter adapter;
     private UserRecyclerAdapter adapter1;
@@ -96,10 +94,11 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         userName.setText(mNickname);
         userType.setText("Администратор");
+        navigationView.getMenu().findItem(R.id.charts).setVisible(false);
         search = false;
     }
 
@@ -120,12 +119,40 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         tabHost.addTab(tabSpec);
     }
 
+    private String getLogInMessage(User unVerifiedUser) throws Exception {
+        int role = unVerifiedUser.getRole();
+        String resultString = "Вы действительно хотите создать аккаунт " + unVerifiedUser.getLogin()
+                + " и дать ему права ";
+        if (role == User.SIMPLE_USER)
+            return resultString + "ПОЛЬЗОВАТЕЛЯ";
+        else if (role == User.DEPARTMENT_MEMBER)
+            return resultString + "РАБОТНИКА ОТДЕЛА";
+        else if (role == User.ADMINISTRATOR)
+            return resultString + "АДМИНИСТРАТОРА";
+        else if (role == User.DEPARTMENT_CHIEF)
+            return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
+        else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
+    }
+
+    private String getDatabaseUserPath(User unVerifiedUser) throws Exception {
+        int role = unVerifiedUser.getRole();
+        if (role == User.SIMPLE_USER)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
+        else if (role == User.DEPARTMENT_MEMBER)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE;
+        else if (role == User.ADMINISTRATOR)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+        else if (role == User.DEPARTMENT_CHIEF)
+            return DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE;
+        else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
+    }
+
     private void setEvents() {
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList = GlobalsMethods.Downloads.getUnverifiedUserList(dataSnapshot);
+                    unverifiedUsersList = Globals.Downloads.getUnverifiedUserList(dataSnapshot);
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
 
                     LinearLayoutManager mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
@@ -134,7 +161,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
                     unverifiedUsersView.setAdapter(adapter);
 
-                    usersList = GlobalsMethods.Downloads.getVerifiedUserList(dataSnapshot);
+                    usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                     adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
 
                     mLayoutManager = new LinearLayoutManager(UserActionsActivity.this, LinearLayoutManager.VERTICAL, false);
@@ -157,24 +184,30 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         ItemClickSupport.addTo(unverifiedUsersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
+                        final User selectedUser = unverifiedUsersList.get(position);
                         android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
 
-                        builder.setTitle("Подтвердить пользователя " + unverifiedUsersList.get(position).getBranchId());
-                        builder.setMessage("Вы действительно хотите подтвердить пользователя?");
+                        builder.setTitle("Подтвердить пользователя " + selectedUser.getBranchId());
+                        try {
+                            builder.setMessage(getLogInMessage(selectedUser));
+                        }
+                        catch (Exception e) {
+                            Globals.showLongTimeToast(getApplicationContext(),
+                                    "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
+                        }
 
                         builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                //TODO определение ролей
                                 search = false;
                                 try {
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE)
-                                            .child(unverifiedUsersList.get(position).getBranchId()).setValue(unverifiedUsersList.get(position).verifyUser());
+                                    databaseRef.child(getDatabaseUserPath(selectedUser))
+                                            .child(selectedUser.getBranchId()).setValue(selectedUser);
                                 }
                                 catch (Exception e) {
                                     e.printStackTrace();
                                 }
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(unverifiedUsersList.get(position).getBranchId()).removeValue();
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                                 Toast.makeText(getApplicationContext(), "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                                 searchView.setQuery(searchView.getQuery().toString() + "", false);
                             }
@@ -187,19 +220,53 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             }
                         });
 
-                        builder.setCancelable(false);
-                        builder.show();
-                    }
-                });
-        ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                builder.setCancelable(false);
+                builder.show();
+            }
+        });
+
+        ItemClickSupport.addTo(unverifiedUsersView).setOnItemLongClickListener(new OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
+                final User selectedUser = unverifiedUsersList.get(position);
+                android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(UserActionsActivity.this);
+
+                builder.setTitle("Удалить заявку пользователя " + selectedUser.getBranchId());
+                builder.setMessage("Вы действительно хотите удалить заявку пользователя "
+                        + selectedUser.getLogin() + " на регистрацию?" );
+
+                builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
-                        intent.putExtra("userId", usersList.get(position).getLogin());
-                        intent.putExtra("currUserId", mUserId);
-                        startActivity(intent);
+                    public void onClick(DialogInterface dialog, int which) {
+                        search = false;
+                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                        Globals.showLongTimeToast(getApplicationContext(), "Заявка пользователя была успешно удалена");
+                        searchView.setQuery(searchView.getQuery().toString() + "", false);
                     }
                 });
+
+                builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+                builder.setCancelable(false);
+                builder.show();
+                return true;
+            }
+        });
+
+        ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+            @Override
+            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", usersList.get(position).getLogin());
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
+            }
+        });
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -271,7 +338,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(UserActionsActivity.this);
+            Globals.showAbout(UserActionsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
@@ -316,9 +383,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 if (!searchView.getQuery().toString().equals(""))
                     search = true;
                 if (tabHost.getCurrentTabTag().equals("tag1")) {
-                    ArrayList<UnverifiedUser> newUnverifiedUsersList = new ArrayList<UnverifiedUser>();
+                    ArrayList<User> newUnverifiedUsersList = new ArrayList<User>();
 
-                    for (UnverifiedUser unverifiedUser: unverifiedUsersList){
+                    for (User unverifiedUser: unverifiedUsersList){
                         if (unverifiedUser.getUserName().toLowerCase().contains(searchView.getQuery().toString().toLowerCase()))
                             newUnverifiedUsersList.add(unverifiedUser);
                     }

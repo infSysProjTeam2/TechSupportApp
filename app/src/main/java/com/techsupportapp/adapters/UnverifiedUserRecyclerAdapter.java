@@ -1,7 +1,6 @@
 package com.techsupportapp.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,17 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.techsupportapp.R;
-import com.techsupportapp.UserProfileActivity;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
 public class UnverifiedUserRecyclerAdapter extends RecyclerView.Adapter<UnverifiedUserRecyclerAdapter.ViewHolder> {
 
     private Context context;
-    private final ArrayList<UnverifiedUser> values;
+    private final ArrayList<User> values;
 
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -37,7 +34,7 @@ public class UnverifiedUserRecyclerAdapter extends RecyclerView.Adapter<Unverifi
     }
 
 
-    public UnverifiedUserRecyclerAdapter(Context context, ArrayList<UnverifiedUser> values) {
+    public UnverifiedUserRecyclerAdapter(Context context, ArrayList<User> values) {
         this.context = context;
         this.values = values;
     }
@@ -53,7 +50,7 @@ public class UnverifiedUserRecyclerAdapter extends RecyclerView.Adapter<Unverifi
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.userNameText.setText(values.get(position).getUserName());
         holder.userDateText.setText(values.get(position).getRegistrationDate());
-        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getUserName(), context));
+        holder.userImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context));
     }
 
     @Override

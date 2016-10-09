@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -26,8 +27,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
@@ -97,7 +99,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         } else if (id == R.id.listOfTickets) {
 
         }else if (id == R.id.about) {
-            GlobalsMethods.showAbout(ListOfTicketsActivity.this);
+            Globals.showAbout(ListOfTicketsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
@@ -171,18 +173,34 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
 
         userName.setText(mNickname);
-        userType.setText("Администратор");
+        Menu nav_menu = navigationView.getMenu();
+
+        int role = Globals.currentUser.getRole();
+
+        if (role == User.ADMINISTRATOR) {
+            userType.setText("Администратор");
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_CHIEF) {
+            userType.setText("Начальник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_MEMBER){
+            userType.setText("Работник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
     }
 
     private void setEvents() {
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                listOfAvailableTickets = GlobalsMethods.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-                listOfSolvedTickets = GlobalsMethods.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                listOfAvailableTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+                listOfSolvedTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
                 listOfMyClosedTickets.clear();
 
                 for (Ticket ticket : listOfSolvedTickets)

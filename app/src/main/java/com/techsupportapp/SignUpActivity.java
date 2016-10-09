@@ -2,9 +2,13 @@ package com.techsupportapp;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -12,10 +16,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.databaseClasses.UnverifiedUser;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +51,12 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText passwordET;
     private EditText repeatPasswordET;
 
+    private RadioButton userRadBtn;
+    private RadioButton workerRadBtn;
+    private RadioButton adminRadBtn;
+    private RadioButton chiefRadBtn;
+
+
     //endregion
 
     @Override
@@ -62,6 +71,18 @@ public class SignUpActivity extends AppCompatActivity {
         setEvents();
     }
 
+    private int checkRole() {
+        if (userRadBtn.isChecked())
+            return User.SIMPLE_USER;
+        else if (workerRadBtn.isChecked())
+            return User.DEPARTMENT_MEMBER;
+        else if (adminRadBtn.isChecked())
+            return User.ADMINISTRATOR;
+        else if (chiefRadBtn.isChecked())
+            return User.DEPARTMENT_CHIEF;
+        else return User.SIMPLE_USER;
+    }
+
     /**
      * Инициализация переменных и элементов макета
      */
@@ -74,6 +95,11 @@ public class SignUpActivity extends AppCompatActivity {
         workPlaceET = (EditText)findViewById(R.id.workPlaceET);
         passwordET = (EditText)findViewById(R.id.passwordET);
         repeatPasswordET = (EditText)findViewById(R.id.repeatPasswordET);
+
+        userRadBtn = (RadioButton)findViewById(R.id.userRadBtn);
+        workerRadBtn = (RadioButton)findViewById(R.id.workerRadBtn);
+        adminRadBtn = (RadioButton)findViewById(R.id.adminRadBtn);
+        chiefRadBtn = (RadioButton)findViewById(R.id.chiefRadBtn);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
@@ -124,14 +150,17 @@ public class SignUpActivity extends AppCompatActivity {
                     loginET.setText("");
                     Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
                 } else {
-                     //TODO Определение прав нового пользователя.
-                    databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
-                            .setValue(new UnverifiedUser("user_" + userCount++, loginET.getText().toString(),
-                                    passwordET.getText().toString(), User.SIMPLE_USER, userNameET.getText().toString(),
-                                    workPlaceET.getText().toString(), false));
+                    try {
+                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                                .setValue(new User("user_" + userCount++, false, loginET.getText().toString(),
+                                        passwordET.getText().toString(), checkRole(), userNameET.getText().toString(),
+                                        workPlaceET.getText().toString()));
+                    } catch (Exception e) {
+                        Globals.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
+                    }
 
                     databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
-                    GlobalsMethods.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
+                    Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
                     SignUpActivity.super.finish();
                 }
             }
@@ -140,13 +169,22 @@ public class SignUpActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                loginList = GlobalsMethods.Downloads.getAllLogins(dataSnapshot);
+                loginList = Globals.Downloads.getAllLogins(dataSnapshot);
                 userCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+
+        repeatPasswordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE)
+                    signUpBtn.callOnClick();
+                return true;
             }
         });
     }
