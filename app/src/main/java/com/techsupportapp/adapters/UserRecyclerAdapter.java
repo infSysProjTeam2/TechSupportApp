@@ -51,7 +51,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.userNameText.setText(values.get(position).getUserName());
-        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getLogin(), context));
+        holder.userImage.setImageBitmap(GlobalsMethods.ImageMethods.createUserImage(values.get(position).getUserName(), context));
 
         holder.userImage.setOnClickListener(new View.OnClickListener() {
             @Override
