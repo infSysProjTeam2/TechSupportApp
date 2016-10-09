@@ -57,7 +57,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, UserProfileActivity.class);
-                intent.putExtra("userId", values.get(position).getUserName());
+                intent.putExtra("userId", values.get(position).getLogin());
                 intent.putExtra("currUserId", GlobalsMethods.currUserId);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
