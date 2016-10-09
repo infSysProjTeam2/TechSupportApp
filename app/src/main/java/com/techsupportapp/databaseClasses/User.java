@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий регистрационные данные подтвержденного пользователя.
- * Основной {@link #User(String branchId, String login, String password, int role, String userId, String workPlace, boolean isBlocked) конструктор}.
+ * Основной {@link #User(String branchId, boolean isBlocked, String login, String password, int role, String userName, String workPlace) конструктор}.
  * @author Monarch
  */
 public class User {
@@ -99,7 +99,7 @@ public class User {
      * @param workPlace Рабочее место пользователя.
      * @param isBlocked Флаг, показывающий, заблокирован ли пользователь.
      */
-    public User(String branchId, String login, String password, int role, String userName, String workPlace, boolean isBlocked) throws Exception {
+    public User(String branchId, boolean isBlocked, String login, String password, int role, String userName, String workPlace) throws Exception {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
@@ -144,6 +144,13 @@ public class User {
     }
 
     /**
+     * @return Флаг, показывающий, заблокирован ли пользователь.
+     */
+    public boolean getIsBlocked() {
+        return isBlocked;
+    }
+
+    /**
      * @return Логин пользователя.
      */
     public String getLogin() {
@@ -158,17 +165,17 @@ public class User {
     }
 
     /**
-     * @return Флаг, показывающий, наделен ли пользователь правами администратора.
-     */
-    public int getRole() {
-        return role;
-    }
-
-    /**
      * @return Дату регистрации пользователя.
      */
     public String getRegistrationDate() {
         return registrationDate;
+    }
+
+    /**
+     * @return Флаг, показывающий, наделен ли пользователь правами администратора.
+     */
+    public int getRole() {
+        return role;
     }
 
     /**
@@ -183,13 +190,6 @@ public class User {
      */
     public String getWorkPlace() {
         return workPlace;
-    }
-
-    /**
-     * @return Флаг, показывающий, заблокирован ли пользователь.
-     */
-    public boolean getIsBlocked() {
-        return isBlocked;
     }
 
     //endregion

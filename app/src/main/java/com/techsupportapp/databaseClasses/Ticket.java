@@ -6,7 +6,7 @@ import java.util.Locale;
 
 /**
  * Класс, агрегирующий данные заявки пользователя.
- * Основной {@link #Ticket(String, String, String, String) конструктор}.
+ * Основной {@link #Ticket(String ticketId, String userId, String userName, String topic, String message) конструктор}.
  * @author Monarch
  */
 public class Ticket {
@@ -117,6 +117,12 @@ public class Ticket {
         this.adminId = adminId;
         this.adminName = adminName;
         this.ticketState = Ticket.ACCEPTED;
+    }
+
+    public void removeAdmin(){
+        this.adminId = null;
+        this.adminName = null;
+        this.ticketState = Ticket.NOT_ACCEPTED;
     }
 
     /**

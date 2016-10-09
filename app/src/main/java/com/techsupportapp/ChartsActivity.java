@@ -24,7 +24,7 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
@@ -73,11 +73,12 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(GlobalsMethods.ImageMethods.getclip(GlobalsMethods.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
-        userType.setText("Администратор");
+        userType.setText("Начальник отдела");
+        nav_menu.findItem(R.id.signUpUser).setVisible(false);
     }
 
     private void configSeekbar(){
@@ -186,7 +187,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.settings) {
 
         } else if (id == R.id.about) {
-            GlobalsMethods.showAbout(ChartsActivity.this);
+            Globals.showAbout(ChartsActivity.this);
             return true;
         } else if (id == R.id.exit) {
             android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);

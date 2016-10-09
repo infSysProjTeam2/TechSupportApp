@@ -12,7 +12,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.techsupportapp.R;
-import com.techsupportapp.utility.GlobalsMethods;
+import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +172,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     @Override
     public int getItemViewType(int position)
     {
-        if (!(mMessages.get(position).getUserId().equals(GlobalsMethods.currUserId)))
+        if (!(mMessages.get(position).getUserId().equals(Globals.currentUser.getLogin())))
             return TYPE_1;
         else
             return TYPE_2;
