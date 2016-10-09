@@ -1,24 +1,31 @@
 package com.techsupportapp;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TabHost;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,31 +43,39 @@ import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private RecyclerView viewOfAvailableTickets;
-    private RecyclerView viewOfMyClosedTickets;
-    private RecyclerView viewOfClosedTickets;
+    private static Context context;
 
-    private DatabaseReference databaseRef;
-    private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
-    private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
-    private TicketRecyclerAdapter adapter;
-    private TabHost tabHost;
+    private static RecyclerView viewOfAvailableTickets;
+    private static RecyclerView viewOfMyClosedTickets;
+    private static RecyclerView viewOfClosedTickets;
+
+    private static DatabaseReference databaseRef;
+    private static ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
+    private static ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
+    private static ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
+    private static TicketRecyclerAdapter adapter;
+    private static TicketRecyclerAdapter adapter1;
+    private static TicketRecyclerAdapter adapter2;
+
+
+    private ViewPager viewPager;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ImageView currUserImage;
 
-    private String mUserId;
-    private String mNickname;
+    private static String mUserId;
+    private static String mNickname;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
 
+        context = ListOfTicketsActivity.this;
+
         mUserId = getIntent().getExtras().getString("uuid");
         mNickname = getIntent().getExtras().getString("nickname");
 
-        initTabHost();
         initializeComponents();
         setEvents();
     }
@@ -73,6 +88,98 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         } else {
             finish();
         }
+    }
+
+    private void initializeComponents() {
+        databaseRef = FirebaseDatabase.getInstance().getReference();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("Список заявок");
+        setSupportActionBar(toolbar);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
+        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
+        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
+
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager.setOffscreenPageLimit(3);
+        viewPager.setAdapter(mSectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+
+        userName.setText(mNickname);
+        Menu nav_menu = navigationView.getMenu();
+
+        int role = Globals.currentUser.getRole();
+
+        if (role == User.ADMINISTRATOR) {
+            userType.setText("Администратор");
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_CHIEF) {
+            userType.setText("Начальник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        }
+        else if (role == User.DEPARTMENT_MEMBER){
+            userType.setText("Работник отдела");
+            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.charts).setVisible(false);
+        }
+    }
+
+    private void setEvents() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                listOfAvailableTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+                listOfSolvedTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                listOfMyClosedTickets.clear();
+
+                for (Ticket ticket : listOfSolvedTickets)
+                    if (ticket.getAdminId().equals(mUserId))
+                        listOfMyClosedTickets.add(ticket);
+
+                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets);
+                adapter.notifyDataSetChanged();
+                viewOfAvailableTickets.setAdapter(adapter);
+
+                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets);
+                adapter1.notifyDataSetChanged();
+                viewOfMyClosedTickets.setAdapter(adapter1);
+
+                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets);
+                adapter2.notifyDataSetChanged();
+                viewOfClosedTickets.setAdapter(adapter2);
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        currUserImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ListOfTicketsActivity.this, UserProfileActivity.class);
+                intent.putExtra("userId", mUserId);
+                intent.putExtra("currUserId", mUserId);
+                startActivity(intent);
+            }
+        });
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -132,165 +239,135 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         this.finishAffinity();
     }
 
-    private void initTabHost(){
-        tabHost = (TabHost) findViewById(R.id.tabHost);
-        tabHost.setup();
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        initTabSpec("tag1", R.id.tab1, "Доступные");
-        initTabSpec("tag2", R.id.tab2, "Закрытые мною");
-        initTabSpec("tag3", R.id.tab3, "Закрытые все");
-
-        tabHost.setCurrentTab(0);
-    }
-
-    private void initTabSpec(String tag, int viewId, String label) {
-        TabHost.TabSpec tabSpec = tabHost.newTabSpec(tag);
-        tabSpec.setContent(viewId);
-        tabSpec.setIndicator(label);
-        tabHost.addTab(tabSpec);
-    }
-
-    private void initializeComponents() {
-        viewOfAvailableTickets = (RecyclerView)findViewById(R.id.listOfAvailableTickets);
-        viewOfMyClosedTickets = (RecyclerView)findViewById(R.id.listOfMyClosedTickets);
-        viewOfClosedTickets = (RecyclerView)findViewById(R.id.listOfClosedTickets);
-
-        databaseRef = FirebaseDatabase.getInstance().getReference();
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Список заявок");
-        setSupportActionBar(toolbar);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        currUserImage = (ImageView)navigationView.getHeaderView(0).findViewById(R.id.userImage);
-        TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
-        TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
-
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
-
-        userName.setText(mNickname);
-        Menu nav_menu = navigationView.getMenu();
-
-        int role = Globals.currentUser.getRole();
-
-        if (role == User.ADMINISTRATOR) {
-            userType.setText("Администратор");
-            nav_menu.findItem(R.id.charts).setVisible(false);
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
-        else if (role == User.DEPARTMENT_CHIEF) {
-            userType.setText("Начальник отдела");
-            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0)
+                return FirstFragment.newInstance();
+            else if (position == 2)
+                return SecondFragment.newInstance();
+            else
+                return ThirdFragment.newInstance();
         }
-        else if (role == User.DEPARTMENT_MEMBER){
-            userType.setText("Работник отдела");
-            nav_menu.findItem(R.id.signUpUser).setVisible(false);
-            nav_menu.findItem(R.id.charts).setVisible(false);
+
+        @Override
+        public int getCount() {
+            return 3;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            switch (position) {
+                case 0:
+                    return "Доступные";
+                case 1:
+                    return "Решенные мной";
+                case 2:
+                    return "Решенные";
+            }
+            return null;
         }
     }
 
-    private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                listOfAvailableTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-                listOfSolvedTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
-                listOfMyClosedTickets.clear();
+    public static class FirstFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            viewOfAvailableTickets = (RecyclerView) v.findViewById(R.id.recycler);
 
-                for (Ticket ticket : listOfSolvedTickets)
-                    if (ticket.getAdminId().equals(mUserId))
-                        listOfMyClosedTickets.add(ticket);
+            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-                if (adapter == null) {
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfAvailableTickets);
-                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
-                    viewOfAvailableTickets.setLayoutManager(mLayoutManager);
-                    viewOfAvailableTickets.setHasFixedSize(false);
-                    viewOfAvailableTickets.setAdapter(adapter);
+            viewOfAvailableTickets.setLayoutManager(mLayoutManager);
+            viewOfAvailableTickets.setHasFixedSize(false);
+            viewOfAvailableTickets.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+
+            ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
+                @Override
+                public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+                    builder.setTitle("Принять заявку");
+                    builder.setMessage("Вы действительно хотите принять заявку?");
+
+                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
+                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
+                        }
+                    });
+
+                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.show();
                 }
-                adapter.notifyDataSetChanged();
-            }
+            });
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+            return v;
+        }
 
-        ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(ListOfTicketsActivity.this);
+        public static FirstFragment newInstance() {
+            FirstFragment f = new FirstFragment();
+            return f;
+        }
+    }
 
-                        builder.setTitle("Принять заявку");
-                        builder.setMessage("Вы действительно хотите принять заявку?");
+    public static class SecondFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            viewOfMyClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
-                        builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
-                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
-                            }
-                        });
+            adapter1 = new TicketRecyclerAdapter(context, listOfMyClosedTickets);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-                        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-                        builder.show();
-                    }
-                });
+            viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
+            viewOfMyClosedTickets.setHasFixedSize(false);
+            viewOfMyClosedTickets.setAdapter(adapter1);
+            adapter1.notifyDataSetChanged();
 
-        tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
-            @Override
-            public void onTabChanged(String tabId) {
-                LinearLayoutManager mLayoutManager;
-                switch (tabId){
-                    case "tag1":
-                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfAvailableTickets);
-                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
-                        viewOfAvailableTickets.setLayoutManager(mLayoutManager);
-                        viewOfAvailableTickets.setHasFixedSize(false);
-                        viewOfAvailableTickets.setAdapter(adapter);
-                        return;
-                    case "tag2":
-                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfMyClosedTickets);
-                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
-                        viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
-                        viewOfMyClosedTickets.setHasFixedSize(false);
-                        viewOfMyClosedTickets.setAdapter(adapter);
-                        return;
-                    case "tag3":
-                        adapter = new TicketRecyclerAdapter(getApplicationContext(), listOfSolvedTickets);
-                        mLayoutManager = new LinearLayoutManager(ListOfTicketsActivity.this, LinearLayoutManager.VERTICAL, false);
-                        viewOfClosedTickets.setLayoutManager(mLayoutManager);
-                        viewOfClosedTickets.setHasFixedSize(false);
-                        viewOfClosedTickets.setAdapter(adapter);
-                        return;
-                    default:
-                        Toast.makeText(getApplicationContext(), "При смене ТАБа что-то произошло. Сообщите разработчику", Toast.LENGTH_LONG).show();
-                        return;
-                }
-            }
-        });
+            return v;
+        }
 
-        currUserImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ListOfTicketsActivity.this, UserProfileActivity.class);
-                intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", mUserId);
-                startActivity(intent);
-            }
-        });
+        public static SecondFragment newInstance() {
+            SecondFragment f = new SecondFragment();
+            return f;
+        }
+    }
+
+    public static class ThirdFragment extends Fragment {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            viewOfClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
+
+            adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+
+            viewOfClosedTickets.setLayoutManager(mLayoutManager);
+            viewOfClosedTickets.setHasFixedSize(false);
+            viewOfClosedTickets.setAdapter(adapter2);
+            adapter2.notifyDataSetChanged();
+
+            return v;
+        }
+
+        public static ThirdFragment newInstance() {
+            ThirdFragment f = new ThirdFragment();
+            return f;
+        }
     }
 }
