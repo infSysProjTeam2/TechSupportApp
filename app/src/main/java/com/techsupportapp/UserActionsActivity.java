@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -20,13 +21,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
@@ -62,6 +64,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static ArrayList<User> usersList = new ArrayList<User>();
     private static UnverifiedUserRecyclerAdapter adapter;
     private static UserRecyclerAdapter adapter1;
+
+    private static BottomSheetBehavior bottomSheetBehavior;
+    private static View bottomSheetBehaviorView;
 
     private MenuItem searchMenu;
     private static SearchView searchView;
@@ -114,6 +119,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
+
+        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -176,9 +185,11 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(UserActionsActivity.this, UserProfileActivity.class);
+                Intent intent;
+                intent = new Intent(UserActionsActivity.this, EditUserProfileActivity.class);
                 intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", mUserId);
+                intent.putExtra("currUserId", Globals.currentUser.getLogin());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -194,6 +205,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onPageSelected(int position) {
                 if (search)
                     MenuItemCompat.collapseActionView(searchMenu);
+
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
 
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
@@ -216,11 +229,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        else if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        else
             finish();
-        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -503,13 +517,54 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             usersView.setAdapter(adapter1);
             adapter1.notifyDataSetChanged();
 
+
+
             ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                 @Override
-                public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                    Intent intent = new Intent(context, UserProfileActivity.class);
-                    intent.putExtra("userId", usersList.get(position).getLogin());
-                    intent.putExtra("currUserId", mUserId);
-                    startActivity(intent);
+                public void onItemClicked(RecyclerView recyclerView,final int position, View v) {
+                    TextView userName = (TextView) bottomSheetBehaviorView.findViewById(R.id.userName);
+                    final TextView userIdT = (TextView) bottomSheetBehaviorView.findViewById(R.id.userId);
+                    TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
+                    TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
+                    TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
+                    ImageView userImage = (ImageView) bottomSheetBehaviorView.findViewById(R.id.userImage);
+
+                    ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
+
+                    userName.setText(usersList.get(position).getUserName());
+                    userIdT.setText(usersList.get(position).getLogin());
+                    regDate.setText(usersList.get(position).getRegistrationDate());
+                    workPlace.setText(usersList.get(position).getWorkPlace());
+                    if (usersList.get(position).getRole() == User.ADMINISTRATOR)
+                        accessLevel.setText("Администратор");
+                    else if (usersList.get(position).getRole() == User.SIMPLE_USER)
+                        accessLevel.setText("Пользователь");
+                    LetterBitmap letterBitmap = new LetterBitmap(context);
+
+                    int color = letterBitmap.getBackgroundColor(userName.getText().toString());
+                    userImage.setBackgroundColor(color);
+                    bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);
+
+                    bottomSheetBehaviorView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                        }
+                    });
+
+                    editUser.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent;
+                            intent = new Intent(context, EditUserProfileActivity.class);
+                            intent.putExtra("userId", usersList.get(position).getLogin());
+                            intent.putExtra("currUserId", Globals.currentUser.getLogin());
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(intent);
+                        }
+                    });
+
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                 }
             });
 

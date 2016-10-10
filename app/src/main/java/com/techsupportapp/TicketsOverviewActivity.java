@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -44,9 +45,13 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private DatabaseReference databaseRef;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
+    private ArrayList<User> usersList = new ArrayList<User>();
+
     private TicketRecyclerAdapter adapter;
 
     private ImageView currUserImage;
+
+    private View bottomSheetBehaviorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +69,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private void initializeComponents(){
         ticketsOverview = (RecyclerView)findViewById(R.id.ticketsOverview);
+
+        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
@@ -115,16 +122,18 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+
                 if (role != User.SIMPLE_USER) {
                     ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
@@ -246,9 +255,11 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(TicketsOverviewActivity.this, UserProfileActivity.class);
+                Intent intent;
+                intent = new Intent(TicketsOverviewActivity.this, EditUserProfileActivity.class);
                 intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", mUserId);
+                intent.putExtra("currUserId", Globals.currentUser.getLogin());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
@@ -257,11 +268,14 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
+
+        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        else if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        else
             super.onBackPressed();
-        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")

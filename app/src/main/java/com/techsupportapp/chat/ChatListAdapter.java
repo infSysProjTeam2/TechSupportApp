@@ -2,14 +2,12 @@ package com.techsupportapp.chat;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.firebase.client.Query;
 import com.techsupportapp.R;
-import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.utility.Globals;
 
 public class ChatListAdapter extends FirebaseListAdapter<Chat> {
@@ -38,11 +36,11 @@ public class ChatListAdapter extends FirebaseListAdapter<Chat> {
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, UserProfileActivity.class);
+                /*Intent intent = new Intent(context, UserProfileActivity.class);
                 intent.putExtra("userId", chat.getUserId());
                 intent.putExtra("currUserId", Globals.currentUser.getLogin());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+                context.startActivity(intent);*/ //TODO что-то сделать
             }
         });
         userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(author,context)));
