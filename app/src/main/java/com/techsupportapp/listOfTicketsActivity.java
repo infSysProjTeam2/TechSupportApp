@@ -164,15 +164,15 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     if (ticket.getAdminId().equals(mUserId))
                         listOfMyClosedTickets.add(ticket);
 
-                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets);
+                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, bottomSheetBehaviorView);
                 viewOfAvailableTickets.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
 
-                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets);
+                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets, usersList, bottomSheetBehaviorView);
                 viewOfMyClosedTickets.setAdapter(adapter1);
                 adapter1.notifyDataSetChanged();
 
-                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets);
+                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets, usersList, bottomSheetBehaviorView);
                 viewOfSolvedTickets.setAdapter(adapter2);
                 adapter2.notifyDataSetChanged();
 
