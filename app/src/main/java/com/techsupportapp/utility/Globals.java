@@ -24,6 +24,21 @@ public class Globals {
     public static User currentUser;
 
     /**
+     * Метод, скрывающий клавиатуру.
+     * @param activity
+     */
+    public static void hideKeyboard(Activity activity) {
+        if (activity == null || activity.getCurrentFocus() == null) {
+            return;
+        }
+
+        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        if (inputMethodManager != null) {
+            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+    /**
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.
      */
@@ -43,18 +58,12 @@ public class Globals {
     }
 
     /**
-     * Метод, скрывающий клавиатуру.
-     * @param activity
+     * Метод, инициализирующий и отображающий долговременное, всплываюее сообщение.
+     * @param context Контекст приложения.
+     * @param message Сообщение.
      */
-    public static void hideKeyboard(Activity activity) {
-        if (activity == null || activity.getCurrentFocus() == null) {
-            return;
-        }
-
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if (inputMethodManager != null) {
-            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-        }
+    public static void showLongTimeToast(Context context, String message){
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     public static boolean isEnglishWord(String word){
@@ -105,15 +114,6 @@ public class Globals {
         }
     }
 
-    /**
-     * Метод, инициализирующий и отображающий долговременное, всплываюее сообщение.
-     * @param context Контекст приложения.
-     * @param message Сообщение.
-     */
-    public static void showLongTimeToast(Context context, String message){
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
-    }
-
     public static class Downloads {
 
         /**
@@ -132,7 +132,6 @@ public class Globals {
 
         /**
          * Метод, скачивающий из базы данных подтвержденных пользователей с определенными правами.
-         *
          * @param dataSnapshot Снимок базы данных.
          * @param databaseTablePath Путь в базе данных к необходимой категории подтвержденных пользователей.
          * @return Всех подтвержденных пользователей с определенными правами.
@@ -140,13 +139,6 @@ public class Globals {
         public static ArrayList<User> getSpecificVerifiedUserList(DataSnapshot dataSnapshot, String databaseTablePath) {
             ArrayList<User> resultList = new ArrayList<User>();
             for (DataSnapshot userRecord : dataSnapshot.child(databaseTablePath).getChildren())
-                resultList.add(userRecord.getValue(User.class));
-            return resultList;
-        }
-
-        public static ArrayList<User> getUnverifiedUserList(DataSnapshot dataSnapshot) {
-            ArrayList<User> resultList = new ArrayList<User>();
-            for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
                 resultList.add(userRecord.getValue(User.class));
             return resultList;
         }
@@ -176,12 +168,23 @@ public class Globals {
             return resultList;
         }
 
+        /**
+         * Метод, скачивающий из базы данных логины всех пользователей.
+         * @param dataSnapshot Снимок базы данных.
+         * @return Логины всех пользователей.
+         */
         public static ArrayList<String> getAllLogins(DataSnapshot dataSnapshot) {
             ArrayList<String> resultList = getUnverifiedLogins(dataSnapshot);
             resultList.addAll(getVerifiedLogins(dataSnapshot));
             return resultList;
         }
 
+        /**
+         * Метод, скачивающий из базы данных все заявки, ответственным за которые является определенный работник.
+         * @param dataSnapshot Снимок базы данных.
+         * @param overseerLogin Логин ответственного, заявки которого нужно получить.
+         * @return Заявки определенного ответственного.
+         */
         public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin){
             ArrayList<Ticket> resultList = new ArrayList<Ticket>();
             for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
@@ -192,6 +195,13 @@ public class Globals {
             return resultList;
         }
 
+        /**
+         * Метод, скачивающий из базы данных заявки определнного пользователя, находящиеся в определенном состоянии.
+         * @param dataSnapshot Снимок базы данных.
+         * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
+         * @param userLogin Логин пользователя.
+         * @return Заявки определенного пользователя, находящиеся в определенном состоянии.
+         */
         public static ArrayList<Ticket> getUserSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath, String userLogin){
             ArrayList<Ticket> resultList = new ArrayList<Ticket>();
             for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren()) {
@@ -202,6 +212,12 @@ public class Globals {
             return resultList;
         }
 
+        /**
+         *  Метод, скачивающий из базы данных все заявки, находящиеся в определенном состоянии.
+         * @param dataSnapshot Снимок базы данных.
+         * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
+         * @return Заявки, находящиеся в определенном состоянии.
+         */
         public static ArrayList<Ticket> getSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath){
             ArrayList<Ticket> resultList = new ArrayList<Ticket>();
             for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren())
