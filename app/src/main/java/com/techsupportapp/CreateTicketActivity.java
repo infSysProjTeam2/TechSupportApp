@@ -179,9 +179,11 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(CreateTicketActivity.this, UserProfileActivity.class);
+                Intent intent;
+                intent = new Intent(CreateTicketActivity.this, EditUserProfileActivity.class);
                 intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", mUserId);
+                intent.putExtra("currUserId", Globals.currentUser.getLogin());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });

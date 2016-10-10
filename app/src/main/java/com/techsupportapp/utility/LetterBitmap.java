@@ -88,6 +88,10 @@ public class LetterBitmap {
         return bitmap;
     }
 
+    public int getBackgroundColor(String key){
+        return pickColor(key);
+    }
+
     /**
      * @param key The key used to generate the tile color
      * @return A new or previously chosen color for <code>key</code> used as the

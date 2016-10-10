@@ -2,25 +2,36 @@ package com.techsupportapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.techsupportapp.EditUserProfileActivity;
 import com.techsupportapp.R;
-import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.Globals;
+import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAdapter.ViewHolder>{
 
     private Context context;
+    private static String userId;
+    private static String adminId;
     private final ArrayList<Ticket> values;
+    private final ArrayList<User> users;
+    private View bottomSheetBehaviorView;
+    private BottomSheetBehavior bottomSheetBehavior;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView authorText;
@@ -39,9 +50,11 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         }
     }
 
-    public TicketRecyclerAdapter(Context context, ArrayList<Ticket> values) {
+    public TicketRecyclerAdapter(Context context, ArrayList<Ticket> values, ArrayList<User> users, View bottomSheetBehaviorView) {
         this.context = context;
         this.values = values;
+        this.users = users;
+        this.bottomSheetBehaviorView = bottomSheetBehaviorView;
     }
 
     @Override
@@ -53,8 +66,6 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String titleText;
-        final String userId;
-        final String adminId;
 
         userId = values.get(position).getUserId();
         adminId = values.get(position).getAdminId();
@@ -83,24 +94,92 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         holder.descText.setText(values.get(position).getMessage());
         holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
+
+        if (!titleText.equals("Не установлено"))
+            setData();
+
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        bottomSheetBehaviorView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean fl = true;
-                Intent intent = new Intent(context, UserProfileActivity.class);
-                if (Globals.currentUser.getRole() == User.ADMINISTRATOR) {
-                    intent.putExtra("userId", userId);
-                }
-                else
-                if (titleText.equals("Не установлено"))
-                    fl = false;
-                else
-                    intent.putExtra("userId", adminId);
+                if (!titleText.equals("Не установлено"))
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            }
+        });
+    }
 
+    private void setData() {
+        String find;
+        find = userId;
+
+        if (Globals.currentUser.getLogin().equals(userId))
+            find = adminId;
+
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER && !Globals.currentUser.getLogin().equals(find)) {
+            ImageButton cv = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
+            cv.setVisibility(View.GONE);
+        }
+
+        ArrayList<String> idList = new ArrayList<String>();
+        Collections.sort(users, new Comparator<User>() {
+            @Override
+            public int compare(User lhs, User rhs) {
+                return lhs.getLogin().compareTo(rhs.getLogin());
+            }
+        });
+
+        for (int i = 0; i < users.size(); i++)
+            idList.add(users.get(i).getLogin());
+        int index = Collections.binarySearch(idList, find, new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+
+        TextView userName = (TextView) bottomSheetBehaviorView.findViewById(R.id.userName);
+        final TextView userIdT = (TextView) bottomSheetBehaviorView.findViewById(R.id.userId);
+        TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
+        TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
+        TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
+        ImageView userImage = (ImageView) bottomSheetBehaviorView.findViewById(R.id.userImage);
+
+        ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
+
+        userName.setText(users.get(index).getUserName());
+        userIdT.setText(users.get(index).getLogin());
+        regDate.setText(users.get(index).getRegistrationDate());
+        workPlace.setText(users.get(index).getWorkPlace());
+        if (users.get(index).getRole() == User.ADMINISTRATOR)
+            accessLevel.setText("Администратор");
+        else if (users.get(index).getRole() == User.SIMPLE_USER)
+            accessLevel.setText("Пользователь");
+        LetterBitmap letterBitmap = new LetterBitmap(context);
+
+        int color = letterBitmap.getBackgroundColor(userName.getText().toString());
+        userImage.setBackgroundColor(color);
+        bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);
+
+        Log.e("MyLOG", Globals.currentUser.getLogin() + " " + find);
+
+        editUser.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent;
+                intent = new Intent(context, EditUserProfileActivity.class);
+                intent.putExtra("userId", userId);
                 intent.putExtra("currUserId", Globals.currentUser.getLogin());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                if (fl)
-                    context.startActivity(intent);
+                context.startActivity(intent);
             }
         });
     }
