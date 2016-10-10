@@ -20,7 +20,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -155,7 +154,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList = Globals.Downloads.getUnverifiedUserList(dataSnapshot);
+                    unverifiedUsersList = Globals.Downloads.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE);
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();

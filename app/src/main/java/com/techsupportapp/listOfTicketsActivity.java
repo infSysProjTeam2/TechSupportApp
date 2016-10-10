@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,7 +46,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private static RecyclerView viewOfAvailableTickets;
     private static RecyclerView viewOfMyClosedTickets;
-    private static RecyclerView viewOfClosedTickets;
+    private static RecyclerView viewOfSolvedTickets;
 
     private static DatabaseReference databaseRef;
     private static ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
@@ -153,16 +152,16 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                         listOfMyClosedTickets.add(ticket);
 
                 adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets);
-                adapter.notifyDataSetChanged();
                 viewOfAvailableTickets.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
 
                 adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets);
-                adapter1.notifyDataSetChanged();
                 viewOfMyClosedTickets.setAdapter(adapter1);
+                adapter1.notifyDataSetChanged();
 
-                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets);
+                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets);
+                viewOfSolvedTickets.setAdapter(adapter2);
                 adapter2.notifyDataSetChanged();
-                viewOfClosedTickets.setAdapter(adapter2);
 
             }
             @Override
@@ -249,7 +248,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         public Fragment getItem(int position) {
             if (position == 0)
                 return FirstFragment.newInstance();
-            else if (position == 2)
+            else if (position == 1)
                 return SecondFragment.newInstance();
             else
                 return ThirdFragment.newInstance();
@@ -352,14 +351,14 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
-            viewOfClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
+            viewOfSolvedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
             adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
-            viewOfClosedTickets.setLayoutManager(mLayoutManager);
-            viewOfClosedTickets.setHasFixedSize(false);
-            viewOfClosedTickets.setAdapter(adapter2);
+            viewOfSolvedTickets.setLayoutManager(mLayoutManager);
+            viewOfSolvedTickets.setHasFixedSize(false);
+            viewOfSolvedTickets.setAdapter(adapter2);
             adapter2.notifyDataSetChanged();
 
             return v;

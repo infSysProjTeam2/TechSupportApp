@@ -59,23 +59,16 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         userId = values.get(position).getUserId();
         adminId = values.get(position).getAdminId();
 
-        if (values.get(position).getAdminId() == null || values.get(position).getAdminId().equals("")) {
-            if (Globals.currentUser.getRole() == User.ADMINISTRATOR)
-                holder.authorText.setText(values.get(position).getUserName());
-            else
-                holder.authorText.setText("Не установлено");
-
-            titleText = holder.authorText.getText().toString();
+        if (Globals.currentUser.getRole() != User.SIMPLE_USER){
+            holder.authorText.setText(values.get(position).getUserName());
+            titleText = values.get(position).getUserName();
         }
-        else {
-            if (Globals.currentUser.getRole() == User.ADMINISTRATOR) {
-                holder.authorText.setText(values.get(position).getUserName() + " ✔");
-                titleText = values.get(position).getUserName();
-            }
-            else {
-                holder.authorText.setText(values.get(position).getAdminName() + " ✔");
-                titleText = values.get(position).getAdminName();
-            }
+        else if (adminId == null || adminId.equals("")) {
+            holder.authorText.setText("Не установлено");
+            titleText = holder.authorText.getText().toString();
+        } else {
+            holder.authorText.setText(values.get(position).getAdminName());
+            titleText = values.get(position).getAdminName();
         }
 
         holder.dateText.setText(values.get(position).getCreateDate());
