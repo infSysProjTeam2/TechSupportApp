@@ -2,6 +2,7 @@ package com.techsupportapp.adapters;
 
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,19 +20,20 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
 
     private Context context;
     private String userId;
-    private final ArrayList<User> values;
+    private ArrayList<User> values;
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView userImage;
-        public TextView userNameText;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private ImageView userImage;
+        private TextView userNameText;
+        private TextView userPermission;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             super(view);
             userImage = (ImageView) view.findViewById(R.id.userImage);
             userNameText = (TextView) view.findViewById(R.id.userName);
+            userPermission = (TextView) view.findViewById(R.id.userPermissions);
         }
     }
-
 
     public UserRecyclerAdapter(Context context, ArrayList<User> values) {
         this.context = context;
@@ -49,12 +51,32 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         userId = values.get(position).getLogin();
 
-        holder.userNameText.setText(values.get(position).getUserName());
-        holder.userImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context));
+        try {
+            holder.userNameText.setText(values.get(position).getUserName());
+            holder.userPermission.setText(getStringRole(values.get(position)));
+            holder.userImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context));
+        }
+        catch (Exception e) {
+            Globals.showLongTimeToast(context, e.getMessage() + "Обратитесь к разработчику");
+        }
     }
 
     @Override
     public int getItemCount() {
         return values.size();
+    }
+
+    @NonNull
+    private String getStringRole(User user) throws Exception {
+        int role = user.getRole();
+        if (role == User.SIMPLE_USER)
+            return "Пользователь";
+        else if (role == User.DEPARTMENT_MEMBER)
+            return "Работник отдела";
+        else if (role == User.ADMINISTRATOR)
+            return "Администратор";
+        else if (role == User.DEPARTMENT_CHIEF)
+            return "Начальник отдела";
+        else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя.");
     }
 }
