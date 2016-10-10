@@ -2,7 +2,6 @@ package com.techsupportapp.adapters;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.techsupportapp.R;
-import com.techsupportapp.UserProfileActivity;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.Globals;
 
@@ -20,8 +18,8 @@ import java.util.ArrayList;
 public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapter.ViewHolder> {
 
     private Context context;
+    private String userId;
     private final ArrayList<User> values;
-
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView userImage;
@@ -49,19 +47,10 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        userId = values.get(position).getLogin();
+
         holder.userNameText.setText(values.get(position).getUserName());
         holder.userImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context));
-
-        holder.userImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, UserProfileActivity.class);
-                intent.putExtra("userId", values.get(position).getLogin());
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            }
-        });
     }
 
     @Override
