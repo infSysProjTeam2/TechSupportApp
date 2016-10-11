@@ -535,12 +535,19 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     userIdT.setText(usersList.get(position).getLogin());
                     regDate.setText(usersList.get(position).getRegistrationDate());
                     workPlace.setText(usersList.get(position).getWorkPlace());
-                    if (usersList.get(position).getRole() == User.ADMINISTRATOR)
-                        accessLevel.setText("Администратор");
-                    else if (usersList.get(position).getRole() == User.SIMPLE_USER)
-                        accessLevel.setText("Пользователь");
-                    LetterBitmap letterBitmap = new LetterBitmap(context);
 
+                    int role = usersList.get(position).getRole();
+
+                    if (role == User.SIMPLE_USER)
+                        accessLevel.setText("Пользователь");
+                    else if (role == User.DEPARTMENT_MEMBER)
+                        accessLevel.setText("Работник отдела");
+                    else if (role == User.ADMINISTRATOR)
+                        accessLevel.setText("Администратор");
+                    else if (role == User.DEPARTMENT_CHIEF)
+                        accessLevel.setText("Начальник отдела");
+
+                    LetterBitmap letterBitmap = new LetterBitmap(context);
                     int color = letterBitmap.getBackgroundColor(userName.getText().toString());
                     userImage.setBackgroundColor(color);
                     bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);

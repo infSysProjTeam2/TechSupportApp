@@ -104,21 +104,21 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         pieChart.setRotationEnabled(true);
         pieChart.setHighlightPerTapEnabled(true);
 
-        pieChart.animateXY(1000, 1000, Easing.EasingOption.EaseOutCirc, Easing.EasingOption.EaseOutCirc);
+        //pieChart.animateXY(1000, 1000, Easing.EasingOption.EaseOutCirc, Easing.EasingOption.EaseOutCirc);
 
         pieChart.setDescription("");
 
         pieChart.setDrawEntryLabels(false);
 
-        Legend l = pieChart.getLegend();
-        l.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
-        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        l.setOrientation(Legend.LegendOrientation.VERTICAL);
-        l.setTextSize(15f);
-        l.setDrawInside(false);
-        l.setXEntrySpace(7f);
-        l.setYEntrySpace(0f);
-        l.setYOffset(0f);
+        Legend legend = pieChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.VERTICAL);
+        legend.setTextSize(15f);
+        legend.setDrawInside(false);
+        legend.setXEntrySpace(7f);
+        legend.setYEntrySpace(0f);
+        legend.setYOffset(0f);
 
         //Сюда посылаются значения
         ArrayList<PieEntry> entries = new ArrayList<PieEntry>();

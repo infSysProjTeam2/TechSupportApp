@@ -23,6 +23,6 @@
 
     <include layout="@layout/content_tickets_overview" />
 
-    <include layout="@layout/content_bottom_sheet" />
+    <include layout="@layout/fragment_bottom_sheet" />
 
 </android.support.design.widget.CoordinatorLayout>
