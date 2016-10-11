@@ -206,7 +206,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 if (search)
                     MenuItemCompat.collapseActionView(searchMenu);
 
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
@@ -342,6 +343,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
                         search = true;
+
+                        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         return true;
                     }
                     @Override
@@ -402,7 +406,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
 
             unverifiedUsersView = (RecyclerView) v.findViewById(R.id.recycler);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
@@ -504,7 +508,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
 
             usersView = (RecyclerView) v.findViewById(R.id.recycler);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
@@ -535,12 +539,19 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     userIdT.setText(usersList.get(position).getLogin());
                     regDate.setText(usersList.get(position).getRegistrationDate());
                     workPlace.setText(usersList.get(position).getWorkPlace());
-                    if (usersList.get(position).getRole() == User.ADMINISTRATOR)
-                        accessLevel.setText("Администратор");
-                    else if (usersList.get(position).getRole() == User.SIMPLE_USER)
-                        accessLevel.setText("Пользователь");
-                    LetterBitmap letterBitmap = new LetterBitmap(context);
 
+                    int role = usersList.get(position).getRole();
+
+                    if (role == User.SIMPLE_USER)
+                        accessLevel.setText("Пользователь");
+                    else if (role == User.DEPARTMENT_MEMBER)
+                        accessLevel.setText("Работник отдела");
+                    else if (role == User.ADMINISTRATOR)
+                        accessLevel.setText("Администратор");
+                    else if (role == User.DEPARTMENT_CHIEF)
+                        accessLevel.setText("Начальник отдела");
+
+                    LetterBitmap letterBitmap = new LetterBitmap(context);
                     int color = letterBitmap.getBackgroundColor(userName.getText().toString());
                     userImage.setBackgroundColor(color);
                     bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);

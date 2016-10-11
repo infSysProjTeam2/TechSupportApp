@@ -291,7 +291,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     public static class FirstFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfAvailableTickets = (RecyclerView) v.findViewById(R.id.recycler);
 
             adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, bottomSheetBehaviorView);
@@ -342,7 +342,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     public static class SecondFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfMyClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
             adapter1 = new TicketRecyclerAdapter(context, listOfMyClosedTickets, usersList, bottomSheetBehaviorView);
@@ -365,7 +365,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     public static class ThirdFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_tickets_list, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfSolvedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
             adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets, usersList, bottomSheetBehaviorView);

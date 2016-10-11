@@ -19,8 +19,8 @@ import java.util.List;
 
 public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
-    private static final int TYPE_1 = 0;
-    private static final int TYPE_2 = 1;
+    private static final int TYPE_LEFT = 0;
+    private static final int TYPE_RIGHT = 1;
 
     private Query mRef;
     private Class<T> mModelClass;
@@ -155,10 +155,10 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
         View v = view;
 
         switch (type) {
-            case TYPE_1:
+            case TYPE_LEFT:
                 v = mInflater.inflate(R.layout.item_message_left, null);
                 break;
-            case TYPE_2:
+            case TYPE_RIGHT:
                 v = mInflater.inflate(R.layout.item_message_right, null);
                 break;
             default:
@@ -173,9 +173,9 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     public int getItemViewType(int position)
     {
         if (!(mMessages.get(position).getUserId().equals(Globals.currentUser.getLogin())))
-            return TYPE_1;
+            return TYPE_LEFT;
         else
-            return TYPE_2;
+            return TYPE_RIGHT;
     }
 
     @Override
