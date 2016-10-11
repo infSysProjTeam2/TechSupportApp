@@ -206,7 +206,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 if (search)
                     MenuItemCompat.collapseActionView(searchMenu);
 
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
@@ -342,6 +343,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
                         search = true;
+
+                        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         return true;
                     }
                     @Override
@@ -402,7 +406,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
 
             unverifiedUsersView = (RecyclerView) v.findViewById(R.id.recycler);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
@@ -504,7 +508,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_user_actions, container, false);
+            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
 
             usersView = (RecyclerView) v.findViewById(R.id.recycler);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
