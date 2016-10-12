@@ -68,7 +68,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static BottomSheetBehavior bottomSheetBehavior;
     private static View bottomSheetBehaviorView;
 
-    private MenuItem searchMenu;
+    private static MenuItem searchMenu;
     private static SearchView searchView;
     private static boolean search;
 
@@ -205,6 +205,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onPageSelected(int position) {
                 if (search)
                     MenuItemCompat.collapseActionView(searchMenu);
+                search = false;
 
                 if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -444,9 +445,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             catch (Exception e) {
                                 e.printStackTrace();
                             }
+
+                            if (search)
+                                MenuItemCompat.collapseActionView(searchMenu);
+
+                            search = false;
+
                             databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                             Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
-                            searchView.setQuery(searchView.getQuery().toString() + "", false);
                         }
                     });
 
@@ -475,10 +481,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+                            if (search)
+                                MenuItemCompat.collapseActionView(searchMenu);
                             search = false;
+
                             databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                             Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
-                            searchView.setQuery(searchView.getQuery().toString() + "", false);
                         }
                     });
 
