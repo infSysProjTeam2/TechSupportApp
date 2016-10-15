@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -152,17 +151,22 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         userIdT.setText(users.get(index).getLogin());
         regDate.setText(users.get(index).getRegistrationDate());
         workPlace.setText(users.get(index).getWorkPlace());
-        if (users.get(index).getRole() == User.ADMINISTRATOR)
-            accessLevel.setText("Администратор");
-        else if (users.get(index).getRole() == User.SIMPLE_USER)
-            accessLevel.setText("Пользователь");
-        LetterBitmap letterBitmap = new LetterBitmap(context);
 
+        int role = users.get(index).getRole();
+
+        if (role == User.SIMPLE_USER)
+            accessLevel.setText("Пользователь");
+        else if (role == User.DEPARTMENT_MEMBER)
+            accessLevel.setText("Работник отдела");
+        else if (role == User.ADMINISTRATOR)
+            accessLevel.setText("Администратор");
+        else if (role == User.DEPARTMENT_CHIEF)
+            accessLevel.setText("Начальник отдела");
+
+        LetterBitmap letterBitmap = new LetterBitmap(context);
         int color = letterBitmap.getBackgroundColor(userName.getText().toString());
         userImage.setBackgroundColor(color);
         bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);
-
-        Log.e("MyLOG", Globals.currentUser.getLogin() + " " + find);
 
         editUser.setOnClickListener(new View.OnClickListener() {
             @Override
