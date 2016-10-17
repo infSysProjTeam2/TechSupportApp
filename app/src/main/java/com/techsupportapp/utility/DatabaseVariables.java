@@ -22,6 +22,8 @@ public class DatabaseVariables {
     public static class Indexes {
         public static final String DATABASE_TICKET_INDEX_COUNTER = "static_variables_table/ticket_index_counter";
         public static final String DATABASE_USER_INDEX_COUNTER = "static_variables_table/user_index_counter";
+        public static final String DATABASE_FIRST_DATE_INDEX = "static_variables_table/first_date_index";
+        public static final String DATABASE_LAST_DATE_INDEX = "static_variables_table/last_date_index";
     }
 
 }

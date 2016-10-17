@@ -27,6 +27,10 @@ import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class CreateTicketActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     //region Fields
@@ -36,6 +40,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private int ticketCount;
     private String mUserId;
     private String mNickname;
+    private String rightDate;
 
     //endregion
 
@@ -154,11 +159,23 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                 if (topicET.getText().toString().equals("") || messageET.getText().toString().equals("")) {
                     Toast.makeText(getApplicationContext(), "Заполните поля", Toast.LENGTH_LONG).show();
                 } else {
-                    Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
-                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
-                    databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
-                    Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
-                    finish();
+                    String newRightDate = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).format(Calendar.getInstance().getTime());
+                    try {
+                        if (rightDate == null) {
+                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).setValue(newRightDate);
+                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                        }
+                        else if (!newRightDate.equals(rightDate))
+                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                        Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
+                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
+                        databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
+                        Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
+                        finish();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -168,6 +185,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ticketCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
+                rightDate = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class);
             }
 
             @Override
@@ -192,4 +210,5 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private void exit(){
         this.finishAffinity();
     }
+
 }

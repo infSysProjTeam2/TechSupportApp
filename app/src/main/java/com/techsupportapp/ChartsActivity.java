@@ -1,5 +1,6 @@
 package com.techsupportapp;
 
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -13,8 +14,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.PieChart;
@@ -23,9 +24,20 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -34,9 +46,12 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
     private ImageView currUserImage;
 
-    private SeekBar seekBar1;
-    private SeekBar seekBar2;
-    private TextView label;
+    private TextView firstDateTV;
+    private TextView lastDateTV;
+
+    private DatabaseReference databaseReference;
+
+    private ArrayList<Ticket> allTickets = new ArrayList<Ticket>();
 
     private PieChart pieChart;
 
@@ -53,8 +68,11 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     }
 
     private void initializeComponents(){
-        configSeekbar();
         initChart();
+
+        firstDateTV = (TextView)findViewById(R.id.firstDateLabel);
+        lastDateTV = (TextView)findViewById(R.id.lastDateLabel);
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Статистика");
@@ -78,12 +96,6 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         userName.setText(mNickname);
         userType.setText("Начальник отдела");
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
-    }
-
-    private void configSeekbar(){
-        seekBar1 = (SeekBar)findViewById(R.id.seekBar1);
-        seekBar2 = (SeekBar)findViewById(R.id.seekBar2);
-        label = (TextView)findViewById(R.id.label);
     }
 
     private void initChart(){
@@ -118,24 +130,6 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         legend.setXEntrySpace(7f);
         legend.setYEntrySpace(0f);
         legend.setYOffset(0f);
-
-        //Сюда посылаются значения
-        ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
-        entries.add(new PieEntry(10, "Создано"));
-        entries.add(new PieEntry(5, "Принято"));
-        entries.add(new PieEntry(3, "Решено"));
-
-        PieDataSet dataSet = new PieDataSet(entries, "Заявки");
-
-        dataSet.setColors(getColors());
-
-        PieData data = new PieData(dataSet);
-
-        data.setValueTextColor(Color.WHITE);
-        data.setValueTextSize(16f);
-
-        pieChart.setData(data);
-        pieChart.invalidate();
     }
 
     private ArrayList<Integer> getColors(){
@@ -154,6 +148,103 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         return colors;
     }
 
+    private boolean compareDates(TextView dateSource, Calendar newDate) {
+        try {
+            if (dateSource.getId() == R.id.firstDateLabel){
+                Calendar anotherDate = Calendar.getInstance();
+                anotherDate.setTime(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(lastDateTV.getText().toString()));
+                return newDate.before(anotherDate);
+            } else {
+                Calendar anotherDate = Calendar.getInstance();
+                anotherDate.setTime(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(firstDateTV.getText().toString()));
+                return newDate.after(anotherDate);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void setChartValues(TextView dateSource){
+        Date firstDate;
+        Date lastDate;
+        long allTicketsCount = 0;
+        long markedTicketsCount = 0;
+        long solvedTicketsCount = 0;
+        if (dateSource.getId() == R.id.firstDateLabel){
+            firstDate = stringToDate(dateSource.getText().toString());
+            lastDate = stringToDate(lastDateTV.getText().toString());
+        } else {
+            firstDate = stringToDate(firstDateTV.getText().toString());
+            lastDate = stringToDate(dateSource.getText().toString());
+        }
+        firstDate.setTime(firstDate.getTime() - 86400000);
+        lastDate.setTime(lastDate.getTime() + 86400000);
+        for (int i = 0; i < allTickets.size(); i++) {
+            Date ticketDate = stringToDate(allTickets.get(i).getCreateDate());
+            if (ticketDate.before(lastDate) && ticketDate.after(firstDate)) {
+                if (allTickets.get(i).getTicketState() == Ticket.SOLVED)
+                    solvedTicketsCount++;
+                else if (allTickets.get(i).getAdminId() != "" && allTickets.get(i).getAdminId() != null)
+                    markedTicketsCount++;
+                allTicketsCount++;
+            }
+        }
+        initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
+    }
+
+    private String dateToString(Date date) {
+        return new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).format(date);
+    }
+
+    private Date stringToDate(String dateStr) {
+        try {
+            return new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(dateStr);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void initChartData(long allTicketsCount, long markedTicketsCount, long solvedTicketsCount){
+        ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
+        entries.add(new PieEntry(allTicketsCount, "Создано"));
+        entries.add(new PieEntry(markedTicketsCount, "Принято"));
+        entries.add(new PieEntry(solvedTicketsCount, "Решено"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "Заявки");
+
+        dataSet.setColors(getColors());
+
+        PieData data = new PieData(dataSet);
+
+        data.setValueTextColor(Color.WHITE);
+        data.setValueTextSize(16f);
+
+        pieChart.setData(data);
+        pieChart.invalidate();
+    }
+
+    private void showDatePicker(final TextView dateSource){
+        final Calendar date = Calendar.getInstance();
+        date.setTime(stringToDate(dateSource.getText().toString()));
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ChartsActivity.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                date.set(year, monthOfYear, dayOfMonth);
+                if (compareDates(dateSource, date)) {
+                    dateSource.setText(dateToString(date.getTime()));
+                    setChartValues(dateSource);
+                }
+                else Globals.showLongTimeToast(getApplicationContext(), "Начальная дата должна предшествовать конечной");
+            }
+        }, date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
+        datePickerDialog.setCancelable(false);
+        datePickerDialog.show();
+    }
+
     private void setEvents(){
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,6 +255,44 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 intent.putExtra("currUserId", Globals.currentUser.getLogin());
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
+            }
+        });
+
+        firstDateTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePicker(firstDateTV);
+            }
+        });
+
+        lastDateTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDatePicker(lastDateTV);
+            }
+        });
+
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                firstDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
+                lastDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
+                if (firstDateTV.getText() == "" || lastDateTV.getText() == ""){
+                    firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
+                    lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
+                }
+
+                long markedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
+                long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
+                long allTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
+
+                initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
+                allTickets = Globals.Downloads.getAllTickets(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }
