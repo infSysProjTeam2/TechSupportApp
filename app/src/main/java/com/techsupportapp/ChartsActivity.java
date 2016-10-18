@@ -11,6 +11,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -277,6 +279,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             public void onDataChange(DataSnapshot dataSnapshot) {
                 firstDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
                 lastDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
+
                 if (firstDateTV.getText() == "" || lastDateTV.getText() == ""){
                     firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
                     lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
@@ -285,6 +288,16 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 long markedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
                 long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
                 long allTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
+
+                String firstDate = firstDateTV.getText().toString();
+                SpannableString contentFirst = new SpannableString(firstDate);
+                contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
+                firstDateTV.setText(contentFirst);
+
+                String lastDate = lastDateTV.getText().toString();
+                SpannableString contentLast = new SpannableString(lastDate);
+                contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
+                lastDateTV.setText(contentLast);
 
                 initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
                 allTickets = Globals.Downloads.getAllTickets(dataSnapshot);
