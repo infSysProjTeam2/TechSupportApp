@@ -16,27 +16,27 @@ public class Ticket {
     /**
      * Новая, не рассмотренная заявка.
      */
-    final static int NOT_ACCEPTED = 0;
+    public final static int NOT_ACCEPTED = 0;
 
     /**
      * Заявка, находящаяся на рассмотрении у консультанта.
      */
-    final static int ACCEPTED = 1;
+    public final static int ACCEPTED = 1;
 
     /**
      * Заявка, переданная для других консультантов.
      */
-    final static int SUBMITTED = 2;
+    public final static int SUBMITTED = 2;
 
     /**
      * Заявка, решение которой было подтверждено пользователем - создателем заявки.
      */
-    final static int CONFIRMED_BY_USER = 4;
+    public final static int CONFIRMED_BY_USER = 4;
 
     /**
      * Решенная заявка.
      */
-    final static int SOLVED = 8;
+    public final static int SOLVED = 8;
 
     //endregion
 

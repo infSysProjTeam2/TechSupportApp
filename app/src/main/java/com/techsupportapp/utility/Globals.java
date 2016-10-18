@@ -225,6 +225,13 @@ public class Globals {
             return resultList;
         }
 
+        public static ArrayList<Ticket> getAllTickets(DataSnapshot dataSnapshot){
+            ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE);
+            resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
+            resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE));
+            return resultList;
+        }
+
     }
 
 }
