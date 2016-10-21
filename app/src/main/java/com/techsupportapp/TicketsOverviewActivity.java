@@ -125,14 +125,14 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
                 if (role != User.SIMPLE_USER) {
                     ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);

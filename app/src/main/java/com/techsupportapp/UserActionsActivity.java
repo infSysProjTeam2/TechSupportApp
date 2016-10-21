@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -37,6 +38,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
 import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.User;
@@ -65,9 +67,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static UnverifiedUserRecyclerAdapter adapter;
     private static UserRecyclerAdapter adapter1;
 
-    private static BottomSheetBehavior bottomSheetBehavior;
-    private static View bottomSheetBehaviorView;
-
+    private static FragmentManager fragmentManager;
     private static MenuItem searchMenu;
     private static SearchView searchView;
     private static boolean search;
@@ -91,6 +91,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     private void initializeComponents(){
+        fragmentManager = getSupportFragmentManager();
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -119,10 +120,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
-
-        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         userName.setText(mNickname);
         userType.setText("Администратор");
@@ -207,9 +204,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     MenuItemCompat.collapseActionView(searchMenu);
                 search = false;
 
-                if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
 
@@ -231,9 +225,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        else if (drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else
             finish();
@@ -345,8 +337,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     public boolean onMenuItemActionExpand(MenuItem menuItem) {
                         search = true;
 
-                        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                         return true;
                     }
                     @Override
@@ -529,55 +519,11 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             usersView.setAdapter(adapter1);
             adapter1.notifyDataSetChanged();
 
-
-
             ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                 @Override
                 public void onItemClicked(RecyclerView recyclerView,final int position, View v) {
-                    TextView userName = (TextView) bottomSheetBehaviorView.findViewById(R.id.userName);
-                    final TextView userIdT = (TextView) bottomSheetBehaviorView.findViewById(R.id.userId);
-                    TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
-                    TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
-                    TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
-
-                    ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
-
-                    userName.setText(usersList.get(position).getUserName());
-                    userIdT.setText(usersList.get(position).getLogin());
-                    regDate.setText(usersList.get(position).getRegistrationDate());
-                    workPlace.setText(usersList.get(position).getWorkPlace());
-
-                    int role = usersList.get(position).getRole();
-
-                    if (role == User.SIMPLE_USER)
-                        accessLevel.setText("Пользователь");
-                    else if (role == User.DEPARTMENT_MEMBER)
-                        accessLevel.setText("Работник отдела");
-                    else if (role == User.ADMINISTRATOR)
-                        accessLevel.setText("Администратор");
-                    else if (role == User.DEPARTMENT_CHIEF)
-                        accessLevel.setText("Начальник отдела");
-
-                    bottomSheetBehaviorView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-
-                        }
-                    });
-
-                    editUser.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent;
-                            intent = new Intent(context, EditUserProfileActivity.class);
-                            intent.putExtra("userId", usersList.get(position).getLogin());
-                            intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(intent);
-                        }
-                    });
-
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(usersList.get(position).getLogin(), Globals.currentUser.getLogin(), usersList.get(position));
+                    bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
                 }
             });
 
