@@ -236,7 +236,7 @@ public class SignInActivity extends AppCompatActivity {
         }
         else
             editor.clear();
-        editor.commit();
+        editor.apply();
     }
 
     /**

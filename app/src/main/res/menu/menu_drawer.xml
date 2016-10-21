@@ -14,7 +14,7 @@
                     android:title="Список возможных заявок" />
                 <item
                     android:id="@+id/signUpUser"
-                    android:icon="@drawable/ic_assignment_turned_in_black_24dp"
+                    android:icon="@drawable/ic_person_black_24dp"
                     android:title="Пользователи" />
                 <item
                     android:id="@+id/charts"
