@@ -116,22 +116,6 @@ public class User {
         this.registrationDate = formatter.format(Calendar.getInstance().getTime());
     }
 
-    /**
-     * Конструктор, использующийся для добавления новых подтвержденных пользователей в систему с заданием определенной даты регистрации.
-     * @param branchId Задает идентификатор узла, объединяющего данные одного объекта класса в базе данных.
-     * @param login Задает логин пользователя.
-     * @param password Задает пароль пользователя.
-     * @param role Задает флаг, показывающий, наделен ли пользователь правами администратора.
-     * @param registrationDate Задает дату регистрации пользователя.
-     */
-    public User(String branchId, String login, String password, int role, String registrationDate) {
-        this.branchId = branchId;
-        this.login = login;
-        this.password = password;
-        this.role = role;
-        this.registrationDate = registrationDate;
-    }
-
     //endregion
 
     //region Getters
@@ -172,7 +156,7 @@ public class User {
     }
 
     /**
-     * @return Флаг, показывающий, наделен ли пользователь правами администратора.
+     * @return Роль данного аккаунта в системе.
      */
     public int getRole() {
         return role;

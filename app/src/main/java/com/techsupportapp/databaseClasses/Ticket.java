@@ -58,12 +58,18 @@ public class Ticket {
     private String userId;
 
     /**
-     * Идентификатор администратора отвечающего за решение заявки.
+     * Идентификатор консультанта, отвечающего за решение заявки.
      */
     private String adminId;
 
+    /**
+     * Имя консультанта, отвещающего за решение заявки.
+     */
     private String adminName;
 
+    /**
+     * Имя пользователя - создателя заявки.
+     */
     private String userName;
 
     /**
@@ -110,8 +116,9 @@ public class Ticket {
     }
 
     /**
-     * Метод, задающий администратора, который будет решать проблему.
-     * @param adminId
+     * Метод, задающий консультанта, который будет решать проблему.
+     * @param adminId Идентификатор консультанта, отвечающего за решение заявки.
+     * @param adminName Имя консультанта, отвещающего за решение заявки.
      */
     public void addAdmin(String adminId, String adminName) {
         this.adminId = adminId;
@@ -119,6 +126,9 @@ public class Ticket {
         this.ticketState = Ticket.ACCEPTED;
     }
 
+    /**
+     * Метод, отзывающий консультанта и переводящий заявку в список нерассматриваемых.
+     */
     public void removeAdmin(){
         this.adminId = null;
         this.adminName = null;
@@ -174,12 +184,16 @@ public class Ticket {
         return ticketState;
     }
 
-
+    /**
+     * @return Имя пользователя - создателя заявки.
+     */
     public String getUserName() {
         return userName;
     }
 
-
+    /**
+     * @return Имя консультанта, отвещающего за решение заявки.
+     */
     public String getAdminName() {
         return adminName;
     }
