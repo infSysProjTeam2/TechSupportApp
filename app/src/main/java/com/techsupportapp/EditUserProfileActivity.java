@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -61,6 +62,9 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private void initializeComponents(){
         databaseRef = FirebaseDatabase.getInstance().getReference();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         userName = (EditText)findViewById(R.id.userName);
         workPlace = (EditText)findViewById(R.id.workPlace);
@@ -287,6 +291,14 @@ public class EditUserProfileActivity extends AppCompatActivity{
         userName.setText(usersList.get(userPosition).getUserName());
         workPlace.setText(usersList.get(userPosition).getWorkPlace());
 
-        setTitle("Профиль " + usersList.get(userPosition).getLogin());
+        setTitle("Профиль " + usersList.get(userPosition).getUserName());
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        if (menuItem.getItemId() == android.R.id.home) {
+            finish();
+        }
+        return super.onOptionsItemSelected(menuItem);
     }
 }

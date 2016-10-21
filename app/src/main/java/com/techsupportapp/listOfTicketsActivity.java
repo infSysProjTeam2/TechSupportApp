@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -32,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
@@ -182,12 +184,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
-                intent = new Intent(ListOfTicketsActivity.this, EditUserProfileActivity.class);
-                intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(Globals.currentUser.getLogin(), Globals.currentUser.getLogin(), Globals.currentUser);
+                bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
             }
         });
     }

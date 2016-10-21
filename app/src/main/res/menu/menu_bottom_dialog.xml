@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:yourapp="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/editUser"
         android:title="Редактировать"
         android:icon="@drawable/ic_mode_edit_white_24dp"
-        yourapp:showAsAction="always" />
+        app:showAsAction="always" />
 </menu>

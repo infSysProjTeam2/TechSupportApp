@@ -123,7 +123,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         if (Globals.currentUser.getLogin().equals(userId))
             find = adminId;
 
-        if (Globals.currentUser.getRole() == User.SIMPLE_USER && !Globals.currentUser.getLogin().equals(find))
+        if (Globals.currentUser.getRole() != User.ADMINISTRATOR && !Globals.currentUser.getLogin().equals(find))
             toolbar.findViewById(R.id.editUser).setVisibility(View.GONE);
 
         if (role == User.SIMPLE_USER)
