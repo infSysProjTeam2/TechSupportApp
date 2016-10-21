@@ -2,7 +2,11 @@ package com.techsupportapp;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -40,9 +44,6 @@ public class SignUpActivity extends AppCompatActivity {
 
     //region Composite Controls
 
-    private Button returnBtn;
-    private Button signUpBtn;
-
     private EditText loginET;
 
     private EditText userNameET;
@@ -55,7 +56,6 @@ public class SignUpActivity extends AppCompatActivity {
     private RadioButton workerRadBtn;
     private RadioButton adminRadBtn;
     private RadioButton chiefRadBtn;
-
 
     //endregion
 
@@ -71,6 +71,10 @@ public class SignUpActivity extends AppCompatActivity {
         setEvents();
     }
 
+    /**
+     * Метод, проверяющий значение RadioButton для получения будущей роли пользователя.
+     * @return Роль пользователя.
+     */
     private int checkRole() {
         if (userRadBtn.isChecked())
             return User.SIMPLE_USER;
@@ -87,8 +91,6 @@ public class SignUpActivity extends AppCompatActivity {
      * Инициализация переменных и элементов макета
      */
     private void initializeComponents() {
-        returnBtn = (Button)findViewById(R.id.returnButton);
-        signUpBtn = (Button)findViewById(R.id.signUpButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         userNameET = (EditText)findViewById(R.id.userNameET);
@@ -102,70 +104,15 @@ public class SignUpActivity extends AppCompatActivity {
         chiefRadBtn = (RadioButton)findViewById(R.id.chiefRadBtn);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     /**
      * Создание методов для событий
      */
     private void setEvents() {
-        returnBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SignUpActivity.super.finish();
-            }
-        });
-
-        signUpBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int index = Collections.binarySearch(loginList, loginET.getText().toString(), new Comparator<String>() {
-                    @Override
-                    public int compare(String lhs, String rhs) {
-                        return lhs.compareTo(rhs);
-                    }
-                });
-                if (loginET.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Поле логина пусто", Toast.LENGTH_LONG).show();
-                    loginET.requestFocus();
-                }
-                else if (userNameET.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Поле имени пользователя пусто", Toast.LENGTH_LONG).show();
-                    userNameET.requestFocus();
-                }
-                else if (workPlaceET.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Поле рабочего места пользователя пусто", Toast.LENGTH_LONG).show();
-                    workPlaceET.requestFocus();
-                }
-                else if (passwordET.getText().toString().equals("")) {
-                    Toast.makeText(getApplicationContext(), "Поле пароля пусто", Toast.LENGTH_LONG).show();
-                    passwordET.requestFocus();
-                }
-                else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString())) {
-                    passwordET.requestFocus();
-                    Toast.makeText(getApplicationContext(), "Пароли не совпадают", Toast.LENGTH_LONG).show();
-                    passwordET.setText("");
-                    repeatPasswordET.setText("");
-                }
-                else if (index >= 0) {
-                    loginET.setText("");
-                    Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
-                } else {
-                    try {
-                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
-                                .setValue(new User("user_" + userCount++, false, loginET.getText().toString(),
-                                        passwordET.getText().toString(), checkRole(), userNameET.getText().toString(),
-                                        workPlaceET.getText().toString()));
-                    } catch (Exception e) {
-                        Globals.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
-                    }
-
-                    databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
-                    Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
-                    SignUpActivity.super.finish();
-                }
-            }
-        });
-
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -183,9 +130,89 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE)
-                    signUpBtn.callOnClick();
+                    tryAddUser();
                 return true;
             }
         });
+
+    }
+
+   @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_sign_up, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_sign_up) {
+            tryAddUser();
+            return true;
+        }
+        else if (id == android.R.id.home)
+            this.finish();
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Проверка корректности заполнения полей заявки.
+     * @return true - если поля заполнены корректно. false - если при заполнении появились ошибки.
+     */
+    private boolean isFieldsContentCorrect(){
+        int index = Collections.binarySearch(loginList, loginET.getText().toString(), new Comparator<String>() {
+            @Override
+            public int compare(String lhs, String rhs) {
+                return lhs.compareTo(rhs);
+            }
+        });
+        if (loginET.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Поле логина пусто", Toast.LENGTH_LONG).show();
+            loginET.requestFocus();
+        }
+        else if (userNameET.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Поле имени пользователя пусто", Toast.LENGTH_LONG).show();
+            userNameET.requestFocus();
+        }
+        else if (workPlaceET.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Поле рабочего места пользователя пусто", Toast.LENGTH_LONG).show();
+            workPlaceET.requestFocus();
+        }
+        else if (passwordET.getText().toString().equals("")) {
+            Toast.makeText(getApplicationContext(), "Поле пароля пусто", Toast.LENGTH_LONG).show();
+            passwordET.requestFocus();
+        }
+        else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString())) {
+            passwordET.requestFocus();
+            Toast.makeText(getApplicationContext(), "Пароли не совпадают", Toast.LENGTH_LONG).show();
+            passwordET.setText("");
+            repeatPasswordET.setText("");
+        }
+        else if (index >= 0) {
+            loginET.setText("");
+            Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
+        } else return true;
+        return false;
+    }
+
+    /**
+     * Метод, добавляющий пользователя при успешном прохождении соответствующих проверок.
+     */
+    private void tryAddUser(){
+        if (isFieldsContentCorrect()) {
+            try {
+                databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                        .setValue(new User("user_" + userCount++, false, loginET.getText().toString(),
+                                passwordET.getText().toString(), checkRole(), userNameET.getText().toString(),
+                                workPlaceET.getText().toString()));
+            } catch (Exception e) {
+                Globals.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
+            }
+
+            databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
+            Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
+            SignUpActivity.super.finish();
+        }
     }
 }
