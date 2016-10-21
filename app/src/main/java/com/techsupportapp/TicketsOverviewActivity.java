@@ -125,14 +125,14 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
                 if (role != User.SIMPLE_USER) {
                     ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
@@ -267,11 +267,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
 
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        else if (drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else
             super.onBackPressed();

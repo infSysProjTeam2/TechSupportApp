@@ -1,4 +1,4 @@
-package com.techsupportapp.chat;
+package com.techsupportapp.adapters;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,6 +8,7 @@ import android.widget.TextView;
 
 import com.firebase.client.Query;
 import com.techsupportapp.R;
+import com.techsupportapp.databaseClasses.Chat;
 import com.techsupportapp.utility.Globals;
 
 public class ChatListAdapter extends FirebaseListAdapter<Chat> {

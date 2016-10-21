@@ -3,6 +3,8 @@ package com.techsupportapp.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,12 +27,9 @@ import java.util.Comparator;
 public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAdapter.ViewHolder>{
 
     private Context context;
-    private static String userId;
-    private static String adminId;
     private final ArrayList<Ticket> values;
     private final ArrayList<User> users;
-    private View bottomSheetBehaviorView;
-    private BottomSheetBehavior bottomSheetBehavior;
+    private FragmentManager fragmentManager;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView authorText;
@@ -49,11 +48,11 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         }
     }
 
-    public TicketRecyclerAdapter(Context context, ArrayList<Ticket> values, ArrayList<User> users, View bottomSheetBehaviorView) {
+    public TicketRecyclerAdapter(Context context, ArrayList<Ticket> values, ArrayList<User> users, FragmentManager fragmentManager) {
         this.context = context;
         this.values = values;
         this.users = users;
-        this.bottomSheetBehaviorView = bottomSheetBehaviorView;
+        this.fragmentManager = fragmentManager;
     }
 
     @Override
@@ -66,8 +65,8 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String titleText;
 
-        userId = values.get(position).getUserId();
-        adminId = values.get(position).getAdminId();
+        final String userId = values.get(position).getUserId();
+        final String adminId = values.get(position).getAdminId();
 
         if (Globals.currentUser.getRole() != User.SIMPLE_USER){
             holder.authorText.setText(values.get(position).getUserName());
@@ -86,42 +85,25 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         holder.descText.setText(values.get(position).getMessage());
         holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
-
-        if (!titleText.equals("Не установлено"))
-            setData();
-
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        bottomSheetBehaviorView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!titleText.equals("Не установлено"))
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                if (!titleText.equals("Не установлено")) {
+                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
+                    bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
+                }
             }
         });
     }
 
-    private void setData() {
+    private User getUser(String userId, String adminId) {
         String find;
         find = userId;
 
         if (Globals.currentUser.getLogin().equals(userId))
             find = adminId;
 
-        ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
-
-        if (Globals.currentUser.getRole() == User.SIMPLE_USER && !Globals.currentUser.getLogin().equals(find))
-            editUser.setVisibility(View.GONE);
-
-        ArrayList<String> idList = new ArrayList<String>();
+        ArrayList<String> idList = new ArrayList<>();
         Collections.sort(users, new Comparator<User>() {
             @Override
             public int compare(User lhs, User rhs) {
@@ -138,39 +120,7 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
             }
         });
 
-        TextView userName = (TextView) bottomSheetBehaviorView.findViewById(R.id.userName);
-        final TextView userIdT = (TextView) bottomSheetBehaviorView.findViewById(R.id.userId);
-        TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
-        TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
-        TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
-
-        userName.setText(users.get(index).getUserName());
-        userIdT.setText(users.get(index).getLogin());
-        regDate.setText(users.get(index).getRegistrationDate());
-        workPlace.setText(users.get(index).getWorkPlace());
-
-        int role = users.get(index).getRole();
-
-        if (role == User.SIMPLE_USER)
-            accessLevel.setText("Пользователь");
-        else if (role == User.DEPARTMENT_MEMBER)
-            accessLevel.setText("Работник отдела");
-        else if (role == User.ADMINISTRATOR)
-            accessLevel.setText("Администратор");
-        else if (role == User.DEPARTMENT_CHIEF)
-            accessLevel.setText("Начальник отдела");
-
-        editUser.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent;
-                intent = new Intent(context, EditUserProfileActivity.class);
-                intent.putExtra("userId", userId);
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-            }
-        });
+        return users.get(index);
     }
 
     @Override

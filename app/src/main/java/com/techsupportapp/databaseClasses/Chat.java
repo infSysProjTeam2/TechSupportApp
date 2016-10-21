@@ -1,4 +1,4 @@
-package com.techsupportapp.chat;
+package com.techsupportapp.databaseClasses;
 
 public class Chat {
 

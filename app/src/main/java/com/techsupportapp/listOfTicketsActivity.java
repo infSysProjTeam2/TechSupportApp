@@ -58,7 +58,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private static TicketRecyclerAdapter adapter2;
 
     private static ArrayList<User> usersList = new ArrayList<User>();
-    private static View bottomSheetBehaviorView;
+    private static FragmentManager fragmentManager;
     private static int extraHeight;
 
     private ViewPager viewPager;
@@ -86,11 +86,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
 
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        else if (drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else
             finish();
@@ -100,8 +97,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private void initializeComponents() {
         databaseRef = FirebaseDatabase.getInstance().getReference();
 
-        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
-
+        fragmentManager = getSupportFragmentManager();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список заявок");
         setSupportActionBar(toolbar);
@@ -164,15 +160,15 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     if (ticket.getAdminId().equals(mUserId))
                         listOfMyClosedTickets.add(ticket);
 
-                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, bottomSheetBehaviorView);
+                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, getSupportFragmentManager());
                 viewOfAvailableTickets.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
 
-                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets, usersList, bottomSheetBehaviorView);
+                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets, usersList, getSupportFragmentManager());
                 viewOfMyClosedTickets.setAdapter(adapter1);
                 adapter1.notifyDataSetChanged();
 
-                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets, usersList, bottomSheetBehaviorView);
+                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets, usersList, getSupportFragmentManager());
                 viewOfSolvedTickets.setAdapter(adapter2);
                 adapter2.notifyDataSetChanged();
 
@@ -294,7 +290,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfAvailableTickets = (RecyclerView) v.findViewById(R.id.recycler);
 
-            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, bottomSheetBehaviorView);
+            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfAvailableTickets.setLayoutManager(mLayoutManager);
@@ -315,7 +311,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                         public void onClick(DialogInterface dialog, int which) {
                             listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
 
-                            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, bottomSheetBehaviorView);
+                            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
                             viewOfAvailableTickets.setAdapter(adapter);
                             adapter.notifyDataSetChanged();
 
@@ -350,7 +346,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfMyClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
-            adapter1 = new TicketRecyclerAdapter(context, listOfMyClosedTickets, usersList, bottomSheetBehaviorView);
+            adapter1 = new TicketRecyclerAdapter(context, listOfMyClosedTickets, usersList, fragmentManager);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
@@ -373,7 +369,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
             viewOfSolvedTickets = (RecyclerView)v.findViewById(R.id.recycler);
 
-            adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets, usersList, bottomSheetBehaviorView);
+            adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets, usersList, fragmentManager);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfSolvedTickets.setLayoutManager(mLayoutManager);

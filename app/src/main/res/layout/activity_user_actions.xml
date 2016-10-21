@@ -48,8 +48,6 @@
 
         </LinearLayout>
 
-        <include layout="@layout/fragment_bottom_sheet" />
-
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView
