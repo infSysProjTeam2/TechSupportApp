@@ -57,7 +57,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tickets_overview);
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         mUserId = Globals.currentUser.getLogin();
         mNickname = Globals.currentUser.getUserName();

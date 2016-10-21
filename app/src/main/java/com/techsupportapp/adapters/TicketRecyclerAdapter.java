@@ -116,10 +116,10 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         if (Globals.currentUser.getLogin().equals(userId))
             find = adminId;
 
-        if (Globals.currentUser.getRole() == User.SIMPLE_USER && !Globals.currentUser.getLogin().equals(find)) {
-            ImageButton cv = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
-            cv.setVisibility(View.GONE);
-        }
+        ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
+
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER && !Globals.currentUser.getLogin().equals(find))
+            editUser.setVisibility(View.GONE);
 
         ArrayList<String> idList = new ArrayList<String>();
         Collections.sort(users, new Comparator<User>() {
@@ -143,9 +143,6 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
         TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
         TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
-        ImageView userImage = (ImageView) bottomSheetBehaviorView.findViewById(R.id.userImage);
-
-        ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
 
         userName.setText(users.get(index).getUserName());
         userIdT.setText(users.get(index).getLogin());
@@ -162,11 +159,6 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
             accessLevel.setText("Администратор");
         else if (role == User.DEPARTMENT_CHIEF)
             accessLevel.setText("Начальник отдела");
-
-        LetterBitmap letterBitmap = new LetterBitmap(context);
-        int color = letterBitmap.getBackgroundColor(userName.getText().toString());
-        userImage.setBackgroundColor(color);
-        bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);
 
         editUser.setOnClickListener(new View.OnClickListener() {
             @Override

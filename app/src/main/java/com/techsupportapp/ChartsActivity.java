@@ -249,7 +249,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private void showDatePicker(final TextView dateSource){
         final Calendar date = Calendar.getInstance();
         date.setTime(stringToDate(dateSource.getText().toString()));
-        DatePickerDialog datePickerDialog = new DatePickerDialog(ChartsActivity.this, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ChartsActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 date.set(year, monthOfYear, dayOfMonth);
