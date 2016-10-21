@@ -539,7 +539,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     TextView regDate = (TextView) bottomSheetBehaviorView.findViewById(R.id.regDate);
                     TextView workPlace = (TextView) bottomSheetBehaviorView.findViewById(R.id.workPlace);
                     TextView accessLevel = (TextView) bottomSheetBehaviorView.findViewById(R.id.accessLevel);
-                    ImageView userImage = (ImageView) bottomSheetBehaviorView.findViewById(R.id.userImage);
 
                     ImageButton editUser = (ImageButton) bottomSheetBehaviorView.findViewById(R.id.editUserBtn);
 
@@ -558,11 +557,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                         accessLevel.setText("Администратор");
                     else if (role == User.DEPARTMENT_CHIEF)
                         accessLevel.setText("Начальник отдела");
-
-                    LetterBitmap letterBitmap = new LetterBitmap(context);
-                    int color = letterBitmap.getBackgroundColor(userName.getText().toString());
-                    userImage.setBackgroundColor(color);
-                    bottomSheetBehaviorView.findViewById(R.id.bottom_sheet).setBackgroundColor(color);
 
                     bottomSheetBehaviorView.setOnClickListener(new View.OnClickListener() {
                         @Override

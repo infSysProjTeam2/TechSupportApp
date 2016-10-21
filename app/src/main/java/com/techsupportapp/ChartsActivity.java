@@ -4,13 +4,17 @@ import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,12 +22,17 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.Legend;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -53,7 +62,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
     private ArrayList<Ticket> allTickets = new ArrayList<Ticket>();
 
-    private PieChart pieChart;
+    private HorizontalBarChart horizontalBarChart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,68 +105,69 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         userName.setText(mNickname);
         userType.setText("Начальник отдела");
         nav_menu.findItem(R.id.signUpUser).setVisible(false);
+
+        initChartData(0, 0, 0);
     }
 
     private void initChart(){
-        pieChart = (PieChart)findViewById(R.id.chart);
+        horizontalBarChart = (HorizontalBarChart) findViewById(R.id.chart);
 
-        pieChart.setDragDecelerationFrictionCoef(0.95f);
-        pieChart.setExtraOffsets(5, 10, 5, 5);
-        pieChart.setDrawHoleEnabled(true);
-        pieChart.setHoleColor(Color.WHITE);
-        pieChart.setTransparentCircleColor(Color.WHITE);
-        pieChart.setTransparentCircleAlpha(110);
-        pieChart.setHoleRadius(58f);
-        pieChart.setTransparentCircleRadius(61f);
-        pieChart.setDrawCenterText(true);
+        horizontalBarChart.setDescription("");
 
-        pieChart.setRotationAngle(0);
-        pieChart.setRotationEnabled(true);
-        pieChart.setHighlightPerTapEnabled(true);
+        horizontalBarChart.setDrawBarShadow(false);
+        horizontalBarChart.setDrawGridBackground(false);
+        horizontalBarChart.setDrawValueAboveBar(true);
+        horizontalBarChart.setScaleEnabled(false);
 
-        //pieChart.animateXY(1000, 1000, Easing.EasingOption.EaseOutCirc, Easing.EasingOption.EaseOutCirc);
+        horizontalBarChart.setVerticalScrollBarEnabled(false);
+        horizontalBarChart.setHorizontalScrollBarEnabled(false);
 
-        pieChart.setDescription("");
+        XAxis xl = horizontalBarChart.getXAxis();
+        xl.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xl.setDrawAxisLine(true);
+        xl.setDrawLabels(false);
+        xl.setTypeface(Typeface.createFromAsset(getAssets(), "OpenSans-Light.ttf"));
+        xl.setDrawGridLines(false);
+        xl.setGranularity(10f);
 
-        pieChart.setDrawEntryLabels(false);
+        YAxis yl = horizontalBarChart.getAxisLeft();
+        yl.setDrawAxisLine(true);
+        yl.setTypeface(Typeface.createFromAsset(getAssets(), "OpenSans-Light.ttf"));
+        yl.setDrawGridLines(true);
+        yl.setAxisMinValue(0f);
 
-        Legend legend = pieChart.getLegend();
-        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.CENTER);
-        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
-        legend.setOrientation(Legend.LegendOrientation.VERTICAL);
-        legend.setTextSize(15f);
-        legend.setDrawInside(false);
-        legend.setXEntrySpace(7f);
-        legend.setYEntrySpace(0f);
-        legend.setYOffset(0f);
+        YAxis yr = horizontalBarChart.getAxisRight();
+        yr.setDrawAxisLine(true);
+        yr.setTypeface(Typeface.createFromAsset(getAssets(), "OpenSans-Light.ttf"));
+        yr.setDrawGridLines(false);
+        yr.setAxisMinValue(0f);
+
+        Legend l = horizontalBarChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        l.setDrawInside(false);
+        l.setTextSize(18f);
+        l.setFormSize(16f);
+        l.setXEntrySpace(4f);
+        l.setYEntrySpace(0f);
+        l.setYOffset(25);
+
+        horizontalBarChart.setFitBars(true);
+        horizontalBarChart.animateXY(1500, 1500);
     }
 
-    private ArrayList<Integer> getColors(){
-        ArrayList<Integer> colors = new ArrayList<Integer>();
-
-        for (int c : ColorTemplate.COLORFUL_COLORS)
-            colors.add(c);
-
-        for (int c : ColorTemplate.LIBERTY_COLORS)
-            colors.add(c);
-
-        for (int c : ColorTemplate.PASTEL_COLORS)
-            colors.add(c);
-
-        colors.add(ColorTemplate.getHoloBlue());
-        return colors;
-    }
 
     private boolean compareDates(TextView dateSource, Calendar newDate) {
         try {
             if (dateSource.getId() == R.id.firstDateLabel){
                 Calendar anotherDate = Calendar.getInstance();
                 anotherDate.setTime(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(lastDateTV.getText().toString()));
-                return newDate.before(anotherDate);
+                return newDate.before(anotherDate);//TODO проверка заявок за один день
             } else {
                 Calendar anotherDate = Calendar.getInstance();
                 anotherDate.setTime(new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(firstDateTV.getText().toString()));
-                return newDate.after(anotherDate);
+                return newDate.after(anotherDate);//TODO проверка заявок за один день
             }
         }
         catch (Exception e) {
@@ -198,6 +208,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         return new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).format(date);
     }
 
+    @Nullable
     private Date stringToDate(String dateStr) {
         try {
             return new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(dateStr);
@@ -209,28 +220,36 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     }
 
     private void initChartData(long allTicketsCount, long markedTicketsCount, long solvedTicketsCount){
-        ArrayList<PieEntry> entries = new ArrayList<PieEntry>();
-        entries.add(new PieEntry(allTicketsCount, "Создано"));
-        entries.add(new PieEntry(markedTicketsCount, "Принято"));
-        entries.add(new PieEntry(solvedTicketsCount, "Решено"));
+        ArrayList<BarEntry> entries = new ArrayList<>();
+        entries.add(new BarEntry(2 * 20f, allTicketsCount));
+        entries.add(new BarEntry(1 * 20f, markedTicketsCount));
+        entries.add(new BarEntry(0, solvedTicketsCount));
 
-        PieDataSet dataSet = new PieDataSet(entries, "Заявки");
+        BarDataSet dataSet = new BarDataSet(entries, "Создано, принято, решено");
 
-        dataSet.setColors(getColors());
+        dataSet.setColors(ColorTemplate.PASTEL_COLORS);
 
-        PieData data = new PieData(dataSet);
-
-        data.setValueTextColor(Color.WHITE);
+        BarData data = new BarData(dataSet);
+        data.setValueTextColor(Color.BLUE);
         data.setValueTextSize(16f);
+        data.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+                return String.valueOf((int) value);
+            }
+        });
+        data.setValueTypeface(Typeface.createFromAsset(getAssets(), "OpenSans-Light.ttf"));
+        data.setBarWidth(20f);
+        data.setHighlightEnabled(false);
 
-        pieChart.setData(data);
-        pieChart.invalidate();
+        horizontalBarChart.setData(data);
+        horizontalBarChart.invalidate();
     }
 
     private void showDatePicker(final TextView dateSource){
         final Calendar date = Calendar.getInstance();
         date.setTime(stringToDate(dateSource.getText().toString()));
-        DatePickerDialog datePickerDialog = new DatePickerDialog(ChartsActivity.this, new DatePickerDialog.OnDateSetListener() {
+        DatePickerDialog datePickerDialog = new DatePickerDialog(ChartsActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog, new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                 date.set(year, monthOfYear, dayOfMonth);
@@ -241,7 +260,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 else Globals.showLongTimeToast(getApplicationContext(), "Начальная дата должна предшествовать конечной");
             }
         }, date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.setCancelable(false);
+        datePickerDialog.setCancelable(true);
         datePickerDialog.show();
     }
 
@@ -277,6 +296,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             public void onDataChange(DataSnapshot dataSnapshot) {
                 firstDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
                 lastDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
+
                 if (firstDateTV.getText() == "" || lastDateTV.getText() == ""){
                     firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
                     lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
@@ -285,6 +305,16 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 long markedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
                 long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
                 long allTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
+
+                String firstDate = firstDateTV.getText().toString();
+                SpannableString contentFirst = new SpannableString(firstDate);
+                contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
+                firstDateTV.setText(contentFirst);
+
+                String lastDate = lastDateTV.getText().toString();
+                SpannableString contentLast = new SpannableString(lastDate);
+                contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
+                lastDateTV.setText(contentLast);
 
                 initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
                 allTickets = Globals.Downloads.getAllTickets(dataSnapshot);
