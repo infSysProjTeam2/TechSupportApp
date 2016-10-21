@@ -1,4 +1,4 @@
-package com.techsupportapp.chat;
+package com.techsupportapp.adapters;
 
 import android.app.Activity;
 import android.util.Log;
@@ -12,6 +12,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.techsupportapp.R;
+import com.techsupportapp.databaseClasses.Chat;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
