@@ -3,7 +3,6 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -151,7 +149,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                         Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                         if (role != User.SIMPLE_USER) {
-                            intent.putExtra("currUserName", mNickname);
                             intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
                             intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                         }
@@ -161,7 +158,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 return;
                             }
                             else {
-                                intent.putExtra("currUserName", mNickname);
                                 intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
                                 intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                             }
@@ -302,7 +298,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(TicketsOverviewActivity.this);
             return true;

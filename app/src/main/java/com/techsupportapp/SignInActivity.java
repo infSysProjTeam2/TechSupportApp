@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
@@ -24,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.Globals;
 
 import java.io.IOException;
@@ -315,6 +317,9 @@ public class SignInActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
 
         savePassAndLogin();
+
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false))
+            startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
         startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));

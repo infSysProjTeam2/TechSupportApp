@@ -87,7 +87,8 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         if (id == R.id.listOfChannels) {
             finish();
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(CreateTicketActivity.this);
             return true;
