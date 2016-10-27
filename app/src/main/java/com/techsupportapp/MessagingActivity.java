@@ -17,8 +17,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.adapters.ChatListAdapter;
+import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
