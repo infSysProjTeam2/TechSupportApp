@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -28,7 +27,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -45,7 +43,6 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
-import com.techsupportapp.utility.LetterBitmap;
 
 import java.util.ArrayList;
 
@@ -246,7 +243,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(UserActionsActivity.this);
             return true;
@@ -285,7 +283,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        getMenuInflater().inflate(R.menu.menu_user_actions, menu);
         searchMenu = menu.findItem(R.id.action_search);
         searchView = (SearchView) searchMenu.getActionView();
 

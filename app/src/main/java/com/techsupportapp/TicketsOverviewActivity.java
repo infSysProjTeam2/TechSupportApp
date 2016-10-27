@@ -151,7 +151,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                         Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                         if (role != User.SIMPLE_USER) {
-                            intent.putExtra("currUserName", mNickname);
                             intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
                             intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                         }
@@ -161,7 +160,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 return;
                             }
                             else {
-                                intent.putExtra("currUserName", mNickname);
                                 intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
                                 intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                             }
@@ -302,7 +300,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(TicketsOverviewActivity.this);
             return true;

@@ -343,7 +343,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ChartsActivity.this);
             return true;

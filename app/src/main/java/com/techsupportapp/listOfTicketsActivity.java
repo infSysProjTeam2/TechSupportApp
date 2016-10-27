@@ -61,7 +61,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private static ArrayList<User> usersList = new ArrayList<User>();
     private static FragmentManager fragmentManager;
-    private static int extraHeight;
 
     private ViewPager viewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -131,7 +130,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         Menu nav_menu = navigationView.getMenu();
 
         int role = Globals.currentUser.getRole();
-        extraHeight = tabLayout.getHeight();
 
         if (role == User.ADMINISTRATOR) {
             userType.setText("Администратор");
@@ -210,7 +208,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.listOfTickets) {
 
         }else if (id == R.id.about) {
