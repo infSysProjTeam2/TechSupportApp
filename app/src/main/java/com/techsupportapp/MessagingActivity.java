@@ -138,7 +138,7 @@ public class MessagingActivity extends AppCompatActivity {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
-            ChatMessage chatMessage = new ChatMessage(input, Globals.currentUser.getUserName(), Globals.currentUser.getLogin(), messageTime);
+            ChatMessage chatMessage = new ChatMessage(input, Globals.currentUser.getUserName(), Globals.currentUser.getLogin(), messageTime, true);
             mFirebaseRef.push().setValue(chatMessage);
             inputText.setText("");
         }
