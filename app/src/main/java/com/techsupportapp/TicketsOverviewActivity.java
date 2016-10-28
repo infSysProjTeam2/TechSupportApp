@@ -3,7 +3,7 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,7 +15,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +24,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
@@ -81,7 +81,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -125,14 +125,14 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
                 if (role != User.SIMPLE_USER) {
                     ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, bottomSheetBehaviorView);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
@@ -149,7 +149,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                         Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
                         if (role != User.SIMPLE_USER) {
-                            intent.putExtra("currUserName", mNickname);
                             intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
                             intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                         }
@@ -159,7 +158,6 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 return;
                             }
                             else {
-                                intent.putExtra("currUserName", mNickname);
                                 intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
                                 intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
                             }
@@ -254,12 +252,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
-                intent = new Intent(TicketsOverviewActivity.this, EditUserProfileActivity.class);
-                intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(Globals.currentUser.getLogin(), Globals.currentUser.getLogin(), Globals.currentUser);
+                bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
             }
         });
     }
@@ -267,11 +261,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheetBehaviorView);
 
-        if (bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED)
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-        else if (drawer.isDrawerOpen(GravityCompat.START))
+        if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else
             super.onBackPressed();
@@ -307,7 +298,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(TicketsOverviewActivity.this);
             return true;

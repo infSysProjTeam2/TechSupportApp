@@ -5,6 +5,7 @@ import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -16,8 +17,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.techsupportapp.chat.Chat;
-import com.techsupportapp.chat.ChatListAdapter;
+import com.techsupportapp.adapters.ChatListAdapter;
+import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -31,7 +32,6 @@ public class MessagingActivity extends AppCompatActivity {
     private ValueEventListener mConnectedListener;
     private ChatListAdapter mChatListAdapter;
 
-    private String mCurrUsername;
     private String mUsername;
     private String mChatRoom;
 
@@ -45,7 +45,6 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        mCurrUsername = getIntent().getExtras().getString("currUserName");
         mUsername = getIntent().getExtras().getString("userName");
         mChatRoom = getIntent().getExtras().getString("chatRoom");
 
@@ -59,6 +58,9 @@ public class MessagingActivity extends AppCompatActivity {
         mFirebaseRef = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         setTitle("Чат с " + mUsername);
     }
@@ -94,7 +96,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(50), this,  mCurrUsername);//TODO 50 сообщений - норм?
+        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(150), this);//TODO 150 сообщений - норм?
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -116,7 +118,7 @@ public class MessagingActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
-                // No-op
+
             }
         });
     }
@@ -136,9 +138,17 @@ public class MessagingActivity extends AppCompatActivity {
         SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
-            Chat chat = new Chat(input, mCurrUsername, Globals.currentUser.getLogin(), messageTime);
-            mFirebaseRef.push().setValue(chat);
+            ChatMessage chatMessage = new ChatMessage(input, Globals.currentUser.getUserName(), Globals.currentUser.getLogin(), messageTime);
+            mFirebaseRef.push().setValue(chatMessage);
             inputText.setText("");
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home)
+            this.finish();
+        return super.onOptionsItemSelected(item);
     }
 }

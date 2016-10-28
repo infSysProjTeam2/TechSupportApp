@@ -1,4 +1,4 @@
-package com.techsupportapp.chat;
+package com.techsupportapp.adapters;
 
 import android.app.Activity;
 import android.util.Log;
@@ -12,6 +12,7 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.Query;
 import com.techsupportapp.R;
+import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     private List<T> mModels;
     private List<String> mKeys;
     private ChildEventListener mListener;
-    private List<Chat> mMessages;
+    private List<ChatMessage> mMessages;
 
     public FirebaseListAdapter(Query mRef, Class<T> mModelClass, Activity activity) {
         this.mRef = mRef;
@@ -36,7 +37,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
         mInflater = activity.getLayoutInflater();
         mModels = new ArrayList<T>();
         mKeys = new ArrayList<String>();
-        mMessages = new ArrayList<Chat>();
+        mMessages = new ArrayList<ChatMessage>();
         mListener = this.mRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
@@ -46,18 +47,18 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 if (previousChildName == null) {
                     mModels.add(0, model);
                     mKeys.add(0, key);
-                    mMessages.add(0, dataSnapshot.getValue(Chat.class));
+                    mMessages.add(0, dataSnapshot.getValue(ChatMessage.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(model);
                         mKeys.add(key);
-                        mMessages.add(dataSnapshot.getValue(Chat.class));
+                        mMessages.add(dataSnapshot.getValue(ChatMessage.class));
                     } else {
                         mModels.add(nextIndex, model);
                         mKeys.add(nextIndex, key);
-                        mMessages.add(nextIndex, dataSnapshot.getValue(Chat.class));
+                        mMessages.add(nextIndex, dataSnapshot.getValue(ChatMessage.class));
                     }
                 }
 
@@ -71,7 +72,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 int index = mKeys.indexOf(key);
 
                 mModels.set(index, newModel);
-                mMessages.add(index, dataSnapshot.getValue(Chat.class));
+                mMessages.add(index, dataSnapshot.getValue(ChatMessage.class));
 
                 notifyDataSetChanged();
             }
@@ -101,18 +102,18 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 if (previousChildName == null) {
                     mModels.add(0, newModel);
                     mKeys.add(0, key);
-                    mMessages.add(0, dataSnapshot.getValue(Chat.class));
+                    mMessages.add(0, dataSnapshot.getValue(ChatMessage.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(newModel);
                         mKeys.add(key);
-                        mMessages.add(dataSnapshot.getValue(Chat.class));
+                        mMessages.add(dataSnapshot.getValue(ChatMessage.class));
                     } else {
                         mModels.add(nextIndex, newModel);
                         mKeys.add(nextIndex, key);
-                        mMessages.add(nextIndex, dataSnapshot.getValue(Chat.class));
+                        mMessages.add(nextIndex, dataSnapshot.getValue(ChatMessage.class));
                     }
                 }
 

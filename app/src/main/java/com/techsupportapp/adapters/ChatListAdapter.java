@@ -1,4 +1,4 @@
-package com.techsupportapp.chat;
+package com.techsupportapp.adapters;
 
 import android.app.Activity;
 import android.content.Context;
@@ -8,21 +8,20 @@ import android.widget.TextView;
 
 import com.firebase.client.Query;
 import com.techsupportapp.R;
+import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.Globals;
 
-public class ChatListAdapter extends FirebaseListAdapter<Chat> {
+public class ChatListAdapter extends FirebaseListAdapter<ChatMessage> {
 
-    private String mUsername;
     private Context context;
 
-    public ChatListAdapter(Query ref, Activity activity, String mUsername) {
-        super(ref, Chat.class, activity);
-        this.mUsername = mUsername;
+    public ChatListAdapter(Query ref, Activity activity) {
+        super(ref, ChatMessage.class, activity);
         this.context = activity.getApplicationContext();
     }
 
     @Override
-    protected void populateView(View view, final Chat chat) {
+    protected void populateView(View view, final ChatMessage chat) {
         final String author = chat.getAuthor();
 
         TextView authorText = (TextView) view.findViewById(R.id.messageAuthor);

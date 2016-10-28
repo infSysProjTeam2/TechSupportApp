@@ -19,7 +19,6 @@ import java.util.ArrayList;
 public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapter.ViewHolder> {
 
     private Context context;
-    private String userId;
     private ArrayList<User> values;
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -49,8 +48,6 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        userId = values.get(position).getLogin();
-
         try {
             holder.userNameText.setText(values.get(position).getUserName());
             holder.userPermission.setText(getStringRole(values.get(position)));

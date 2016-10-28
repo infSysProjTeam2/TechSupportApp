@@ -46,9 +46,6 @@
                 android:layout_height="match_parent"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
         </LinearLayout>
-
-        <include layout="@layout/fragment_bottom_sheet" />
-
     </android.support.design.widget.CoordinatorLayout>
 
     <android.support.design.widget.NavigationView

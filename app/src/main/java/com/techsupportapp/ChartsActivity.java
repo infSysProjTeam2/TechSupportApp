@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -38,6 +39,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
@@ -196,7 +198,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             if (ticketDate.before(lastDate) && ticketDate.after(firstDate)) {
                 if (allTickets.get(i).getTicketState() == Ticket.SOLVED)
                     solvedTicketsCount++;
-                else if (allTickets.get(i).getAdminId() != "" && allTickets.get(i).getAdminId() != null)
+                else if (!allTickets.get(i).getAdminId().equals("") && allTickets.get(i).getAdminId() != null)
                     markedTicketsCount++;
                 allTicketsCount++;
             }
@@ -268,12 +270,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent;
-                intent = new Intent(ChartsActivity.this, EditUserProfileActivity.class);
-                intent.putExtra("userId", mUserId);
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(Globals.currentUser.getLogin(), Globals.currentUser.getLogin(), Globals.currentUser);
+                bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
             }
         });
 
@@ -345,7 +343,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
-
+            Intent intent = new Intent(this, PreferencesActivity.class);
+            startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ChartsActivity.this);
             return true;
