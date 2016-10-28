@@ -6,15 +6,17 @@ public class ChatMessage {
     private String author;
     private String messageTime;
     private String userId;
+    private boolean unread;
 
     private ChatMessage() {
     }
 
-    public ChatMessage(String message, String author, String userId, String messageTime) {
+    public ChatMessage(String message, String author, String userId, String messageTime, boolean unread) {
         this.message = message;
         this.author = author;
         this.userId = userId;
         this.messageTime = messageTime;
+        this.unread = unread;
     }
 
     public String getMessage() {
@@ -31,4 +33,7 @@ public class ChatMessage {
 
     public String getUserId() { return userId; }
 
+    public boolean isUnread(){
+        return unread;
+    }
 }

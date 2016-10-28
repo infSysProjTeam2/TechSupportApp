@@ -31,34 +31,33 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     private ChildEventListener mListener;
     private List<ChatMessage> mMessages;
 
-    public FirebaseListAdapter(Query mRef, Class<T> mModelClass, Activity activity) {
+    public FirebaseListAdapter(final Query mRef, Class<T> mModelClass, Activity activity) {
         this.mRef = mRef;
         this.mModelClass = mModelClass;
         mInflater = activity.getLayoutInflater();
-        mModels = new ArrayList<T>();
-        mKeys = new ArrayList<String>();
-        mMessages = new ArrayList<ChatMessage>();
+        mModels = new ArrayList<>();
+        mKeys = new ArrayList<>();
         mListener = this.mRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
                 T model = dataSnapshot.getValue(FirebaseListAdapter.this.mModelClass);
                 String key = dataSnapshot.getKey();
 
+                if (((ChatMessage)model).isUnread() && !((ChatMessage)model).getUserId().equals(Globals.currentUser.getLogin()))
+                    mRef.getRef().child(key).child("unread").setValue(false);
+
                 if (previousChildName == null) {
                     mModels.add(0, model);
                     mKeys.add(0, key);
-                    mMessages.add(0, dataSnapshot.getValue(ChatMessage.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(model);
                         mKeys.add(key);
-                        mMessages.add(dataSnapshot.getValue(ChatMessage.class));
                     } else {
                         mModels.add(nextIndex, model);
                         mKeys.add(nextIndex, key);
-                        mMessages.add(nextIndex, dataSnapshot.getValue(ChatMessage.class));
                     }
                 }
 
@@ -72,7 +71,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 int index = mKeys.indexOf(key);
 
                 mModels.set(index, newModel);
-                mMessages.add(index, dataSnapshot.getValue(ChatMessage.class));
 
                 notifyDataSetChanged();
             }
@@ -85,7 +83,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
 
                 mKeys.remove(index);
                 mModels.remove(index);
-                mMessages.remove(index);
 
                 notifyDataSetChanged();
             }
@@ -98,22 +95,18 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
                 int index = mKeys.indexOf(key);
                 mModels.remove(index);
                 mKeys.remove(index);
-                mMessages.remove(index);
                 if (previousChildName == null) {
                     mModels.add(0, newModel);
                     mKeys.add(0, key);
-                    mMessages.add(0, dataSnapshot.getValue(ChatMessage.class));
                 } else {
                     int previousIndex = mKeys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == mModels.size()) {
                         mModels.add(newModel);
                         mKeys.add(key);
-                        mMessages.add(dataSnapshot.getValue(ChatMessage.class));
                     } else {
                         mModels.add(nextIndex, newModel);
                         mKeys.add(nextIndex, key);
-                        mMessages.add(nextIndex, dataSnapshot.getValue(ChatMessage.class));
                     }
                 }
 
@@ -132,7 +125,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
         mRef.removeEventListener(mListener);
         mModels.clear();
         mKeys.clear();
-        mMessages.clear();
     }
 
     @Override
@@ -173,7 +165,7 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     @Override
     public int getItemViewType(int position)
     {
-        if (!(mMessages.get(position).getUserId().equals(Globals.currentUser.getLogin())))
+        if (!(((ChatMessage)mModels.get(position)).getUserId().equals(Globals.currentUser.getLogin())))
             return TYPE_LEFT;
         else
             return TYPE_RIGHT;

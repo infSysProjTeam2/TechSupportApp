@@ -27,19 +27,18 @@ public class ChatListAdapter extends FirebaseListAdapter<ChatMessage> {
         TextView authorText = (TextView) view.findViewById(R.id.messageAuthor);
         TextView messageText = (TextView) view.findViewById(R.id.messageText);
         TextView messageTime = (TextView) view.findViewById(R.id.messageTime);
+        TextView unread = (TextView) view.findViewById(R.id.unread);
         ImageView userImage = (ImageView) view.findViewById(R.id.userImage);
 
         authorText.setText(author + ": ");
         messageText.setText(chat.getMessage());
         messageTime.setText(chat.getMessageTime());
+        if (!chat.isUnread())
+            unread.setText("");
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                /*Intent intent = new Intent(context, UserProfileActivity.class);
-                intent.putExtra("userId", chat.getUserId());
-                intent.putExtra("currUserId", Globals.currentUser.getLogin());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);*/ //TODO что-то сделать
+                //TODO что-то сделать
             }
         });
         userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(author,context)));

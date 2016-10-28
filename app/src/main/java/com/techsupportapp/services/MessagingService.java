@@ -83,8 +83,10 @@ public class MessagingService extends Service {
                 .addAction(R.mipmap.ic_launcher, "Просмотр", pIntent);;
 
         Notification notification = new Notification.InboxStyle(builder)
-                .addLine("Первое сообщение").addLine("Второе сообщение")
-                .addLine("Третье сообщение").addLine("Четвертое сообщение")
+                .addLine("Первое сообщение")
+                .addLine("Второе сообщение")
+                .addLine("Третье сообщение")
+                .addLine("Четвертое сообщение")
                 .setSummaryText("+2 more").build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
