@@ -86,7 +86,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
                 setData();
             }
 

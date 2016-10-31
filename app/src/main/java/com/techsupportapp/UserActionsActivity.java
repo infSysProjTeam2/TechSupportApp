@@ -158,12 +158,12 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList = Globals.Downloads.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE);
+                    unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE);
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
 
-                    usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                    usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
                     adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
                     usersView.setAdapter(adapter1);
                     adapter1.notifyDataSetChanged();

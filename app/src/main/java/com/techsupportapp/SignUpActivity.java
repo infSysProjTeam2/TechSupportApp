@@ -113,7 +113,7 @@ public class SignUpActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                loginList = Globals.Downloads.getAllLogins(dataSnapshot);
+                loginList = Globals.Downloads.Strings.getAllLogins(dataSnapshot);
                 userCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
             }
 

@@ -149,10 +149,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
 
-                listOfAvailableTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-                listOfSolvedTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+                listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
                 listOfMyClosedTickets.clear();
 
                 for (Ticket ticket : listOfSolvedTickets)

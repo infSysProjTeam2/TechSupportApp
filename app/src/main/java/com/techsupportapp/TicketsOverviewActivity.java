@@ -121,17 +121,17 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
 
                 if (role != User.SIMPLE_USER) {
-                    ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
+                    ticketsOverviewList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, mUserId);
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
-                    ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
-                    ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
+                    ticketsOverviewList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
+                    ticketsOverviewList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);

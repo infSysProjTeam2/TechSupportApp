@@ -12,13 +12,21 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.R;
 import com.techsupportapp.SignInActivity;
+import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.utility.Globals;
+
+import java.util.ArrayList;
 
 public class MessagingService extends Service {
-
+    //TODO сделать связку с количеством сообщений в каждом чате(возможно не требуется сервиса)
     DatabaseReference databaseRef;
     ChildEventListener childEventListener;
+    private ArrayList<String> ticketIDList;
+    private long messagesCount = 0;
 
     public MessagingService() {
     }
@@ -35,7 +43,11 @@ public class MessagingService extends Service {
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                showNotification();
+                if (!dataSnapshot.getValue(ChatMessage.class).getUserId().equals(Globals.currentUser.getLogin()) && dataSnapshot.getValue(ChatMessage.class).isUnread()) {
+                    messagesCount++;//TODO сделать нормальный счетчик
+                    showNotification();
+                }
+                //TODO для администратора
             }
 
             @Override
@@ -58,18 +70,36 @@ public class MessagingService extends Service {
 
             }
         };
+
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (Globals.currentUser.getRole() == User.SIMPLE_USER) {
+                    ticketIDList = Globals.Downloads.Strings.getUserMarkedTicketIDs(dataSnapshot, Globals.currentUser.getLogin());
+                    for (int i = 0; i < ticketIDList.size(); i++)
+                        databaseRef.child("chat").child(ticketIDList.get(i)).addChildEventListener(childEventListener);
+                }
+                //TODO для администратора
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        databaseRef.addChildEventListener(childEventListener);
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy()
     {
-        databaseRef.removeEventListener(childEventListener);
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER)
+            for (int i = 0; i < ticketIDList.size(); i++)
+                databaseRef.child("chat").child(ticketIDList.get(i)).removeEventListener(childEventListener);
     }
 
     private void showNotification(){
@@ -78,15 +108,12 @@ public class MessagingService extends Service {
         Notification.Builder builder = new Notification.Builder(this)
                 .setTicker("Новые сообщения")
                 .setContentTitle("Новые сообщения")
-                .setContentText("Новые сообщения")
+                .setContentText("Количество новых сообщений " + messagesCount)
                 .setSmallIcon(R.mipmap.icon)
                 .addAction(R.mipmap.ic_launcher, "Просмотр", pIntent);;
 
         Notification notification = new Notification.InboxStyle(builder)
-                .addLine("Первое сообщение")
-                .addLine("Второе сообщение")
-                .addLine("Третье сообщение")
-                .addLine("Четвертое сообщение")
+                .addLine("Количество новых сообщений " + messagesCount)
                 .setSummaryText("+2 more").build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;

@@ -52,6 +52,8 @@ import java.util.Locale;
 
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
+    private int oneDayMilliSec = 86400000;
+
     private String mUserId;
     private String mNickname;
 
@@ -191,8 +193,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             firstDate = stringToDate(firstDateTV.getText().toString());
             lastDate = stringToDate(dateSource.getText().toString());
         }
-        firstDate.setTime(firstDate.getTime() - 86400000);
-        lastDate.setTime(lastDate.getTime() + 86400000);
+        firstDate.setTime(firstDate.getTime() - oneDayMilliSec);
+        lastDate.setTime(lastDate.getTime() + oneDayMilliSec);
         for (int i = 0; i < allTickets.size(); i++) {
             Date ticketDate = stringToDate(allTickets.get(i).getCreateDate());
             if (ticketDate.before(lastDate) && ticketDate.after(firstDate)) {
@@ -315,7 +317,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 lastDateTV.setText(contentLast);
 
                 initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
-                allTickets = Globals.Downloads.getAllTickets(dataSnapshot);
+                allTickets = Globals.Downloads.Tickets.getAllTickets(dataSnapshot);
             }
 
             @Override

@@ -46,6 +46,8 @@ public class SignInActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
 
+    private boolean isDownloaded;
+
     //endregion
 
     //region Composite Controls
@@ -120,6 +122,7 @@ public class SignInActivity extends AppCompatActivity {
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
         rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+        stopService(new Intent(this, MessagingService.class));//TODO проверить правильность места использования метода
     }
 
     //endregion
@@ -178,7 +181,7 @@ public class SignInActivity extends AppCompatActivity {
      * Закрытие окна загрузки.
      */
     private void closeLoadingDialog(){
-        loadingDialog.dismiss();
+            loadingDialog.dismiss();
     }
 
     /**
@@ -186,7 +189,6 @@ public class SignInActivity extends AppCompatActivity {
      */
     private void dataConstruction(){
         initializeComponents();
-        showLoadingDialog();
         setEvents();
     }
 
@@ -221,6 +223,7 @@ public class SignInActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
         setTitle("Авторизация");
+        isDownloaded = false;
     }
 
     /**
@@ -256,6 +259,10 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (hasConnection()) {
+                    if (!isDownloaded) {
+                        showLoadingDialog();
+                        return;
+                    }
                     if (!checkFields())
                         return;
                     checkVerificationData();
@@ -267,12 +274,18 @@ public class SignInActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                isDownloaded = false;
                 unverifiedLoginList.clear();
 
-                userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-                unverifiedLoginList = Globals.Downloads.getUnverifiedLogins(dataSnapshot);
+                userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+                unverifiedLoginList = Globals.Downloads.Strings.getUnverifiedLogins(dataSnapshot);
 
-                closeLoadingDialog();
+                if (loadingDialog != null){
+                    isDownloaded = true;
+                    closeLoadingDialog();
+                    signInBut.callOnClick();
+                }
+
             }
 
             @Override
