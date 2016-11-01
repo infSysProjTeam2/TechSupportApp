@@ -191,6 +191,7 @@ public class SignUpActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
         } else return true;
         return false;
+        //TODO Сделать проверку парольей на длину и англ символы (уже есть в Globals)
     }
 
     /**

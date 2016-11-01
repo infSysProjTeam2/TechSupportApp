@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.techsupportapp">
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -59,8 +57,7 @@
             android:theme="@style/AppTheme.NoActionBar"/>
         <service
             android:name=".services.MessagingService"
-            android:enabled="true"
-            android:exported="true" />
+            android:enabled="true"/>
     </application>
 
 </manifest>

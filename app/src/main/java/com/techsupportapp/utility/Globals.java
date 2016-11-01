@@ -13,7 +13,9 @@ import android.support.v7.app.AlertDialog;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
+import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 
@@ -24,37 +26,15 @@ public class Globals {
     public static User currentUser;
 
     /**
-     * Метод, скрывающий клавиатуру.
-     * @param activity
-     */
-    public static void hideKeyboard(Activity activity) {
-        if (activity == null || activity.getCurrentFocus() == null) {
-            return;
-        }
-
-        InputMethodManager inputMethodManager = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-        if (inputMethodManager != null) {
-            inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(), 0);
-        }
-    }
-
-    /**
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.
      */
     public static void showAbout(Context context) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("О программе");
-        String str = String.format("Tech Support App V1.0");
-        builder.setMessage(str);
-        builder.setPositiveButton("Ок", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int arg1) {
-
-            }
-        });
-        builder.setCancelable(false);
-        AlertDialog alert = builder.create();
-        alert.show();
+        new MaterialDialog.Builder(context)
+                .title("О программе")
+                .content(String.format("Tech Support App V%s", context.getString(R.string.app_version)))
+                .positiveText(android.R.string.ok)
+                .show();
     }
 
     /**

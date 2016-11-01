@@ -29,7 +29,6 @@ public abstract class FirebaseListAdapter<T> extends BaseAdapter {
     private List<T> mModels;
     private List<String> mKeys;
     private ChildEventListener mListener;
-    private List<ChatMessage> mMessages;
 
     public FirebaseListAdapter(final Query mRef, Class<T> mModelClass, Activity activity) {
         this.mRef = mRef;
