@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
+import com.weiwangcn.betterspinner.library.BetterSpinner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,6 +103,12 @@ public class SignUpActivity extends AppCompatActivity {
         chiefRadBtn = (RadioButton)findViewById(R.id.chiefRadBtn);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, getResources().getStringArray(R.array.roles_array));
+        BetterSpinner textView = (BetterSpinner) findViewById(R.id.spinner);
+        textView.setAdapter(adapter);
+    }
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

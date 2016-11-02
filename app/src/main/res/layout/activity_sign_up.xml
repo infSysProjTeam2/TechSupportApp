@@ -15,7 +15,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
 
             <EditText
                 android:id="@+id/loginET"
@@ -46,6 +49,12 @@
                 android:minWidth="200dp"
                 android:hint="Рабочее место"
                 android:inputType="textCapWords" />
+
+            <com.weiwangcn.betterspinner.library.BetterSpinner
+                android:id="@+id/spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="16dp" />
 
             <RadioGroup
                 android:layout_width="wrap_content"
