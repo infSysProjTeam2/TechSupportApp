@@ -1,12 +1,10 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.AlertDialog;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -19,6 +17,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -58,7 +58,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private CheckBox rememberPasCB;
 
-    private ProgressDialog loadingDialog;
+    private MaterialDialog loadingDialog;
 
     //endregion
 
@@ -66,26 +66,29 @@ public class SignInActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        new MaterialDialog.Builder(this)
+            .title("Закрыть приложение")
+            .content("Вы действительно хотите закрыть приложение?")
+            .positiveText(android.R.string.yes)
+            .negativeText(android.R.string.no)
+            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    savePassAndLogin();
+                    exit();
+                }
+            })
+            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    dialog.cancel();
+                }
+            })
+            .show();
+    }
 
-        builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                savePassAndLogin();
-                SignInActivity.super.onBackPressed();
-            }
-        });
-
-        builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.setCancelable(false);
-        builder.setMessage("Вы действительно хотите закрыть приложение?");
-        builder.show();
+    private void exit(){
+        this.finishAffinity();
     }
 
     @Override
@@ -115,11 +118,11 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
 
-        SharedPreferences settings = getPreferences(0);
-        loginET.setText(settings.getString("Login",""));
-        passwordET.setText(settings.getString("Password",""));
-        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+        loginET.setText(preferences.getString("Login",""));
+        passwordET.setText(preferences.getString("Password",""));
+        rememberPasCB.setChecked(preferences.getBoolean("cbState", false));
     }
 
     //endregion
@@ -227,8 +230,8 @@ public class SignInActivity extends AppCompatActivity {
      * Сохранение данных логина и пароля для повторного входа.
      */
     private void savePassAndLogin(){
-        SharedPreferences settings = getPreferences(0);
-        SharedPreferences.Editor editor = settings.edit();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
+        SharedPreferences.Editor editor = preferences.edit();
         if (rememberPasCB.isChecked()) {
             String login = loginET.getText().toString();
             String password = passwordET.getText().toString();
@@ -302,11 +305,12 @@ public class SignInActivity extends AppCompatActivity {
      * Отображение окна загрузки.
      */
     private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
+        loadingDialog = new MaterialDialog.Builder(this)
+                .content("Загрузка...")
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .show();
     }
 
     /**
@@ -322,7 +326,6 @@ public class SignInActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));
+        startActivity(new Intent(SignInActivity.this, AcceptedTicketsActivity.class));
     }
-
 }

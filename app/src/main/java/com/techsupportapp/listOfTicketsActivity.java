@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -27,15 +28,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
@@ -136,11 +139,11 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         }
         else if (role == User.DEPARTMENT_CHIEF) {
             userType.setText("Начальник отдела");
-            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.userActions).setVisible(false);
         }
         else if (role == User.DEPARTMENT_MEMBER){
             userType.setText("Работник отдела");
-            nav_menu.findItem(R.id.signUpUser).setVisible(false);
+            nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
         }
     }
@@ -192,9 +195,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.listOfChannels) {
+        if (id == R.id.acceptedTickets) {
             finish();
-        } else if (id == R.id.signUpUser) {
+        } else if (id == R.id.userActions) {
             Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
@@ -209,31 +212,31 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
-        } else if (id == R.id.listOfTickets) {
-
-        }else if (id == R.id.about) {
+        } else if (id == R.id.about) {
             Globals.showAbout(ListOfTicketsActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.exit) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-
-            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    exit();
-                }
-            });
-
-            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.setCancelable(false);
-            builder.setMessage("Вы действительно хотите закрыть приложение?");
-            builder.show();
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            exit();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -297,32 +300,31 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                 @Override
                 public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                    new MaterialDialog.Builder(context)
+                            .title("Принять заявку")
+                            .content("Вы действительно хотите принять заявку?")
+                            .positiveText(android.R.string.yes)
+                            .negativeText(android.R.string.no)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
 
-                    builder.setTitle("Принять заявку");
-                    builder.setMessage("Вы действительно хотите принять заявку?");
+                                    adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
+                                    viewOfAvailableTickets.setAdapter(adapter);
+                                    adapter.notifyDataSetChanged();
 
-                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
-
-                            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
-                            viewOfAvailableTickets.setAdapter(adapter);
-                            adapter.notifyDataSetChanged();
-
-                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
-                        }
-                    });
-
-                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-                    builder.show();
+                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
+                                }
+                            })
+                            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .show();
                 }
             });
 

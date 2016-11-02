@@ -1,11 +1,12 @@
 package com.techsupportapp;
 
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -14,8 +15,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +22,8 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -39,8 +40,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -85,6 +86,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         lastDateTV = (TextView)findViewById(R.id.lastDateLabel);
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
+        firstDateTV.setPaintFlags(firstDateTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        lastDateTV.setPaintFlags(lastDateTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Статистика");
         setSupportActionBar(toolbar);
@@ -106,7 +111,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
         userType.setText("Начальник отдела");
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.userActions).setVisible(false);
 
         initChartData(0, 0, 0);
     }
@@ -198,7 +203,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             if (ticketDate.before(lastDate) && ticketDate.after(firstDate)) {
                 if (allTickets.get(i).getTicketState() == Ticket.SOLVED)
                     solvedTicketsCount++;
-                else if (!allTickets.get(i).getAdminId().equals("") && allTickets.get(i).getAdminId() != null)
+                else if (allTickets.get(i).getAdminId() != null && !allTickets.get(i).getAdminId().equals(""))
                     markedTicketsCount++;
                 allTicketsCount++;
             }
@@ -292,6 +297,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                //TODO пофиксить текст, переезжающий на другую строку
                 firstDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
                 lastDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
 
@@ -303,16 +309,6 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                 long markedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
                 long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
                 long allTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
-
-                String firstDate = firstDateTV.getText().toString();
-                SpannableString contentFirst = new SpannableString(firstDate);
-                contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
-                firstDateTV.setText(contentFirst);
-
-                String lastDate = lastDateTV.getText().toString();
-                SpannableString contentLast = new SpannableString(lastDate);
-                contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
-                lastDateTV.setText(contentLast);
 
                 initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
                 allTickets = Globals.Downloads.getAllTickets(dataSnapshot);
@@ -335,39 +331,43 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
-        } else if (id == R.id.listOfChannels) {
             finish();
-        } else if (id == R.id.signUpUser) {
+        } else if (id == R.id.acceptedTickets) {
+            finish();
+        } else if (id == R.id.userActions) {
             Intent intent = new Intent(ChartsActivity.this, UserActionsActivity.class);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ChartsActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.exit) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-
-            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    exit();
-                }
-            });
-
-            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.setCancelable(false);
-            builder.setMessage("Вы действительно хотите закрыть приложение?");
-            builder.show();
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            exit();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

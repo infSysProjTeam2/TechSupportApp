@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -31,15 +32,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
 import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
@@ -229,13 +232,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.listOfChannels) {
+        if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.listOfTickets) {
             Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
+            finish();
         } else if (id == R.id.charts) {
             Intent intent = new Intent(UserActionsActivity.this, ChartsActivity.class);
             intent.putExtra("uuid", mUserId);
@@ -248,26 +252,28 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         } else if (id == R.id.about) {
             Globals.showAbout(UserActionsActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.exit) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-
-            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    exit();
-                }
-            });
-
-            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.setCancelable(false);
-            builder.setMessage("Вы действительно хотите закрыть приложение?");
-            builder.show();
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            exit();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -408,47 +414,43 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 @Override
                 public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
                     final User selectedUser = unverifiedUsersList.get(position);
-                    AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
 
-                    builder.setTitle("Подтвердить пользователя " + selectedUser.getBranchId());
                     try {
-                        builder.setMessage(getLogInMessage(selectedUser));
-                    }
-                    catch (Exception e) {
+                        new MaterialDialog.Builder(context)
+                                .title("Подтвердить пользователя " + selectedUser.getBranchId())
+                                .content(getLogInMessage(selectedUser))
+                                .positiveText(android.R.string.yes)
+                                .negativeText(android.R.string.no)
+                                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        search = false;
+                                        try {
+                                            databaseRef.child(getDatabaseUserPath(selectedUser))
+                                                    .child(selectedUser.getBranchId()).setValue(selectedUser);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        if (search)
+                                            MenuItemCompat.collapseActionView(searchMenu);
+
+                                        search = false;
+
+                                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                        Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
+                                    }
+                                })
+                                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .show();
+                    } catch (Exception e) {
                         Globals.showLongTimeToast(context, "Передана нулевая ссылка или неверно указаны права пользователя. Обратитесь к разработчику");
                     }
-
-                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            search = false;
-                            try {
-                                databaseRef.child(getDatabaseUserPath(selectedUser))
-                                        .child(selectedUser.getBranchId()).setValue(selectedUser);
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
-
-                            if (search)
-                                MenuItemCompat.collapseActionView(searchMenu);
-
-                            search = false;
-
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
-                            Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-
-                    builder.setCancelable(false);
-                    builder.show();
                 }
             });
 
@@ -456,33 +458,29 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 @Override
                 public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
                     final User selectedUser = unverifiedUsersList.get(position);
-                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(context);
+                    new MaterialDialog.Builder(context)
+                            .title("Отклонить заявку пользователя " + selectedUser.getBranchId())
+                            .content("Вы действительно хотите отклонить заявку пользователя " + selectedUser.getLogin() + " на регистрацию?")
+                            .positiveText(android.R.string.yes)
+                            .negativeText(android.R.string.no)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    if (search)
+                                        MenuItemCompat.collapseActionView(searchMenu);
+                                    search = false;
 
-                    builder.setTitle("Отклонить заявку пользователя " + selectedUser.getBranchId());
-                    builder.setMessage("Вы действительно хотите отклонить заявку пользователя "
-                            + selectedUser.getLogin() + " на регистрацию?" );
-
-                    builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (search)
-                                MenuItemCompat.collapseActionView(searchMenu);
-                            search = false;
-
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
-                            Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
-                        }
-                    });
-
-                    builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.cancel();
-                        }
-                    });
-
-                    builder.setCancelable(false);
-                    builder.show();
+                                    databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                    Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
+                                }
+                            })
+                            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                @Override
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    dialog.cancel();
+                                }
+                            })
+                            .show();
                     return true;
                 }
             });

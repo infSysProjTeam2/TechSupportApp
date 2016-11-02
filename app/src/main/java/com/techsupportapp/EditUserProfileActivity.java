@@ -1,20 +1,20 @@
 package com.techsupportapp;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.view.LayoutInflater;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -37,16 +37,17 @@ public class EditUserProfileActivity extends AppCompatActivity{
     private String mUserId;
     private String mCurrUserId;
 
-    private int currUserPosition;
     private int userPosition;
 
-    private boolean changedType;
+    private boolean changedRole;
 
     private EditText userName;
     private EditText workPlace;
     private Button saveBtn;
     private Button changePasswordBtn;
     private Button changeUserTypeBtn;
+
+    private String newPassword = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +80,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
             workPlace.setEnabled(false);
             changePasswordBtn.setEnabled(false);
         }
-        changedType = false;
+        changedRole = false;
     }
 
     private void setEvents(){
@@ -99,158 +100,144 @@ public class EditUserProfileActivity extends AppCompatActivity{
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater li = LayoutInflater.from(EditUserProfileActivity.this);
-                View promptsView = li.inflate(R.layout.prompts_change_user_type, null);
+                new MaterialDialog.Builder(EditUserProfileActivity.this)
+                        .title("Изменение прав")
+                        .items(R.array.roles_array)
+                        .itemsCallback(new MaterialDialog.ListCallback() {
+                            @Override
+                            public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                //TODO сделать это
+                                if (text.equals("Пользователь")) {
+                                    if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
+                                        User chUser;
+                                        try {
+                                            chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                                    User.SIMPLE_USER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                                            databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                            databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditUserProfileActivity.this);
+                                        changedRole = true;
+                                        Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
+                                    } else
+                                        Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
+                                } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
+                                    User chUser;
+                                    try {
+                                        chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
+                                                User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                                        databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                        databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                    changedRole = true;
+                                    Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();
+                                } else
+                                    Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
 
-                alertDialogBuilder.setView(promptsView);
-
-                final ListView typesOfUsers = (ListView) promptsView.findViewById(R.id.typesOfUsersList);
-                final String[] types = {"Пользователь"};
-                final ArrayAdapter<String> adapter = new ArrayAdapter<String>(EditUserProfileActivity.this, android.R.layout.simple_list_item_1, types);
-                typesOfUsers.setAdapter(adapter);
-
-                alertDialogBuilder
-                        .setCancelable(true)
-
-                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                final AlertDialog alertDialog = alertDialogBuilder.create();
-
-                typesOfUsers.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        if (types[position].equals("Пользователь")) {
-                            if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
-                                User chUser;
-                                try {
-                                    chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                            User.SIMPLE_USER, usersList.get(userPosition).getLogin(), "Wayward Pines");
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
+                                if (changedRole && mUserId.equals(mCurrUserId)) {
+                                    Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+                                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(i);
                                 }
-                                catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-
-                                changedType = true;
-                                alertDialog.dismiss();
-                                Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
-                            } else
-                                Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
-                        } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
-                            User chUser;
-                            try {
-                                chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                        User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), "Wayward Pines");
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                             }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            changedType = true;
-                            alertDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();
-                        } else
-                            Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
-
-                        if (changedType && mUserId.equals(mCurrUserId)){
-                            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage( getBaseContext().getPackageName() );
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(i);
-                        }
-
-                    }
-                });
-
-                alertDialog.show();
+                        })
+                        .show();
             }
         });
 
         changePasswordBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater li = LayoutInflater.from(EditUserProfileActivity.this);
-                View promptsView = li.inflate(R.layout.prompts_change_password, null);
+                MaterialDialog dialog;
+                final MaterialDialog.SingleButtonCallback callback;
+                final EditText currentPasswordET;
+                final EditText newPasswordET;
+                final EditText newPasswordRepeatET;
+                final TextView hintTV;
+                final View positiveAction;
 
-                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(EditUserProfileActivity.this);
-
-                alertDialogBuilder.setView(promptsView);
-
-                final EditText currentPassword = (EditText) promptsView.findViewById(R.id.currentPasswordEt);
-                final EditText newPassword = (EditText) promptsView.findViewById(R.id.newPasswordEt);
-                final EditText newPasswordRepeat = (EditText) promptsView.findViewById(R.id.newPasswordRepeatEt);
-
-                alertDialogBuilder
-                        .setCancelable(true)
-                        .setTitle("Смена пароля")
-                        .setPositiveButton("Ок",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-
-                                    }
-                                })
-                        .setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-
-                final AlertDialog alertDialog = alertDialogBuilder.create();
-                alertDialog.show();
-
-                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
-                {
+                callback = new MaterialDialog.SingleButtonCallback() {
                     @Override
-                    public void onClick(View v)
-                    {
-                        if (currentPassword.getText().toString().equals("")) {
-                            Toast.makeText(getApplicationContext(), "Поле текущего пароля пусто", Toast.LENGTH_LONG).show();
-                        }
-                        else if (newPassword.getText().toString().equals(""))
-                            Toast.makeText(getApplicationContext(), "Поле нового пароля пусто", Toast.LENGTH_LONG).show();
-                        else if (newPasswordRepeat.getText().toString().equals(""))
-                            Toast.makeText(getApplicationContext(), "Нужно повторить пароль", Toast.LENGTH_LONG).show();
-                        else if (!currentPassword.getText().toString().equals(usersList.get(userPosition).getPassword()))
-                            Toast.makeText(getApplicationContext(), "Введен неправильный пароль", Toast.LENGTH_LONG).show();
-                        else if (!newPassword.getText().toString().equals(newPasswordRepeat.getText().toString()))
-                            Toast.makeText(getApplicationContext(), "Пароли должны совпадать", Toast.LENGTH_LONG).show();
-                        else if (newPassword.getText().toString().length() < 5 || newPasswordRepeat.getText().toString().length() < 5)
-                            Toast.makeText(getApplicationContext(), "Пароль должен быть не менее 5 символов", Toast.LENGTH_LONG).show();
-                        else if (!Globals.isEnglishWord(newPassword.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeat.getText().toString()))
-                            Toast.makeText(getApplicationContext(), "Пароли должны содержать только английские символы и цифры", Toast.LENGTH_LONG).show();
-                        else
-                        {
-                            try {
-                                User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(),
-                                        usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), "Wayward Pines");
-                                if (chUser.getRole() == User.ADMINISTRATOR)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                else if (chUser.getRole() == User.SIMPLE_USER)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        try {
+                            User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPassword,
+                                    usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                            if (chUser.getRole() == User.ADMINISTRATOR)
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            else if (chUser.getRole() == User.SIMPLE_USER)
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
+                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
 
-                            }
-                            catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            Toast.makeText(getApplicationContext(), "Пароль успешно изменен", Toast.LENGTH_LONG).show();
-                            alertDialog.dismiss();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
-                });
+                };
+
+                dialog = new MaterialDialog.Builder(EditUserProfileActivity.this)
+                        .title("Смена пароля")
+                        .customView(R.layout.prompts_change_password, true)
+                        .positiveText(android.R.string.ok)
+                        .negativeText(android.R.string.cancel)
+                        .onPositive(callback)
+                        .cancelable(false)
+                        .build();
+
+                currentPasswordET = (EditText) dialog.findViewById(R.id.currentPasswordEt);
+                newPasswordET = (EditText) dialog.findViewById(R.id.newPasswordEt);
+                newPasswordRepeatET = (EditText) dialog.findViewById(R.id.newPasswordRepeatEt);
+                hintTV = (TextView) dialog.findViewById(R.id.hint);
+                positiveAction = dialog.getActionButton(DialogAction.POSITIVE);
+
+                TextWatcher textWatcher = new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        if (currentPasswordET.getText().toString().equals("")) {
+                            hintTV.setText("Поле текущего пароля пусто");
+                        } else if (newPasswordET.getText().toString().equals(""))
+                            hintTV.setText("Поле нового пароля пусто");
+                        else if (newPasswordRepeatET.getText().toString().equals(""))
+                            hintTV.setText("Нужно повторить пароль");
+                        else if (!currentPasswordET.getText().toString().equals(usersList.get(userPosition).getPassword()))
+                            hintTV.setText("Введен неправильный пароль");
+                        else if (!newPasswordET.getText().toString().equals(newPasswordRepeatET.getText().toString()))
+                            hintTV.setText("Пароли должны совпадать");
+                        else if (newPasswordET.getText().toString().length() < 5 || newPasswordRepeatET.getText().toString().length() < 5)
+                            hintTV.setText("Пароль должен быть содержать не менее 5 символов");
+                        else if (!Globals.isEnglishWord(newPasswordET.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeatET.getText().toString()))
+                            hintTV.setText("Пароли должны содержать только английские символы и цифры");
+                        else {
+                            newPassword = newPasswordET.getText().toString();
+                            hintTV.setText("");
+                            positiveAction.setEnabled(true);
+                        }
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                    }
+                };
+
+                currentPasswordET.addTextChangedListener(textWatcher);
+                newPasswordET.addTextChangedListener(textWatcher);
+                newPasswordRepeatET.addTextChangedListener(textWatcher);
+
+                positiveAction.setEnabled(false);
+
+                dialog.show();
             }
         });
-
 
 
         saveBtn.setOnClickListener(new View.OnClickListener() {
@@ -272,13 +259,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
         for (int i = 0; i < usersList.size(); i++)
             idList.add(usersList.get(i).getLogin());
         userPosition = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return lhs.compareTo(rhs);
-            }
-        });
-
-        currUserPosition = Collections.binarySearch(idList, mCurrUserId, new Comparator<String>() {
             @Override
             public int compare(String lhs, String rhs) {
                 return lhs.compareTo(rhs);

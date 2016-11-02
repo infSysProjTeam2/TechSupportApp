@@ -1,12 +1,15 @@
 package com.techsupportapp;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.TextView;
@@ -20,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
+import com.weiwangcn.betterspinner.library.BetterSpinner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,10 +53,7 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText passwordET;
     private EditText repeatPasswordET;
 
-    private RadioButton userRadBtn;
-    private RadioButton workerRadBtn;
-    private RadioButton adminRadBtn;
-    private RadioButton chiefRadBtn;
+    private BetterSpinner spinner;
 
     //endregion
 
@@ -73,13 +74,13 @@ public class SignUpActivity extends AppCompatActivity {
      * @return Роль пользователя.
      */
     private int checkRole() {
-        if (userRadBtn.isChecked())
+        if (spinner.getText().toString().equals("Пользователь"))
             return User.SIMPLE_USER;
-        else if (workerRadBtn.isChecked())
+        else if (spinner.getText().toString().equals("Работник отдела"))
             return User.DEPARTMENT_MEMBER;
-        else if (adminRadBtn.isChecked())
+        else if (spinner.getText().toString().equals("Администратор"))
             return User.ADMINISTRATOR;
-        else if (chiefRadBtn.isChecked())
+        else if (spinner.getText().toString().equals("Начальник отдела"))
             return User.DEPARTMENT_CHIEF;
         else return User.SIMPLE_USER;
     }
@@ -95,12 +96,13 @@ public class SignUpActivity extends AppCompatActivity {
         passwordET = (EditText)findViewById(R.id.passwordET);
         repeatPasswordET = (EditText)findViewById(R.id.repeatPasswordET);
 
-        userRadBtn = (RadioButton)findViewById(R.id.userRadBtn);
-        workerRadBtn = (RadioButton)findViewById(R.id.workerRadBtn);
-        adminRadBtn = (RadioButton)findViewById(R.id.adminRadBtn);
-        chiefRadBtn = (RadioButton)findViewById(R.id.chiefRadBtn);
-
         databaseReference = FirebaseDatabase.getInstance().getReference();
+
+        String[] roles_array = new String[] {"Пользователь", "Работник отдела", "Администратор", "Начальник отдела" };
+
+        spinner = (BetterSpinner) findViewById(R.id.spinner);
+        spinner.setAdapter(new ArrayAdapter<>(SignUpActivity.this, android.R.layout.simple_dropdown_item_1line, roles_array));
+        spinner.setText(roles_array[0]);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -191,6 +193,7 @@ public class SignUpActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
         } else return true;
         return false;
+        //TODO Сделать проверку парольей на длину и англ символы (уже есть в Globals)
     }
 
     /**
