@@ -187,6 +187,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         .positiveText(android.R.string.ok)
                         .negativeText(android.R.string.cancel)
                         .onPositive(callback)
+                        .cancelable(false)
                         .build();
 
                 currentPasswordET = (EditText) dialog.findViewById(R.id.currentPasswordEt);
@@ -213,7 +214,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         else if (!newPasswordET.getText().toString().equals(newPasswordRepeatET.getText().toString()))
                             hintTV.setText("Пароли должны совпадать");
                         else if (newPasswordET.getText().toString().length() < 5 || newPasswordRepeatET.getText().toString().length() < 5)
-                            hintTV.setText("Пароль должен быть не менее 5 символов");
+                            hintTV.setText("Пароль должен быть содержать не менее 5 символов");
                         else if (!Globals.isEnglishWord(newPasswordET.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeatET.getText().toString()))
                             hintTV.setText("Пароли должны содержать только английские символы и цифры");
                         else {
