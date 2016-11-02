@@ -1,13 +1,11 @@
 package com.techsupportapp;
 
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -61,7 +59,7 @@ public class SignInActivity extends AppCompatActivity {
 
     private CheckBox rememberPasCB;
 
-    private ProgressDialog loadingDialog;
+    private MaterialDialog loadingDialog;
 
     //endregion
 
@@ -69,25 +67,25 @@ public class SignInActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        MaterialDialog dialog = new MaterialDialog.Builder(this)
-                .title("Закрыть приложение")
-                .content("Вы действительно хотите закрыть приложение?")
-                .positiveText(android.R.string.ok)
-                .negativeText(android.R.string.cancel)
-                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        savePassAndLogin();
-                        SignInActivity.super.onBackPressed();
-                    }
-                })
-                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                    @Override
-                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        dialog.cancel();
-                    }
-                })
-                .show();
+        new MaterialDialog.Builder(this)
+            .title("Закрыть приложение")
+            .content("Вы действительно хотите закрыть приложение?")
+            .positiveText(android.R.string.ok)
+            .negativeText(android.R.string.cancel)
+            .onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    savePassAndLogin();
+                    SignInActivity.super.onBackPressed();
+                }
+            })
+            .onNegative(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    dialog.cancel();
+                }
+            })
+            .show();
     }
 
     @Override
@@ -304,11 +302,12 @@ public class SignInActivity extends AppCompatActivity {
      * Отображение окна загрузки.
      */
     private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
+        loadingDialog = new MaterialDialog.Builder(this)
+                .content("Загрузка...")
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .show();
     }
 
     /**

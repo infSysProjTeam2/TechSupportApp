@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -38,7 +39,7 @@ public class MessagingActivity extends AppCompatActivity {
     private EditText inputText;
     private ImageButton sendBtn;
 
-    private ProgressDialog loadingDialog;
+    private MaterialDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,11 +86,12 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
+        loadingDialog = new MaterialDialog.Builder(this)
+                .content("Загрузка...")
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .show();
     }
 
         @Override
