@@ -1,6 +1,5 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -70,13 +69,13 @@ public class SignInActivity extends AppCompatActivity {
         new MaterialDialog.Builder(this)
             .title("Закрыть приложение")
             .content("Вы действительно хотите закрыть приложение?")
-            .positiveText(android.R.string.ok)
-            .negativeText(android.R.string.cancel)
+            .positiveText(android.R.string.yes)
+            .negativeText(android.R.string.no)
             .onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                     savePassAndLogin();
-                    SignInActivity.super.onBackPressed();
+                    exit();
                 }
             })
             .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -86,6 +85,10 @@ public class SignInActivity extends AppCompatActivity {
                 }
             })
             .show();
+    }
+
+    private void exit(){
+        this.finishAffinity();
     }
 
     @Override
@@ -115,11 +118,11 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
 
-        SharedPreferences settings = getPreferences(0);
-        loginET.setText(settings.getString("Login",""));
-        passwordET.setText(settings.getString("Password",""));
-        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
+        loginET.setText(preferences.getString("Login",""));
+        passwordET.setText(preferences.getString("Password",""));
+        rememberPasCB.setChecked(preferences.getBoolean("cbState", false));
     }
 
     //endregion
@@ -227,8 +230,8 @@ public class SignInActivity extends AppCompatActivity {
      * Сохранение данных логина и пароля для повторного входа.
      */
     private void savePassAndLogin(){
-        SharedPreferences settings = getPreferences(0);
-        SharedPreferences.Editor editor = settings.edit();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
+        SharedPreferences.Editor editor = preferences.edit();
         if (rememberPasCB.isChecked()) {
             String login = loginET.getText().toString();
             String password = passwordET.getText().toString();
@@ -323,7 +326,6 @@ public class SignInActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));
+        startActivity(new Intent(SignInActivity.this, AcceptedTicketsActivity.class));
     }
-
 }

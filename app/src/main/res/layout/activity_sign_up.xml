@@ -9,6 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:paddingTop="16dp"
         android:layout_centerHorizontal="true">
 
         <LinearLayout
@@ -52,45 +53,15 @@
 
             <com.weiwangcn.betterspinner.library.BetterSpinner
                 android:id="@+id/spinner"
+                android:gravity="center"
+                android:paddingTop="32dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingTop="16dp" />
-
-            <RadioGroup
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="16dp">
-
-                <RadioButton
-                    android:id="@+id/userRadBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Пользователь"
-                    android:checked="true"/>
-
-                <RadioButton
-                    android:id="@+id/workerRadBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Работник отдела"/>
-
-                <RadioButton
-                    android:id="@+id/adminRadBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Администратор"/>
-
-                <RadioButton
-                    android:id="@+id/chiefRadBtn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Начальник отдела"/>
-
-            </RadioGroup>
+                android:minWidth="200dp" />
 
             <EditText
                 android:id="@+id/passwordET"
-                android:paddingTop="16dp"
+                android:paddingTop="32dp"
                 android:gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

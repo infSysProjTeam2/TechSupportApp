@@ -111,7 +111,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
         userType.setText("Начальник отдела");
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.userActions).setVisible(false);
 
         initChartData(0, 0, 0);
     }
@@ -331,25 +331,30 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
-        } else if (id == R.id.listOfChannels) {
             finish();
-        } else if (id == R.id.signUpUser) {
+        } else if (id == R.id.acceptedTickets) {
+            finish();
+        } else if (id == R.id.userActions) {
             Intent intent = new Intent(ChartsActivity.this, UserActionsActivity.class);
             intent.putExtra("uuid", mUserId);
             intent.putExtra("nickname", mNickname);
             startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ChartsActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.ok)
-                    .negativeText(android.R.string.cancel)
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

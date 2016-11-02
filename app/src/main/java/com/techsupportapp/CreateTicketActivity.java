@@ -86,7 +86,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.listOfChannels) {
+        if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
@@ -94,12 +94,15 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         } else if (id == R.id.about) {
             Globals.showAbout(CreateTicketActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.ok)
-                    .negativeText(android.R.string.cancel)
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -150,9 +153,9 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         userType.setText("Пользователь");
 
         Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.userActions).setVisible(false);
         nav_menu.findItem(R.id.charts).setVisible(false);
-        nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
+        nav_menu.findItem(R.id.acceptedTickets).setTitle("Список ваших заявок");
         nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
     }
 
