@@ -1,4 +1,4 @@
-package com.techsupportapp.adapters;
+package com.techsupportapp.fragments;
 
 import android.app.Dialog;
 import android.content.Intent;
