@@ -28,6 +28,7 @@ import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
@@ -91,7 +92,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(mNickname, TicketsOverviewActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
@@ -264,8 +265,12 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else
+        else {
+            MessagingService.stopMessagingService(getApplicationContext());
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
             super.onBackPressed();
+        }
+
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -309,6 +314,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    MessagingService.stopMessagingService(getApplicationContext());
+                    Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
                     exit();
                 }
             });

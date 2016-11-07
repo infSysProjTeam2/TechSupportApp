@@ -41,6 +41,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -103,7 +104,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(mNickname);
@@ -356,6 +357,8 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    MessagingService.stopMessagingService(getApplicationContext());
+                    Globals.logInfoAPK(ChartsActivity.this, "Служба - ОСТАНОВЛЕНА");
                     exit();
                 }
             });

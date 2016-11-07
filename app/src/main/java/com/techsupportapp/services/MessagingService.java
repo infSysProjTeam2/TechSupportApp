@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
@@ -29,6 +30,18 @@ public class MessagingService extends Service {
     private long messagesCount = 0;
 
     public MessagingService() {
+    }
+
+    public static void startMessagingService(Context context){
+        Intent intent = new Intent(context, MessagingService.class);
+        intent.addCategory("MessagingService");
+        context.startService(intent);
+    }
+
+    public static void stopMessagingService(Context context){
+        Intent intent = new Intent(context, MessagingService.class);
+        intent.addCategory("MessagingService");
+        context.stopService(intent);
     }
 
     @Override

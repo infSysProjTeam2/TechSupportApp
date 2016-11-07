@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -81,7 +82,7 @@ public class Globals {
          * @param bitmap Изображение, форму которого необходимо изменить.
          * @return Возвращает закругленную картинку (класс Bitmap).
          */
-        public static Bitmap getclip(Bitmap bitmap) {
+        public static Bitmap getClip(Bitmap bitmap) {
             Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                     bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(output);
@@ -97,6 +98,10 @@ public class Globals {
             canvas.drawBitmap(bitmap, rect, rect, paint);
             return output;
         }
+    }
+
+    public static void logInfoAPK(Context context, String message){
+        Log.i("APK001/" + context.toString(), message);
     }
 
     public static class Downloads {

@@ -41,6 +41,6 @@ public class ChatListAdapter extends FirebaseListAdapter<ChatMessage> {
                 //TODO что-то сделать
             }
         });
-        userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(author,context)));
+        userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(author,context)));
     }
 }

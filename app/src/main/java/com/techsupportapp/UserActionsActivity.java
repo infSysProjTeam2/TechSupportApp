@@ -40,6 +40,7 @@ import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
 import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
@@ -107,7 +108,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -254,6 +255,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    MessagingService.stopMessagingService(getApplicationContext());
+                    Globals.logInfoAPK(UserActionsActivity.this, "Служба - ОСТАНОВЛЕНА");
                     exit();
                 }
             });

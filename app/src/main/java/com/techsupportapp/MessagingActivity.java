@@ -96,7 +96,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(150), this);//TODO 150 сообщений - норм?
+        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(150), this);
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override

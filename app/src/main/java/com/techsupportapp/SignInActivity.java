@@ -74,7 +74,7 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 savePassAndLogin();
-                SignInActivity.super.onBackPressed();
+                SignInActivity.super.finish();
             }
         });
 
@@ -105,6 +105,12 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        android.os.Process.killProcess(android.os.Process.myPid()); //TODO is it necessary?
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_sign_up) {
@@ -122,7 +128,6 @@ public class SignInActivity extends AppCompatActivity {
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
         rememberPasCB.setChecked(settings.getBoolean("cbState", false));
-        stopService(new Intent(this, MessagingService.class));//TODO проверить правильность места использования метода
     }
 
     //endregion
@@ -274,18 +279,19 @@ public class SignInActivity extends AppCompatActivity {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - НАЧАТО");
                 isDownloaded = false;
                 unverifiedLoginList.clear();
 
                 userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
                 unverifiedLoginList = Globals.Downloads.Strings.getUnverifiedLogins(dataSnapshot);
 
+                isDownloaded = true;
                 if (loadingDialog != null){
-                    isDownloaded = true;
                     closeLoadingDialog();
                     signInBut.callOnClick();
                 }
-
+                Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - ЗАВЕРШЕНО");
             }
 
             @Override
@@ -331,8 +337,10 @@ public class SignInActivity extends AppCompatActivity {
 
         savePassAndLogin();
 
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false))
-            startService(new Intent(this, MessagingService.class));
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false)) {
+            MessagingService.startMessagingService(getApplicationContext());
+            Globals.logInfoAPK(SignInActivity.this, "Служба - ЗАПУЩЕНА");
+        }
 
         Globals.currentUser = user;
         startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));
