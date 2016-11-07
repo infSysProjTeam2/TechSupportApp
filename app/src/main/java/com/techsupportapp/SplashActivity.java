@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -21,20 +23,24 @@ import java.util.ArrayList;
 
 public class SplashActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
     private ArrayList<User> userList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        tryToConnect();
+        finish();
+    }
 
+    private void tryToConnect(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getString("Login","").equals("") || preferences.getString("Password","").equals("")){
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
         } else {
             if (hasConnection()) {
-                databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.addValueEventListener(new ValueEventListener() {
+                valueEventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
@@ -48,13 +54,14 @@ public class SplashActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+                        finish();
                     }
-                });
-            } else {
+                };
+                databaseReference = FirebaseDatabase.getInstance().getReference();
+                databaseReference.addValueEventListener(valueEventListener);
+            } else
                 Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
-            }
         }
-        finish();
     }
 
     private void signIn(User user){
@@ -64,6 +71,7 @@ public class SplashActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
+        databaseReference.removeEventListener(valueEventListener);
         startActivity(new Intent(SplashActivity.this, AcceptedTicketsActivity.class));
     }
 
