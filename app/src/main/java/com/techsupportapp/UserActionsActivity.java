@@ -50,12 +50,9 @@ import com.techsupportapp.utility.ItemClickSupport;
 import java.util.ArrayList;
 
 public class UserActionsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private static String mUserId;
-    private String mNickname;
-
     private static Context context;
 
-    private static ViewPager viewPager;
+    private ViewPager viewPager;
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     private static RecyclerView unverifiedUsersView;
@@ -82,9 +79,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
         context = UserActionsActivity.this;
 
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
-
         supportInvalidateOptionsMenu();
         initializeComponents();
         setEvents();
@@ -110,7 +104,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, UserActionsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), UserActionsActivity.this)));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -121,7 +115,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         userType.setText("Администратор");
         navigationView.getMenu().findItem(R.id.charts).setVisible(false);
 
@@ -236,14 +230,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             finish();
         } else if (id == R.id.listOfTickets) {
             Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {
             Intent intent = new Intent(UserActionsActivity.this, ChartsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {

@@ -53,9 +53,6 @@ import java.util.Locale;
 
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private String mUserId;
-    private String mNickname;
-
     private ImageView currUserImage;
 
     private TextView firstDateTV;
@@ -71,9 +68,6 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_charts);
-
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
 
         initializeComponents();
         setEvents();
@@ -106,10 +100,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ChartsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         userType.setText("Начальник отдела");
         nav_menu.findItem(R.id.userActions).setVisible(false);
 
@@ -328,16 +322,12 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
         if (id == R.id.listOfTickets) {
             Intent intent = new Intent(ChartsActivity.this, ListOfTicketsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.userActions) {
             Intent intent = new Intent(ChartsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {

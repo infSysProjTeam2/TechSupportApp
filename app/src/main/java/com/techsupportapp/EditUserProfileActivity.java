@@ -35,7 +35,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
     private ArrayList<User> usersList = new ArrayList<User>();
 
     private String mUserId;
-    private String mCurrUserId;
 
     private int userPosition;
 
@@ -54,7 +53,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
 
         mUserId = getIntent().getExtras().getString("userId");
-        mCurrUserId = getIntent().getExtras().getString("currUserId");
         setContentView(R.layout.activity_edit_user_profile);
 
         initializeComponents();
@@ -75,7 +73,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
         saveBtn = (Button)findViewById(R.id.saveBtn);
 
-        if (!mUserId.equals(mCurrUserId)) {
+        if (!mUserId.equals(Globals.currentUser.getLogin())) {
             userName.setEnabled(false);
             workPlace.setEnabled(false);
             changePasswordBtn.setEnabled(false);
@@ -138,7 +136,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 } else
                                     Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
 
-                                if (changedRole && mUserId.equals(mCurrUserId)) {
+                                if (changedRole && mUserId.equals(Globals.currentUser.getLogin())) {
                                     Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(i);

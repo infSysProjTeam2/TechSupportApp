@@ -69,18 +69,12 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private ImageView currUserImage;
 
-    private static String mUserId;
-    private static String mNickname;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
 
         context = ListOfTicketsActivity.this;
-
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
 
         initializeComponents();
         setEvents();
@@ -117,7 +111,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -128,7 +122,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         Menu nav_menu = navigationView.getMenu();
 
         int role = Globals.currentUser.getRole();
@@ -159,7 +153,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                 listOfMyClosedTickets.clear();
 
                 for (Ticket ticket : listOfSolvedTickets)
-                    if (ticket.getAdminId().equals(mUserId))
+                    if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
                         listOfMyClosedTickets.add(ticket);
 
                 adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, getSupportFragmentManager());
@@ -199,14 +193,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             finish();
         } else if (id == R.id.userActions) {
             Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {
             Intent intent = new Intent(ListOfTicketsActivity.this, ChartsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {
@@ -308,7 +298,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
+                                    listOfAvailableTickets.get(position).addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
 
                                     adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
                                     viewOfAvailableTickets.setAdapter(adapter);

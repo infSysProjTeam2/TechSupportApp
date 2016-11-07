@@ -42,8 +42,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private DatabaseReference databaseReference;
 
     private int ticketCount;
-    private String mUserId;
-    private String mNickname;
     private String rightDate;
 
     //endregion
@@ -64,8 +62,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_ticket);
 
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
         initializeComponents();
 
         setEvents();
@@ -147,9 +143,9 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, CreateTicketActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), CreateTicketActivity.this)));
 
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         userType.setText("Пользователь");
 
         Menu nav_menu = navigationView.getMenu();
@@ -174,7 +170,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                         }
                         else if (!newRightDate.equals(rightDate))
                             databaseReference.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
-                        Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
+                        Ticket newTicket = new Ticket("ticket" + ticketCount, Globals.currentUser.getLogin(), Globals.currentUser.getUserName(), topicET.getText().toString(), messageET.getText().toString());
                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
                         databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();

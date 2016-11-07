@@ -41,8 +41,6 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     private RecyclerView ticketsOverview;
     private LinearLayoutManager mLayoutManager;
 
-    private String mUserId;
-    private String mNickname;
     private int role;
 
     private DatabaseReference databaseRef;
@@ -53,15 +51,11 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
     private ImageView currUserImage;
 
-    private View bottomSheetBehaviorView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accepted_tickets);
 
-        mUserId = Globals.currentUser.getLogin();
-        mNickname = Globals.currentUser.getUserName();
         role = Globals.currentUser.getRole();
 
         initializeComponents();
@@ -70,8 +64,6 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
     private void initializeComponents(){
         ticketsOverview = (RecyclerView)findViewById(R.id.ticketsOverview);
-
-        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
@@ -93,10 +85,10 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, AcceptedTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), AcceptedTicketsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         if (role == User.ADMINISTRATOR) {
             userType.setText("Администратор");
             nav_menu.findItem(R.id.charts).setVisible(false);
@@ -126,14 +118,14 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                 usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
 
                 if (role != User.SIMPLE_USER) {
-                    ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
+                    ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
-                    ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
-                    ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
+                    ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
+                    ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
@@ -287,26 +279,18 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         if (id == R.id.listOfTickets) {
             if (role != User.SIMPLE_USER) {
                 Intent intent = new Intent(AcceptedTicketsActivity.this, ListOfTicketsActivity.class);
-                intent.putExtra("uuid", mUserId);
-                intent.putExtra("nickname", mNickname);
                 startActivity(intent);
             }
             else
             {
                 Intent intent = new Intent(AcceptedTicketsActivity.this, CreateTicketActivity.class);
-                intent.putExtra("uuid", mUserId);
-                intent.putExtra("nickname", mNickname);
                 startActivity(intent);
             }
         } else if (id == R.id.userActions) {
             Intent intent = new Intent(AcceptedTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.charts) {
             Intent intent = new Intent(AcceptedTicketsActivity.this, ChartsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
