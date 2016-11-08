@@ -43,7 +43,9 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
     private int role;
 
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
+
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayList<User> usersList = new ArrayList<User>();
 
@@ -55,11 +57,28 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accepted_tickets);
-
         role = Globals.currentUser.getRole();
 
         initializeComponents();
         setEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     private void initializeComponents(){
@@ -67,7 +86,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список принятых заявок");
@@ -112,7 +131,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
@@ -137,7 +156,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
         ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
@@ -174,8 +193,8 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                             selectedTicket.removeAdmin();
-                                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                         }
                                     })
                                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -197,7 +216,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                             }
                                         })
                                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -217,8 +236,8 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                             }
                                         })
                                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -258,7 +277,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            AcceptedTicketsActivity.this.finish();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -297,10 +316,10 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(AcceptedTicketsActivity.this);
-            return true;
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
@@ -310,7 +329,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            AcceptedTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -325,9 +344,5 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void exit(){
-        this.finishAffinity();
     }
 }

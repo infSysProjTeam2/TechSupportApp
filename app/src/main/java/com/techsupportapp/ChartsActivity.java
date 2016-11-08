@@ -59,6 +59,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private TextView lastDateTV;
 
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
 
     private ArrayList<Ticket> allTickets = new ArrayList<Ticket>();
 
@@ -68,9 +69,26 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_charts);
-
         initializeComponents();
         setEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     private void initializeComponents(){
@@ -288,7 +306,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             }
         });
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 //TODO пофиксить текст, переезжающий на другую строку
@@ -312,7 +330,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -339,6 +357,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
@@ -348,7 +367,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            ChartsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -373,9 +392,5 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         } else {
             finish();
         }
-    }
-
-    private void exit(){
-        this.finishAffinity();
     }
 }

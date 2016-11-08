@@ -1,7 +1,6 @@
 package com.techsupportapp;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,7 +15,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -58,7 +56,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static RecyclerView unverifiedUsersView;
     private static RecyclerView usersView;
 
-    private static DatabaseReference databaseRef;
+    private static DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
+
     private static ArrayList<User> unverifiedUsersList = new ArrayList<User>();
     private static ArrayList<User> usersList = new ArrayList<User>();
     private static UnverifiedUserRecyclerAdapter adapter;
@@ -84,9 +84,27 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         setEvents();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
     private void initializeComponents(){
         fragmentManager = getSupportFragmentManager();
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Пользователи");
@@ -151,7 +169,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
@@ -171,7 +189,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,10 +259,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(UserActionsActivity.this);
-            return true;
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
@@ -254,7 +272,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            UserActionsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -348,10 +366,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         return super.onOptionsItemSelected(item);
     }
 
-    private void exit(){
-        this.finishAffinity();
-    }
-
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -416,7 +430,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         search = false;
                                         try {
-                                            databaseRef.child(getDatabaseUserPath(selectedUser))
+                                            databaseReference.child(getDatabaseUserPath(selectedUser))
                                                     .child(selectedUser.getBranchId()).setValue(selectedUser);
                                         } catch (Exception e) {
                                             e.printStackTrace();
@@ -427,7 +441,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
                                         search = false;
 
-                                        databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                                         Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                                     }
                                 })
@@ -460,7 +474,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                                         MenuItemCompat.collapseActionView(searchMenu);
                                     search = false;
 
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                    databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                                     Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
                                 }
                             })

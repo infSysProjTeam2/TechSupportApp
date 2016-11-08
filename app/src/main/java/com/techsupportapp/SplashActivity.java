@@ -4,9 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -36,8 +34,8 @@ public class SplashActivity extends AppCompatActivity {
     private void tryToConnect(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getString("Login","").equals("") || preferences.getString("Password","").equals("")){
-            Intent intent = new Intent(this, SignInActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, SignInActivity.class));
+            finish();
         } else {
             if (hasConnection()) {
                 valueEventListener = new ValueEventListener() {
@@ -54,7 +52,6 @@ public class SplashActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
-                        finish();
                     }
                 };
                 databaseReference = FirebaseDatabase.getInstance().getReference();

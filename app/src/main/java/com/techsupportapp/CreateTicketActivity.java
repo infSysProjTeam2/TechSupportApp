@@ -40,6 +40,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     //region Fields
 
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
 
     private int ticketCount;
     private String rightDate;
@@ -63,8 +64,25 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         setContentView(R.layout.activity_create_ticket);
 
         initializeComponents();
-
         setEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -89,10 +107,10 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(CreateTicketActivity.this);
-            return true;
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
@@ -102,7 +120,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            CreateTicketActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -184,7 +202,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         });
 
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ticketCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
@@ -195,7 +213,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,9 +223,4 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             }
         });
     }
-
-    private void exit(){
-        this.finishAffinity();
-    }
-
 }
