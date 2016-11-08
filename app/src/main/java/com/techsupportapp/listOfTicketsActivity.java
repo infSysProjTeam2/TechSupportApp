@@ -1,28 +1,20 @@
 package com.techsupportapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,38 +25,25 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.fragments.ListOfTicketsFragments;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
-import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-
-    private static Context context;
-
-    private static RecyclerView viewOfAvailableTickets;
-    private static RecyclerView viewOfMyClosedTickets;
-    private static RecyclerView viewOfSolvedTickets;
-
-    private static DatabaseReference databaseReference;
+    private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
-    private static ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
-    private static ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
-    private static ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
-    private static TicketRecyclerAdapter adapter;
-    private static TicketRecyclerAdapter adapter1;
-    private static TicketRecyclerAdapter adapter2;
+    private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<>();
+    private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
+    private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<>();
 
-    private static ArrayList<User> usersList = new ArrayList<User>();
-    private static FragmentManager fragmentManager;
+    private static ArrayList<User> usersList = new ArrayList<>();
 
-    private ViewPager viewPager;
-    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ListOfTicketsFragments.SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ImageView currUserImage;
 
@@ -72,8 +51,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
-
-        context = ListOfTicketsActivity.this;
 
         initializeComponents();
         setEvents();
@@ -111,7 +88,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private void initializeComponents() {
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        fragmentManager = getSupportFragmentManager();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список заявок");
         setSupportActionBar(toolbar);
@@ -130,9 +106,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter = new ListOfTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
-        viewPager = (ViewPager) findViewById(R.id.viewPager);
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
         viewPager.setOffscreenPageLimit(3);
         viewPager.setAdapter(mSectionsPagerAdapter);
 
@@ -173,18 +149,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
                         listOfMyClosedTickets.add(ticket);
 
-                adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, getSupportFragmentManager());
-                viewOfAvailableTickets.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-
-                adapter1 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfMyClosedTickets, usersList, getSupportFragmentManager());
-                viewOfMyClosedTickets.setAdapter(adapter1);
-                adapter1.notifyDataSetChanged();
-
-                adapter2 = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfSolvedTickets, usersList, getSupportFragmentManager());
-                viewOfSolvedTickets.setAdapter(adapter2);
-                adapter2.notifyDataSetChanged();
-
+                mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, databaseReference);
+                mSectionsPagerAdapter.updateSecondFragment(listOfMyClosedTickets, usersList, ListOfTicketsActivity.this);
+                mSectionsPagerAdapter.updateThirdFragment(listOfSolvedTickets, usersList, ListOfTicketsActivity.this);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -248,141 +215,5 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            if (position == 0)
-                return FirstFragment.newInstance();
-            else if (position == 1)
-                return SecondFragment.newInstance();
-            else
-                return ThirdFragment.newInstance();
-        }
-
-        @Override
-        public int getCount() {
-            return 3;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0:
-                    return "Доступные";
-                case 1:
-                    return "Решенные мной";
-                case 2:
-                    return "Решенные";
-            }
-            return null;
-        }
-    }
-
-    public static class FirstFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
-            viewOfAvailableTickets = (RecyclerView) v.findViewById(R.id.recycler);
-
-            adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-
-            viewOfAvailableTickets.setLayoutManager(mLayoutManager);
-            viewOfAvailableTickets.setHasFixedSize(false);
-            viewOfAvailableTickets.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
-
-            ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                @Override
-                public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
-                    new MaterialDialog.Builder(context)
-                            .title("Принять заявку")
-                            .content("Вы действительно хотите принять заявку?")
-                            .positiveText(android.R.string.yes)
-                            .negativeText(android.R.string.no)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    listOfAvailableTickets.get(position).addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
-
-                                    adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
-                                    viewOfAvailableTickets.setAdapter(adapter);
-                                    adapter.notifyDataSetChanged();
-
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
-                                }
-                            })
-                            .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    dialog.cancel();
-                                }
-                            })
-                            .show();
-                }
-            });
-
-
-            return v;
-        }
-
-        public static FirstFragment newInstance() {
-            FirstFragment f = new FirstFragment();
-            return f;
-        }
-    }
-
-    public static class SecondFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
-            viewOfMyClosedTickets = (RecyclerView)v.findViewById(R.id.recycler);
-
-            adapter1 = new TicketRecyclerAdapter(context, listOfMyClosedTickets, usersList, fragmentManager);
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-
-            viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
-            viewOfMyClosedTickets.setHasFixedSize(false);
-            viewOfMyClosedTickets.setAdapter(adapter1);
-            adapter1.notifyDataSetChanged();
-
-            return v;
-        }
-
-        public static SecondFragment newInstance() {
-            SecondFragment f = new SecondFragment();
-            return f;
-        }
-    }
-
-    public static class ThirdFragment extends Fragment {
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.fragment_recycler, container, false);
-            viewOfSolvedTickets = (RecyclerView)v.findViewById(R.id.recycler);
-
-            adapter2 = new TicketRecyclerAdapter(context, listOfSolvedTickets, usersList, fragmentManager);
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-
-            viewOfSolvedTickets.setLayoutManager(mLayoutManager);
-            viewOfSolvedTickets.setHasFixedSize(false);
-            viewOfSolvedTickets.setAdapter(adapter2);
-            adapter2.notifyDataSetChanged();
-
-            return v;
-        }
-
-        public static ThirdFragment newInstance() {
-            ThirdFragment f = new ThirdFragment();
-            return f;
-        }
     }
 }
