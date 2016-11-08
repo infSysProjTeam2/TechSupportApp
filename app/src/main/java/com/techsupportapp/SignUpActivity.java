@@ -38,6 +38,8 @@ public class SignUpActivity extends AppCompatActivity {
     //region Fields
 
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
+
     private ArrayList<String> loginList = new ArrayList<String>();
     private int userCount;
 
@@ -65,8 +67,25 @@ public class SignUpActivity extends AppCompatActivity {
         setTitle("Регистрация");
 
         initializeComponents();
-
         setEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     /**
@@ -112,7 +131,7 @@ public class SignUpActivity extends AppCompatActivity {
      * Создание методов для событий
      */
     private void setEvents() {
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 loginList = Globals.Downloads.getAllLogins(dataSnapshot);
@@ -123,7 +142,7 @@ public class SignUpActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
         repeatPasswordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

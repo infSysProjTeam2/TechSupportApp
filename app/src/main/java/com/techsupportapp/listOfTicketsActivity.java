@@ -1,8 +1,6 @@
 package com.techsupportapp;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -53,7 +51,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private static RecyclerView viewOfMyClosedTickets;
     private static RecyclerView viewOfSolvedTickets;
 
-    private static DatabaseReference databaseRef;
+    private static DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
     private static ArrayList<Ticket> listOfAvailableTickets = new ArrayList<Ticket>();
     private static ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<Ticket>();
     private static ArrayList<Ticket> listOfSolvedTickets = new ArrayList<Ticket>();
@@ -69,9 +68,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private ImageView currUserImage;
 
-    private static String mUserId;
-    private static String mNickname;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,11 +75,26 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         context = ListOfTicketsActivity.this;
 
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
-
         initializeComponents();
         setEvents();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -98,7 +109,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void initializeComponents() {
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         fragmentManager = getSupportFragmentManager();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -117,7 +128,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
 
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -128,7 +139,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         Menu nav_menu = navigationView.getMenu();
 
         int role = Globals.currentUser.getRole();
@@ -149,7 +160,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
@@ -159,7 +170,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                 listOfMyClosedTickets.clear();
 
                 for (Ticket ticket : listOfSolvedTickets)
-                    if (ticket.getAdminId().equals(mUserId))
+                    if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
                         listOfMyClosedTickets.add(ticket);
 
                 adapter = new TicketRecyclerAdapter(ListOfTicketsActivity.this, listOfAvailableTickets, usersList, getSupportFragmentManager());
@@ -179,7 +190,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,14 +210,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             finish();
         } else if (id == R.id.userActions) {
             Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {
             Intent intent = new Intent(ListOfTicketsActivity.this, ChartsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {
@@ -214,7 +221,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ListOfTicketsActivity.this);
-            return true;
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
@@ -227,7 +233,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            ListOfTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -242,10 +248,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void exit(){
-        this.finishAffinity();
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -308,14 +310,14 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    listOfAvailableTickets.get(position).addAdmin(mUserId, mNickname);
+                                    listOfAvailableTickets.get(position).addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
 
                                     adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, fragmentManager);
                                     viewOfAvailableTickets.setAdapter(adapter);
                                     adapter.notifyDataSetChanged();
 
-                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
+                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
                                 }
                             })
                             .onNegative(new MaterialDialog.SingleButtonCallback() {

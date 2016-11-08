@@ -45,6 +45,7 @@ public class SignInActivity extends AppCompatActivity {
     private ArrayList<String> unverifiedLoginList = new ArrayList<String>();
 
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
 
     //endregion
 
@@ -118,6 +119,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
 
         loginET.setText(preferences.getString("Login",""));
@@ -125,6 +127,17 @@ public class SignInActivity extends AppCompatActivity {
         rememberPasCB.setChecked(preferences.getBoolean("cbState", false));
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
+    }
     //endregion
 
     /**
@@ -267,7 +280,7 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 unverifiedLoginList.clear();
@@ -282,7 +295,7 @@ public class SignInActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
                 Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
-        });
+        };
 
         passwordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

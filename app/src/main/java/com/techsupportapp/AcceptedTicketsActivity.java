@@ -41,11 +41,11 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     private RecyclerView ticketsOverview;
     private LinearLayoutManager mLayoutManager;
 
-    private String mUserId;
-    private String mNickname;
     private int role;
 
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
+
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayList<User> usersList = new ArrayList<User>();
 
@@ -53,29 +53,40 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
     private ImageView currUserImage;
 
-    private View bottomSheetBehaviorView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_accepted_tickets);
-
-        mUserId = Globals.currentUser.getLogin();
-        mNickname = Globals.currentUser.getUserName();
         role = Globals.currentUser.getRole();
 
         initializeComponents();
         setEvents();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
     private void initializeComponents(){
         ticketsOverview = (RecyclerView)findViewById(R.id.ticketsOverview);
 
-        bottomSheetBehaviorView = findViewById(R.id.bottom_sheet);
-
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список принятых заявок");
@@ -93,10 +104,10 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(mNickname, AcceptedTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), AcceptedTicketsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         if (role == User.ADMINISTRATOR) {
             userType.setText("Администратор");
             nav_menu.findItem(R.id.charts).setVisible(false);
@@ -120,20 +131,20 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
 
                 if (role != User.SIMPLE_USER) {
-                    ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, mUserId);
+                    ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
                 } else {
-                    ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
-                    ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
+                    ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
+                    ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
                     adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
@@ -145,7 +156,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
         ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
@@ -182,8 +193,8 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                             selectedTicket.removeAdmin();
-                                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                         }
                                     })
                                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -205,7 +216,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                             }
                                         })
                                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -225,8 +236,8 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                                         .onPositive(new MaterialDialog.SingleButtonCallback() {
                                             @Override
                                             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                                databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                             }
                                         })
                                         .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -266,7 +277,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            AcceptedTicketsActivity.this.finish();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -287,36 +298,28 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         if (id == R.id.listOfTickets) {
             if (role != User.SIMPLE_USER) {
                 Intent intent = new Intent(AcceptedTicketsActivity.this, ListOfTicketsActivity.class);
-                intent.putExtra("uuid", mUserId);
-                intent.putExtra("nickname", mNickname);
                 startActivity(intent);
             }
             else
             {
                 Intent intent = new Intent(AcceptedTicketsActivity.this, CreateTicketActivity.class);
-                intent.putExtra("uuid", mUserId);
-                intent.putExtra("nickname", mNickname);
                 startActivity(intent);
             }
         } else if (id == R.id.userActions) {
             Intent intent = new Intent(AcceptedTicketsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.charts) {
             Intent intent = new Intent(AcceptedTicketsActivity.this, ChartsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(AcceptedTicketsActivity.this);
-            return true;
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
@@ -326,7 +329,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            exit();
+                            AcceptedTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -341,9 +344,5 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void exit(){
-        this.finishAffinity();
     }
 }

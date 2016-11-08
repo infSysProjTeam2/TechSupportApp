@@ -1,6 +1,5 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -29,8 +28,8 @@ import java.util.Locale;
 
 public class MessagingActivity extends AppCompatActivity {
 
-    private Firebase mFirebaseRef;
-    private ValueEventListener mConnectedListener;
+    private Firebase databaseReference;
+    private ValueEventListener valueEventListener;
     private ChatListAdapter mChatListAdapter;
 
     private String mUsername;
@@ -55,8 +54,8 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        mFirebaseRef.setAndroidContext(MessagingActivity.this);
-        mFirebaseRef = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
+        databaseReference.setAndroidContext(MessagingActivity.this);
+        databaseReference = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
@@ -94,11 +93,11 @@ public class MessagingActivity extends AppCompatActivity {
                 .show();
     }
 
-        @Override
+    @Override
     public void onStart() {
         super.onStart();
         final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(150), this);//TODO 150 сообщений - норм?
+        mChatListAdapter = new ChatListAdapter(databaseReference.limit(150), this);//TODO 150 сообщений - норм?
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -108,7 +107,7 @@ public class MessagingActivity extends AppCompatActivity {
             }
         });
 
-        mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
+        valueEventListener = databaseReference.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 boolean connected = (Boolean) dataSnapshot.getValue();
@@ -128,7 +127,7 @@ public class MessagingActivity extends AppCompatActivity {
     @Override
     public void onStop() {
         super.onStop();
-        mFirebaseRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
+        databaseReference.getRoot().child(".info/connected").removeEventListener(valueEventListener);
         mChatListAdapter.cleanup();
     }
 
@@ -141,7 +140,7 @@ public class MessagingActivity extends AppCompatActivity {
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
             ChatMessage chatMessage = new ChatMessage(input, Globals.currentUser.getUserName(), Globals.currentUser.getLogin(), messageTime, true);
-            mFirebaseRef.push().setValue(chatMessage);
+            databaseReference.push().setValue(chatMessage);
             inputText.setText("");
         }
     }
