@@ -212,7 +212,7 @@ public class SignInActivity extends AppCompatActivity {
     private boolean hasConnection() {
         ConnectivityManager cm = (ConnectivityManager)SignInActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork.isConnectedOrConnecting();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }
 
     /**
