@@ -277,7 +277,7 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            AcceptedTicketsActivity.this.finish();
+                            AcceptedTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
