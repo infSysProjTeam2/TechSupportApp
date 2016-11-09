@@ -1,10 +1,14 @@
 package com.techsupportapp;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -22,43 +26,62 @@ import java.util.ArrayList;
 public class SplashActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
-    private ArrayList<User> userList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         tryToConnect();
-        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        databaseReference.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        databaseReference.removeEventListener(valueEventListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        databaseReference.removeEventListener(valueEventListener);
     }
 
     private void tryToConnect(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getString("Login","").equals("") || preferences.getString("Password","").equals("")){
-            startActivity(new Intent(this, SignInActivity.class));
-            finish();
+            showSignInActivity();
         } else {
             if (hasConnection()) {
                 valueEventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-
+                        ArrayList<User> userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
-                        for (User user : userList)
-                            if (user.getLogin().equals(preferences.getString("Login", "")))
-                                signIn(user);
+                        checkVerificationData(userList, preferences.getString("Login", ""), preferences.getString("Password", ""));
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
                         Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+                        SplashActivity.this.finish();
                     }
                 };
                 databaseReference = FirebaseDatabase.getInstance().getReference();
-                databaseReference.addValueEventListener(valueEventListener);
-            } else
+            } else {
                 Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
+                showSignInActivity();
+            }
         }
+    }
+
+    private void showSignInActivity(){
+        startActivity(new Intent(SplashActivity.this, SignInActivity.class));
+        SplashActivity.this.finish();
     }
 
     private void signIn(User user){
@@ -68,19 +91,28 @@ public class SplashActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        databaseReference.removeEventListener(valueEventListener);
         startActivity(new Intent(SplashActivity.this, AcceptedTicketsActivity.class));
+        SplashActivity.this.finish();
+    }
+
+    private void checkVerificationData(ArrayList<User> userList, String login, String password) {
+        int i = 0;
+        while (!login.equals(userList.get(i).getLogin()) && ++i < userList.size());
+        if (i >= userList.size()) {
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
+            showSignInActivity();
+        }
+        else if (login.equals(userList.get(i).getLogin()) && password.equals(userList.get(i).getPassword()))
+            signIn(userList.get(i));
+        else {
+            Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
+            showSignInActivity();
+        }
     }
 
     private boolean hasConnection() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        } catch (IOException e)          { e.printStackTrace(); }
-        catch (InterruptedException e) { e.printStackTrace(); }
-
-        return false;
+        ConnectivityManager cm = (ConnectivityManager)SplashActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork.isConnectedOrConnecting();
     }
 }
