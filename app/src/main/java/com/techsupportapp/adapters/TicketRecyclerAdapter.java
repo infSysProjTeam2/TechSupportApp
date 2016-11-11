@@ -28,11 +28,11 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     private FragmentManager fragmentManager;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView authorText;
-        public TextView dateText;
-        public TextView topicText;
-        public TextView descText;
-        public ImageView ticketImage;
+        TextView authorText;
+        TextView dateText;
+        TextView topicText;
+        TextView descText;
+        ImageView ticketImage;
 
         public ViewHolder(View view) {
             super(view);

@@ -31,7 +31,6 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.Globals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -332,6 +331,6 @@ public class SignInActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        startActivity(new Intent(SignInActivity.this, AcceptedTicketsActivity.class));
+        startActivity(new Intent(SignInActivity.this, TicketsActivity.class));
     }
 }
