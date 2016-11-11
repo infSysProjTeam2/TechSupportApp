@@ -21,6 +21,12 @@ public class Globals {
 
     public static User currentUser;
 
+    public static ArrayList<Integer> expandedItemsAvailable = new ArrayList<>();
+    public static ArrayList<Integer> expandedItemsMyClosed = new ArrayList<>();
+    public static ArrayList<Integer> expandedItemsClosed = new ArrayList<>();
+    public static ArrayList<Integer> expandedItemsOverview = new ArrayList<>();
+
+
     /**
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.

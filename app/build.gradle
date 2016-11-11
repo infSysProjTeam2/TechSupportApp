@@ -36,6 +36,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:25.0.0'
     compile 'com.github.PhilJay:MPAndroidChart:v3.0.0-beta1'
     compile 'com.afollestad.material-dialogs:core:0.9.0.2'
+    compile 'com.github.grennis:ExpandableRecyclerView:0.9.3'
     compile ('com.weiwangcn.betterspinner:library:1.1.0') {
         exclude group: 'com.android.support', module: 'appcompat-v7'
     }

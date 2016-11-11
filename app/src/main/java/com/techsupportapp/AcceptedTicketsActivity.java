@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -26,13 +25,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketRecyclerAdapter;
+import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
+import com.techsupportapp.adapters.TicketExpandableRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
-import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
@@ -49,9 +48,9 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayList<User> usersList = new ArrayList<User>();
 
-    private TicketRecyclerAdapter adapter;
-
     private ImageView currUserImage;
+
+    private TicketExpandableRecyclerAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,17 +137,34 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
                 if (role != User.SIMPLE_USER) {
                     ticketsOverviewList = Globals.Downloads.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                    int type;
+                    if (role == User.DEPARTMENT_CHIEF)
+                        type = TicketExpandableRecyclerAdapter.TYPE_OVERVIEWCREATED;
+                    else
+                        type = TicketExpandableRecyclerAdapter.TYPE_MYACCEPTED;
+
+                    adapter = new TicketExpandableRecyclerAdapter(type, AcceptedTicketsActivity.this, databaseReference, ticketsOverviewList, usersList, getSupportFragmentManager());
+                    adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                    new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCREATED, AcceptedTicketsActivity.this, databaseReference, ticketsOverviewList, usersList, getSupportFragmentManager());
+                    adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
                     ticketsOverview.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
+
+                try {
+                    for (int position : Globals.expandedItemsOverview)
+                        adapter.expandItems(position, true);
+                } catch (Exception e){
+                    e.printStackTrace();
                 }
             }
 
@@ -157,101 +173,6 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
 
             }
         };
-        ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        Intent intent = new Intent(AcceptedTicketsActivity.this, MessagingActivity.class);
-                        if (role != User.SIMPLE_USER) {
-                            intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
-                            intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                        }
-                        else {
-                            if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
-                                Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
-                                return;
-                            }
-                            else {
-                                intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
-                                intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                            }
-                        }
-                        startActivity(intent);
-                    }
-                });
-
-        ItemClickSupport.addTo(ticketsOverview).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener () {
-                    @Override
-                    public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                        if (role == User.DEPARTMENT_CHIEF) {
-                            final Ticket selectedTicket = ticketsOverviewList.get(position);
-                            new MaterialDialog.Builder(AcceptedTicketsActivity.this)
-                                    .title("Отказ от заявки пользователя " + selectedTicket.getUserName())
-                                    .content("Вы действительно хотите отказаться от данной заявки?")
-                                    .positiveText(android.R.string.yes)
-                                    .negativeText(android.R.string.no)
-                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                            selectedTicket.removeAdmin();
-                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                        }
-                                    })
-                                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                            dialog.cancel();
-                                        }
-                                    })
-                                    .show();
-                        }
-                        else if (role == User.SIMPLE_USER){
-                            final Ticket selectedTicket = ticketsOverviewList.get(position);
-                            if (selectedTicket.getAdminId() == null || selectedTicket.getAdminId().equals("")) {
-                                new MaterialDialog.Builder(AcceptedTicketsActivity.this)
-                                        .title("Отзыв заявки " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
-                                        .content("Вы действительно хотите отозвать данную заявку?")
-                                        .positiveText(android.R.string.yes)
-                                        .negativeText(android.R.string.no)
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                            }
-                                        })
-                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.cancel();
-                                            }
-                                        })
-                                        .show();
-                            }
-                            else {
-                                new MaterialDialog.Builder(AcceptedTicketsActivity.this)
-                                        .title("Подтверждение решения проблемы по заявке " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
-                                        .content("Ваша проблема действительно была решена?")
-                                        .positiveText(android.R.string.yes)
-                                        .negativeText(android.R.string.no)
-                                        .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                                databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                            }
-                                        })
-                                        .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                            @Override
-                                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                                dialog.cancel();
-                                            }
-                                        })
-                                        .show();
-                            }
-                        }
-                        return true;
-                    }
-        });
 
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override

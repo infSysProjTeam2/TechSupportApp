@@ -2,7 +2,6 @@ package com.techsupportapp.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -12,16 +11,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DatabaseReference;
+import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
 import com.techsupportapp.R;
-import com.techsupportapp.adapters.TicketRecyclerAdapter;
+import com.techsupportapp.adapters.TicketExpandableRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
-import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
@@ -106,7 +102,9 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(final ArrayList<Ticket> listOfAvailableTickets, final ArrayList<User> usersList, final Context context, final DatabaseReference databaseReference){
-            TicketRecyclerAdapter adapter = new TicketRecyclerAdapter(context, listOfAvailableTickets, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, databaseReference, listOfAvailableTickets, usersList, getFragmentManager());
+            adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
+
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfAvailableTickets.setLayoutManager(mLayoutManager);
@@ -114,32 +112,12 @@ public class ListOfTicketsFragments {
             viewOfAvailableTickets.setAdapter(adapter);
             adapter.notifyDataSetChanged();
 
-            ItemClickSupport.addTo(viewOfAvailableTickets).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                @Override
-                public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
-                    new MaterialDialog.Builder(context)
-                            .title("Принять заявку")
-                            .content("Вы действительно хотите принять заявку?")
-                            .positiveText(android.R.string.yes)
-                            .negativeText(android.R.string.no)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    listOfAvailableTickets.get(position).addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
-
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
-                                }
-                            })
-                            .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    dialog.cancel();
-                                }
-                            })
-                            .show();
-                }
-            });
+            try {
+                for (int position : Globals.expandedItemsAvailable)
+                    adapter.expandItems(position, true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
         public static FirstFragment newInstance() {
@@ -160,13 +138,22 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
-            TicketRecyclerAdapter adapter = new TicketRecyclerAdapter(context, listOfMyClosedTickets, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCLOSED, context, null, listOfMyClosedTickets, usersList, getFragmentManager());
+            adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
+
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
             viewOfMyClosedTickets.setHasFixedSize(false);
             viewOfMyClosedTickets.setAdapter(adapter);
             adapter.notifyDataSetChanged();
+
+            try {
+                for (int position : Globals.expandedItemsMyClosed)
+                    adapter.expandItems(position, true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
         public static SecondFragment newInstance() {
@@ -187,13 +174,22 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
-            TicketRecyclerAdapter adapter = new TicketRecyclerAdapter(context, listOfSolvedTickets, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, null, listOfSolvedTickets, usersList, getFragmentManager());
+            adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
+
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
 
             viewOfSolvedTickets.setLayoutManager(mLayoutManager);
             viewOfSolvedTickets.setHasFixedSize(false);
             viewOfSolvedTickets.setAdapter(adapter);
             adapter.notifyDataSetChanged();
+
+            try {
+                for (int position : Globals.expandedItemsClosed)
+                    adapter.expandItems(position, true);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
         }
 
         public static ThirdFragment newInstance() {
