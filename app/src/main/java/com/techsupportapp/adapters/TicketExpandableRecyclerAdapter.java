@@ -33,9 +33,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     public static final int TYPE_AVAILABLE = 1;
     public static final int TYPE_MYCLOSED = 2;
     public static final int TYPE_CLOSED = 3;
-    public static final int TYPE_MYACCEPTED = 4;
-    public static final int TYPE_MYCREATED = 5;
-    public static final int TYPE_OVERVIEWCREATED = 6;
 
     private Context context;
     private int type;
@@ -55,32 +52,36 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         setItems(values);
     }
 
+    private void checkExpanded(){
+        if (type == TYPE_AVAILABLE) {
+            Globals.expandedItemsAvailable.clear();
+            for (int i = 0; i < getItemCount(); i++)
+                if (getItemViewType(i) == TYPE_HEADER && isExpanded(i))
+                    Globals.expandedItemsAvailable.add(i);
+        } else if (type == TYPE_MYCLOSED){
+            Globals.expandedItemsMyClosed.clear();
+            for (int i = 0; i < getItemCount(); i++)
+                if (getItemViewType(i) == TYPE_HEADER && isExpanded(i))
+                    Globals.expandedItemsMyClosed.add(i);
+        } else if (type == TYPE_CLOSED){
+            Globals.expandedItemsClosed.clear();
+            for (int i = 0; i < getItemCount(); i++)
+                if (getItemViewType(i) == TYPE_HEADER && isExpanded(i))
+                    Globals.expandedItemsClosed.add(i);
+        }
+    }
+
+
     @Override
     public void expandItems(int position, boolean notify) {
         super.expandItems(position, notify);
-
-        if (type == TYPE_AVAILABLE)
-            Globals.expandedItemsAvailable.add(position);
-        else if (type == TYPE_MYCLOSED)
-            Globals.expandedItemsMyClosed.add(position);
-        else if (type == TYPE_CLOSED)
-            Globals.expandedItemsClosed.add(position);
-        else
-            Globals.expandedItemsOverview.add(position);
+        checkExpanded();
     }
 
     @Override
     public void collapseItems(int position, boolean notify) {
         super.collapseItems(position, notify);
-
-        if (type == TYPE_AVAILABLE)
-            Globals.expandedItemsAvailable.remove(Globals.expandedItemsAvailable.indexOf(position));
-        else if (type == TYPE_MYCLOSED)
-            Globals.expandedItemsMyClosed.remove(Globals.expandedItemsMyClosed.indexOf(position));
-        else if (type == TYPE_CLOSED)
-            Globals.expandedItemsClosed.remove(Globals.expandedItemsClosed.indexOf(position));
-        else
-            Globals.expandedItemsOverview.remove(Globals.expandedItemsOverview.indexOf(position));
+        checkExpanded();
     }
 
     public static class TicketListItem extends ExpandableRecyclerAdapter.ListItem {
@@ -166,8 +167,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                 }
             });
 
+            View rootView = ticketImage.getRootView();
+
             if (type == TYPE_AVAILABLE) {
-                ticketImage.getRootView().setOnClickListener(new View.OnClickListener() {
+                rootView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         new MaterialDialog.Builder(context)
@@ -191,114 +194,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                     }
                                 })
                                 .show();
-                    }
-                });
-            } else if (type == TYPE_MYACCEPTED){
-                ticketImage.getRootView().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(context, MessagingActivity.class);
-
-                        intent.putExtra("userName", visibleItems.get(position).ticket.getUserName());
-                        intent.putExtra("chatRoom", visibleItems.get(position).ticket.getTicketId());
-
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
-                });
-
-                ticketImage.getRootView().setOnLongClickListener(new View.OnLongClickListener() {
-                    public boolean onLongClick(View arg0) {
-                        new MaterialDialog.Builder(context)
-                                .title("Подтверждение решения проблемы по заявке " + visibleItems.get(position).ticket.getTicketId() + " от " + visibleItems.get(position).ticket.getCreateDate())
-                                .content("Ваша проблема действительно была решена?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
-                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).setValue(visibleItems.get(position).ticket);
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
-                                    }
-                                })
-                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        dialog.cancel();
-                                    }
-                                })
-                                .show();
-
-                        return true;
-                    }
-                });
-            } else if (type == TYPE_MYCREATED){
-                ticketImage.getRootView().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(context, MessagingActivity.class);
-                        if (visibleItems.get(position).ticket.getAdminId() == null || visibleItems.get(position).ticket.getAdminId().equals("")) {
-                            Toast.makeText(context, "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
-                            return;
-                        } else {
-                            intent.putExtra("userName", visibleItems.get(position).ticket.getAdminName());
-                            intent.putExtra("chatRoom", visibleItems.get(position).ticket.getTicketId());
-                        }
-
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        context.startActivity(intent);
-                    }
-                });
-
-                ticketImage.getRootView().setOnLongClickListener(new View.OnLongClickListener() {
-                    public boolean onLongClick(View arg0) {
-                        if (visibleItems.get(position).ticket.getAdminId() == null || visibleItems.get(position).ticket.getAdminId().equals("")) {
-                            new MaterialDialog.Builder(context)
-                                    .title("Отзыв заявки " + visibleItems.get(position).ticket.getTicketId() + " от " + visibleItems.get(position).ticket.getCreateDate())
-                                    .content("Вы действительно хотите отозвать данную заявку?")
-                                    .positiveText(android.R.string.yes)
-                                    .negativeText(android.R.string.no)
-                                    .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                            databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
-                                        }
-                                    })
-                                    .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                        @Override
-                                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                            dialog.cancel();
-                                        }
-                                    })
-                                    .show();
-                        }
-                        return true;
-                    }
-                });
-            } else if (type == TYPE_OVERVIEWCREATED){
-                ticketImage.getRootView().setOnLongClickListener(new View.OnLongClickListener() {
-                    public boolean onLongClick(View arg0) {
-                        new MaterialDialog.Builder(context)
-                                .title("Отказ от заявки пользователя " + visibleItems.get(position).ticket.getUserName())
-                                .content("Вы действительно хотите отказаться от данной заявки?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
-                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        visibleItems.get(position).ticket.removeAdmin();
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).setValue(visibleItems.get(position).ticket);
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
-                                    }
-                                })
-                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        dialog.cancel();
-                                    }
-                                })
-                                .show();
-                        return true;
                     }
                 });
             }

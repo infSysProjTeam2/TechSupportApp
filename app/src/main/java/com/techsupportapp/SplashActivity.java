@@ -8,7 +8,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -20,7 +19,6 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.Globals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class SplashActivity extends AppCompatActivity {
@@ -91,7 +89,7 @@ public class SplashActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        startActivity(new Intent(SplashActivity.this, AcceptedTicketsActivity.class));
+        startActivity(new Intent(SplashActivity.this, TicketsActivity.class));
         SplashActivity.this.finish();
     }
 

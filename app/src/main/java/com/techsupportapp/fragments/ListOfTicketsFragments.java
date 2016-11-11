@@ -105,7 +105,7 @@ public class ListOfTicketsFragments {
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfAvailableTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
@@ -117,14 +117,14 @@ public class ListOfTicketsFragments {
             viewOfAvailableTickets.setLayoutManager(mLayoutManager);
             viewOfAvailableTickets.setHasFixedSize(false);
             viewOfAvailableTickets.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
 
             try {
-                for (int position : Globals.expandedItemsAvailable)
+;                for (int position : Globals.expandedItemsAvailable)
                     adapter.expandItems(position, true);
             } catch (Exception e){
                 e.printStackTrace();
             }
+            adapter.notifyDataSetChanged();
         }
 
         public static FirstFragment newInstance() {
@@ -148,7 +148,7 @@ public class ListOfTicketsFragments {
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfMyClosedTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
@@ -160,7 +160,6 @@ public class ListOfTicketsFragments {
             viewOfMyClosedTickets.setLayoutManager(mLayoutManager);
             viewOfMyClosedTickets.setHasFixedSize(false);
             viewOfMyClosedTickets.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
 
             try {
                 for (int position : Globals.expandedItemsMyClosed)
@@ -168,6 +167,9 @@ public class ListOfTicketsFragments {
             } catch (Exception e){
                 e.printStackTrace();
             }
+
+            adapter.notifyDataSetChanged();
+
         }
 
         public static SecondFragment newInstance() {
@@ -191,7 +193,7 @@ public class ListOfTicketsFragments {
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfSolvedTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
@@ -203,7 +205,6 @@ public class ListOfTicketsFragments {
             viewOfSolvedTickets.setLayoutManager(mLayoutManager);
             viewOfSolvedTickets.setHasFixedSize(false);
             viewOfSolvedTickets.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
 
             try {
                 for (int position : Globals.expandedItemsClosed)
@@ -211,6 +212,8 @@ public class ListOfTicketsFragments {
             } catch (Exception e){
                 e.printStackTrace();
             }
+
+            adapter.notifyDataSetChanged();
         }
 
         public static ThirdFragment newInstance() {
