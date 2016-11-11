@@ -102,7 +102,14 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(final ArrayList<Ticket> listOfAvailableTickets, final ArrayList<User> usersList, final Context context, final DatabaseReference databaseReference){
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, databaseReference, listOfAvailableTickets, usersList, getFragmentManager());
+            ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
+
+            //TODO сделать категории
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            for (Ticket ticket : listOfAvailableTickets)
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, databaseReference, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -138,7 +145,14 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCLOSED, context, null, listOfMyClosedTickets, usersList, getFragmentManager());
+            ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
+
+            //TODO сделать категории
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            for (Ticket ticket : listOfMyClosedTickets)
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCLOSED, context, null, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -174,7 +188,14 @@ public class ListOfTicketsFragments {
         }
 
         public void updateContent(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, null, listOfSolvedTickets, usersList, getFragmentManager());
+            ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
+
+            //TODO сделать категории
+            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+            for (Ticket ticket : listOfSolvedTickets)
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, null, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);

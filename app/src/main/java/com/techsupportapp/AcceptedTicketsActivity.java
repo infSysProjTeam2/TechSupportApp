@@ -143,7 +143,14 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                     else
                         type = TicketExpandableRecyclerAdapter.TYPE_MYACCEPTED;
 
-                    adapter = new TicketExpandableRecyclerAdapter(type, AcceptedTicketsActivity.this, databaseReference, ticketsOverviewList, usersList, getSupportFragmentManager());
+                    ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
+
+                    //TODO сделать категории
+                    ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+                    for (Ticket ticket : ticketsOverviewList)
+                        ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+
+                    adapter = new TicketExpandableRecyclerAdapter(type, AcceptedTicketsActivity.this, databaseReference, ticketListItems, usersList, getSupportFragmentManager());
                     adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);
@@ -152,7 +159,15 @@ public class AcceptedTicketsActivity extends AppCompatActivity implements Naviga
                 } else {
                     ticketsOverviewList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
                     ticketsOverviewList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
-                    new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCREATED, AcceptedTicketsActivity.this, databaseReference, ticketsOverviewList, usersList, getSupportFragmentManager());
+
+                    ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
+
+                    //TODO сделать категории
+                    ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Заявки"));
+                    for (Ticket ticket : ticketsOverviewList)
+                        ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+
+                    adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCREATED, AcceptedTicketsActivity.this, databaseReference, ticketListItems, usersList, getSupportFragmentManager());
                     adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
                     ticketsOverview.setLayoutManager(mLayoutManager);
                     ticketsOverview.setHasFixedSize(false);

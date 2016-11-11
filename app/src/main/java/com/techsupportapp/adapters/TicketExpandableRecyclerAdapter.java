@@ -15,7 +15,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DatabaseReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
-import com.techsupportapp.AcceptedTicketsActivity;
 import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
@@ -27,7 +26,6 @@ import com.techsupportapp.utility.Globals;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<TicketExpandableRecyclerAdapter.TicketListItem> {
     private static final int TYPE_TICKET = 1001;
@@ -45,7 +43,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     private FragmentManager fragmentManager;
     private DatabaseReference databaseReference;
 
-    public TicketExpandableRecyclerAdapter(int type, Context context, DatabaseReference databaseReference, ArrayList<Ticket> values, ArrayList<User> users, FragmentManager fragmentManager) {
+    public TicketExpandableRecyclerAdapter(int type, Context context, DatabaseReference databaseReference, ArrayList<TicketListItem> values, ArrayList<User> users, FragmentManager fragmentManager) {
         super(context);
 
         this.context = context;
@@ -54,7 +52,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         this.fragmentManager = fragmentManager;
         this.databaseReference = databaseReference;
 
-        setItems(getSampleItems(values));
+        setItems(values);
     }
 
     @Override
@@ -311,7 +309,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_HEADER:
-                return new HeaderViewHolder(inflate(R.layout.item_header, parent));
+                return new HeaderViewHolder(inflate(R.layout.item_ticket_header, parent));
             case TYPE_TICKET:
             default:
                 return new TicketViewHolder(inflate(R.layout.item_ticket, parent));
@@ -329,16 +327,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                 ((TicketViewHolder) holder).bind(position);
                 break;
         }
-    }
-
-    private List<TicketListItem> getSampleItems(ArrayList<Ticket> values) {
-        List<TicketListItem> items = new ArrayList<>();
-
-        items.add(new TicketListItem("Заявки"));
-        for (Ticket ticket : values)
-            items.add(new TicketListItem(ticket));
-
-        return items;
     }
 
     private User getUser(String userId, String adminId) {
