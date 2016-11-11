@@ -21,13 +21,27 @@ import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class MessagingService extends Service {
-    //TODO сделать связку с количеством сообщений в каждом чате(возможно не требуется сервиса)
-    DatabaseReference databaseRef;
-    ChildEventListener childEventListener;
+
+    private DatabaseReference databaseRef;
+    private ChildEventListener childEventListener;
+
+    private ArrayList<Counter> counterList = new ArrayList<Counter>();
     private ArrayList<String> ticketIDList;
-    private long messagesCount = 0;
+
+    private NotificationManager notificationManager;
+
+    private class Counter{
+        int count;
+        String ticketId;
+
+        private Counter(String ticketId, int count){
+            this.ticketId = ticketId;
+            this.count = count;
+        }
+    }
 
     public MessagingService() {
     }
@@ -52,15 +66,20 @@ public class MessagingService extends Service {
     @Override
     public void onCreate()
     {
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
         databaseRef = FirebaseDatabase.getInstance().getReference();
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Globals.logInfoAPK(MessagingService.this, "База данных - ЧТЕНИЕ - ОБНОВЛЕНИЕ УЗЛОВ");
                 if (!dataSnapshot.getValue(ChatMessage.class).getUserId().equals(Globals.currentUser.getLogin()) && dataSnapshot.getValue(ChatMessage.class).isUnread()) {
-                    messagesCount++;//TODO сделать нормальный счетчик
-                    showNotification();
+                    int index = Collections.binarySearch(ticketIDList, dataSnapshot.getRef().getParent().getKey());
+                    counterList.get(index).count++;
+                    Globals.logInfoAPK(MessagingService.this, "База данных - УВЕЛИЧЕНИЕ СЧЕТЧИКА");
                 }
                 //TODO для администратора
+                showNotification();
             }
 
             @Override
@@ -87,10 +106,13 @@ public class MessagingService extends Service {
         databaseRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Globals.logInfoAPK(MessagingService.this, "База данных - ОБНОВЛЕНИЕ ДАННЫХ");
                 if (Globals.currentUser.getRole() == User.SIMPLE_USER) {
                     ticketIDList = Globals.Downloads.Strings.getUserMarkedTicketIDs(dataSnapshot, Globals.currentUser.getLogin());
-                    for (int i = 0; i < ticketIDList.size(); i++)
+                    for (int i = 0; i < ticketIDList.size(); i++) {
+                        counterList.add(new Counter(ticketIDList.get(i), 0));
                         databaseRef.child("chat").child(ticketIDList.get(i)).addChildEventListener(childEventListener);
+                    }
                 }
                 //TODO для администратора
             }
@@ -111,26 +133,19 @@ public class MessagingService extends Service {
     public void onDestroy()
     {
         if (Globals.currentUser.getRole() == User.SIMPLE_USER)
-            for (int i = 0; i < ticketIDList.size(); i++)
-                databaseRef.child("chat").child(ticketIDList.get(i)).removeEventListener(childEventListener);
+            for (int i = 0; i < counterList.size(); i++)
+                databaseRef.child("chat").child(counterList.get(i).ticketId).removeEventListener(childEventListener);
     }
 
     private void showNotification(){
-        Intent intent = new Intent(this, SignInActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification.Builder builder = new Notification.Builder(this)
-                .setTicker("Новые сообщения")
+        long messagesCount = 0;
+        for (int i = 0; i < counterList.size(); i++)
+            messagesCount += counterList.get(i).count;
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
                 .setContentTitle("Новые сообщения")
                 .setContentText("Количество новых сообщений " + messagesCount)
-                .setSmallIcon(R.mipmap.icon)
-                .addAction(R.mipmap.ic_launcher, "Просмотр", pIntent);;
-
-        Notification notification = new Notification.InboxStyle(builder)
-                .addLine("Количество новых сообщений " + messagesCount)
-                .setSummaryText("+2 more").build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                .setSmallIcon(R.mipmap.icon);
+        Notification notification = builder.build();
         notificationManager.notify(3, notification);
     }
 }

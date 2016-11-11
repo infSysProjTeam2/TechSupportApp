@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -357,8 +358,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MessagingService.stopMessagingService(getApplicationContext());
-                    Globals.logInfoAPK(ChartsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    if (PreferenceManager.getDefaultSharedPreferences(ChartsActivity.this).getBoolean("allowNotifications", false)) {
+                        MessagingService.stopMessagingService(getApplicationContext());
+                        Globals.logInfoAPK(ChartsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    }
                     exit();
                 }
             });

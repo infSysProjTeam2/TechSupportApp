@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -255,8 +256,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MessagingService.stopMessagingService(getApplicationContext());
-                    Globals.logInfoAPK(UserActionsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    if (PreferenceManager.getDefaultSharedPreferences(UserActionsActivity.this).getBoolean("allowNotifications", false)) {
+                        MessagingService.stopMessagingService(getApplicationContext());
+                        Globals.logInfoAPK(UserActionsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    }
                     exit();
                 }
             });

@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -266,8 +267,10 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else {
-            MessagingService.stopMessagingService(getApplicationContext());
-            Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
+            if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false)) {
+                MessagingService.stopMessagingService(getApplicationContext());
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
+            }
             super.onBackPressed();
         }
 
@@ -314,8 +317,10 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MessagingService.stopMessagingService(getApplicationContext());
-                    Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    if (PreferenceManager.getDefaultSharedPreferences(TicketsOverviewActivity.this).getBoolean("allowNotifications", false)) {
+                        MessagingService.stopMessagingService(getApplicationContext());
+                        Globals.logInfoAPK(TicketsOverviewActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    }
                     exit();
                 }
             });

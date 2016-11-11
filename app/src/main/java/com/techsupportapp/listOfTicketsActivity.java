@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -222,8 +223,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MessagingService.stopMessagingService(getApplicationContext());
-                    Log.e("СЛУЖБА", "ОСТАНОВЛЕНА");
+                    if (PreferenceManager.getDefaultSharedPreferences(ListOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
+                        MessagingService.stopMessagingService(getApplicationContext());
+                        Log.e("СЛУЖБА", "ОСТАНОВЛЕНА");
+                    }
                     exit();
                 }
             });

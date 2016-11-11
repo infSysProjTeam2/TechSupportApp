@@ -101,7 +101,9 @@ public class Globals {
     }
 
     public static void logInfoAPK(Context context, String message){
-        Log.i("APK001/" + context.toString(), message);
+        String activity = context.toString();
+        activity = activity.substring(activity.lastIndexOf('.') + 1, activity.indexOf("@"));
+        Log.i("APK001/" + activity, message);
     }
 
     public static class Downloads {

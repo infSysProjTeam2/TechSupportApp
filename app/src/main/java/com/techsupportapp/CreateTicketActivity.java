@@ -3,6 +3,7 @@ package com.techsupportapp;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -99,8 +100,10 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
             builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MessagingService.stopMessagingService(getApplicationContext());
-                    Globals.logInfoAPK(CreateTicketActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    if (PreferenceManager.getDefaultSharedPreferences(CreateTicketActivity.this).getBoolean("allowNotifications", false)) {
+                        MessagingService.stopMessagingService(getApplicationContext());
+                        Globals.logInfoAPK(CreateTicketActivity.this, "Служба - ОСТАНОВЛЕНА");
+                    }
                     exit();
                 }
             });
