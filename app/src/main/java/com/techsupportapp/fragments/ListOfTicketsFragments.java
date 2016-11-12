@@ -21,7 +21,14 @@ import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
+/**
+ * Класс для фрагментов ViewPager, находящегося в ListOfTicketsActivity.class.
+ * @author ahgpoug
+ */
 public class ListOfTicketsFragments {
+    /**
+     * Адаптер для фрагментов
+     */
     public static class SectionsPagerAdapter extends FragmentPagerAdapter {
         private FirstFragment firstFragment;
         private SecondFragment secondFragment;
@@ -31,6 +38,9 @@ public class ListOfTicketsFragments {
             super(fm);
         }
 
+        /**
+         * Метод, загружающий новые фрагменты по их номеру
+         */
         @Override
         public Fragment getItem(int position) {
             if (position == 0)
@@ -41,11 +51,15 @@ public class ListOfTicketsFragments {
                 return ThirdFragment.newInstance();
         }
 
+        //Получение числа фрагментов
         @Override
         public int getCount() {
             return 3;
         }
 
+        /**
+         * Установка заголовков в TabLayout для фрагментов
+         */
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -59,6 +73,9 @@ public class ListOfTicketsFragments {
             return null;
         }
 
+        /**
+         * Метод для запоминания ссылок на фрагменты
+         */
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
@@ -76,22 +93,47 @@ public class ListOfTicketsFragments {
             return createdFragment;
         }
 
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param listOfAvailableTickets список заявок, доступных для принятия.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
+         */
         public void updateFirstFragment(ArrayList<Ticket> listOfAvailableTickets, ArrayList<User> usersList, Context context, DatabaseReference databaseReference){
             firstFragment.updateContent(listOfAvailableTickets, usersList, context, databaseReference);
         }
 
+        /**
+         * Метод для обновления информации на втором фрагменте.
+         * @param listOfMyClosedTickets список заявок, закрытых текущим пользователем.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateSecondFragment(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
             secondFragment.updateContent(listOfMyClosedTickets, usersList, context);
         }
 
+        /**
+         * Метод для обновления информации на третьем фрагменте.
+         * @param listOfSolvedTickets список заявок, закрытых всеми пользователями.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateThirdFragment(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
             thirdFragment.updateContent(listOfSolvedTickets, usersList, context);
         }
     }
 
+    /**
+     * Фрагемент списка доступных для принятия заявок
+     */
     public static class FirstFragment extends Fragment {
         RecyclerView viewOfAvailableTickets;
 
+        /**
+         * Метод, вызывающийся при создании фрагмента
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
@@ -101,14 +143,24 @@ public class ListOfTicketsFragments {
             return v;
         }
 
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param listOfAvailableTickets список заявок, доступных для принятия.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
+         */
         public void updateContent(final ArrayList<Ticket> listOfAvailableTickets, final ArrayList<User> usersList, final Context context, final DatabaseReference databaseReference){
+            //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
+            //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfAvailableTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
+            //Создание нового адаптера для viewOfAvailableTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, databaseReference, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
@@ -118,6 +170,7 @@ public class ListOfTicketsFragments {
             viewOfAvailableTickets.setHasFixedSize(false);
             viewOfAvailableTickets.setAdapter(adapter);
 
+            //Раскрытие категорий, которые были раскрыты ранее
             try {
 ;                for (int position : Globals.expandedItemsAvailable)
                     adapter.expandItems(position, true);
@@ -127,14 +180,24 @@ public class ListOfTicketsFragments {
             adapter.notifyDataSetChanged();
         }
 
+        /**
+         * Создание нового экземпляра текущего фрагемента
+         */
         public static FirstFragment newInstance() {
             FirstFragment f = new FirstFragment();
             return f;
         }
     }
 
+    /**
+     * Фрагемент списка заявок, закрытых текущим пользователем
+     */
     public static class SecondFragment extends Fragment {
         RecyclerView viewOfMyClosedTickets;
+
+        /**
+         * Метод, вызывающийся при создании фрагмента
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
@@ -144,14 +207,23 @@ public class ListOfTicketsFragments {
             return v;
         }
 
+        /**
+         * Метод для обновления информации на втором фрагменте.
+         * @param listOfMyClosedTickets список заявок, закрытых текущим пользователем.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateContent(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
+            //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
+            //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfMyClosedTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
+            //Создание нового адаптера для viewOfMyClosedTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCLOSED, context, null, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
@@ -161,6 +233,7 @@ public class ListOfTicketsFragments {
             viewOfMyClosedTickets.setHasFixedSize(false);
             viewOfMyClosedTickets.setAdapter(adapter);
 
+            //Раскрытие категорий, которые были раскрыты ранее
             try {
                 for (int position : Globals.expandedItemsMyClosed)
                     adapter.expandItems(position, true);
@@ -172,14 +245,24 @@ public class ListOfTicketsFragments {
 
         }
 
+        /**
+         * Создание нового экземпляра текущего фрагемента
+         */
         public static SecondFragment newInstance() {
             SecondFragment f = new SecondFragment();
             return f;
         }
     }
 
+    /**
+     * Фрагемент списка заявок, закрытых всем пользователями
+     */
     public static class ThirdFragment extends Fragment {
         RecyclerView viewOfSolvedTickets;
+
+        /**
+         * Метод, вызывающийся при создании фрагмента
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
@@ -189,14 +272,23 @@ public class ListOfTicketsFragments {
             return v;
         }
 
+        /**
+         * Метод для обновления информации на третьем фрагменте.
+         * @param listOfSolvedTickets список заявок, закрытых всеми пользователями.
+         * @param usersList список всех пользователей.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateContent(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
+            //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
             //TODO сделать категории
+            //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
             for (Ticket ticket : listOfSolvedTickets)
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
+            //Создание нового адаптера для viewOfSolvedTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, null, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
@@ -206,6 +298,7 @@ public class ListOfTicketsFragments {
             viewOfSolvedTickets.setHasFixedSize(false);
             viewOfSolvedTickets.setAdapter(adapter);
 
+            //Раскрытие категорий, которые были раскрыты ранее
             try {
                 for (int position : Globals.expandedItemsClosed)
                     adapter.expandItems(position, true);
@@ -216,6 +309,9 @@ public class ListOfTicketsFragments {
             adapter.notifyDataSetChanged();
         }
 
+        /**
+         * Создание нового экземпляра текущего фрагемента
+         */
         public static ThirdFragment newInstance() {
             ThirdFragment f = new ThirdFragment();
             return f;
