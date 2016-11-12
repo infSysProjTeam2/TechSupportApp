@@ -28,7 +28,14 @@ import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
+/**
+ * Класс для фрагментов ViewPager, находящегося в UserActionsActivity.class.
+ * @author ahgpoug
+ */
 public class UserActionsFragments {
+    /**
+     * Адаптер для фрагментов
+     */
     public static class SectionsPagerAdapter extends FragmentPagerAdapter {
         private FirstFragment firstFragment;
         private SecondFragment secondFragment;
@@ -36,6 +43,9 @@ public class UserActionsFragments {
             super(fm);
         }
 
+        /**
+         * Метод, загружающий новые фрагменты по их номеру
+         */
         @Override
         public Fragment getItem(int position) {
             if (position == 0)
@@ -44,11 +54,15 @@ public class UserActionsFragments {
                 return SecondFragment.newInstance();
         }
 
+        //Получение числа фрагментов
         @Override
         public int getCount() {
             return 2;
         }
 
+        /**
+         * Установка заголовков в TabLayout для фрагментов
+         */
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -60,6 +74,9 @@ public class UserActionsFragments {
             return null;
         }
 
+        /**
+         * Метод для запоминания ссылок на фрагменты
+         */
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Fragment createdFragment = (Fragment) super.instantiateItem(container, position);
@@ -74,19 +91,38 @@ public class UserActionsFragments {
             return createdFragment;
         }
 
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param unverifiedUsersList список пользователей с неподтвержденной регистрацией.
+         * @param context контекст Activity, где был создан фрагмент.
+         * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
+         * @param search параметр, было ли раскрыто поле для поиска.
+         * @return true - нужно закрыть меню поиска. false - не нужно закрывать меню для поиска
+         */
         public boolean updateFirstFragment(ArrayList<User> unverifiedUsersList, Context context, DatabaseReference databaseReference, boolean search){
             return firstFragment.updateContent(unverifiedUsersList, context, databaseReference, search);
         }
 
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param usersList список пользователей с подтвержденной регистрацией.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateSecondFragment(ArrayList<User> usersList, Context context){
             secondFragment.updateContent(usersList, context);
         }
     }
 
+    /**
+     * Фрагемент списка пользователей с неподтвержденной регистрацией.
+     */
     public static class FirstFragment extends Fragment {
         RecyclerView unverifiedUsersView;
         boolean result;
 
+        /**
+         * Метод, вызывающийся при создании фрагмента
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
@@ -96,16 +132,26 @@ public class UserActionsFragments {
             return v;
         }
 
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param unverifiedUsersList список пользователей с неподтвержденной регистрацией.
+         * @param context контекст Activity, где был создан фрагмент.
+         * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
+         * @param search параметр, было ли раскрыто поле для поиска.
+         * @return true - нужно закрыть меню поиска. false - не нужно закрывать меню для поиска
+         */
         public boolean updateContent(final ArrayList<User> unverifiedUsersList, final Context context, final DatabaseReference databaseReference, boolean search) {
             result = search;
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
             unverifiedUsersView.setLayoutManager(mLayoutManager);
             unverifiedUsersView.setHasFixedSize(false);
 
+            //Создание нового адаптера для unverifiedUsersView
             UnverifiedUserRecyclerAdapter adapter = new UnverifiedUserRecyclerAdapter(context, unverifiedUsersList);
             unverifiedUsersView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
 
+            //Одиночный клик по unverifiedUsersView
             ItemClickSupport.addTo(unverifiedUsersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                 @Override
                 public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
@@ -120,6 +166,8 @@ public class UserActionsFragments {
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        //Подтверждение пользователя
+                                        //Перенос из списка неподтвержденных пользователей в список подтвержденных
                                         try {
                                             databaseReference.child(UserActionsActivity.getDatabaseUserPath(selectedUser)).child(selectedUser.getBranchId()).setValue(selectedUser);
                                         } catch (Exception e) {
@@ -145,6 +193,7 @@ public class UserActionsFragments {
                 }
             });
 
+            //Долгий клик по unverifiedUsersView
             ItemClickSupport.addTo(unverifiedUsersView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
@@ -157,6 +206,8 @@ public class UserActionsFragments {
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                    //Отмена завявки пользователя на регистрацию
+                                    //Удалиние заявки на регистрацию
                                     result = false;
 
                                     databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
@@ -176,15 +227,24 @@ public class UserActionsFragments {
             return result;
         }
 
-            public static FirstFragment newInstance() {
+        /**
+         * Создание нового экземпляра текущего фрагемента
+         */
+        public static FirstFragment newInstance() {
             FirstFragment f = new FirstFragment();
             return f;
         }
     }
 
+    /**
+     * Фрагемент списка всех пользователей
+     */
     public static class SecondFragment extends Fragment {
         RecyclerView usersView;
 
+        /**
+         * Метод, вызывающийся при создании фрагмента
+         */
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.fragment_recycler, container, false);
@@ -194,7 +254,11 @@ public class UserActionsFragments {
             return v;
         }
 
-
+        /**
+         * Метод для обновления информации на первом фрагменте.
+         * @param usersList список пользователей с подтвержденной регистрацией.
+         * @param context контекст Activity, где был создан фрагмент.
+         */
         public void updateContent(final ArrayList<User> usersList, Context context){
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
             usersView.setLayoutManager(mLayoutManager);
@@ -204,14 +268,20 @@ public class UserActionsFragments {
             usersView.setAdapter(adapter);
             adapter.notifyDataSetChanged();
 
+            //Одиночных клик по usersView
             ItemClickSupport.addTo(usersView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                 @Override
                 public void onItemClicked(RecyclerView recyclerView,final int position, View v) {
+                    //Вызов диалогового окна, выдвагающегося снизу
                     BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(usersList.get(position).getLogin(), Globals.currentUser.getLogin(), usersList.get(position));
                     bottomSheetDialogFragment.show(getFragmentManager(), bottomSheetDialogFragment.getTag());
                 }
             });
         }
+
+        /**
+         * Создание нового экземпляра текущего фрагемента
+         */
         public static SecondFragment newInstance() {
             SecondFragment f = new SecondFragment();
             return f;
