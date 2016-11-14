@@ -11,15 +11,16 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.ChatListAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
-import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.text.SimpleDateFormat;
@@ -28,7 +29,7 @@ import java.util.Locale;
 
 public class MessagingActivity extends AppCompatActivity {
 
-    private Firebase databaseReference;
+    private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
     private ChatListAdapter mChatListAdapter;
 
@@ -54,8 +55,7 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        databaseReference.setAndroidContext(MessagingActivity.this);
-        databaseReference = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
+        databaseReference = FirebaseDatabase.getInstance().getReference("chat/" + mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
@@ -97,7 +97,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(databaseReference.limit(150), this);//TODO 150 сообщений - норм?
+        mChatListAdapter = new ChatListAdapter(databaseReference.limitToLast(150), this);//TODO 150 сообщений - норм?
         listView.setAdapter(mChatListAdapter);
         mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -107,27 +107,27 @@ public class MessagingActivity extends AppCompatActivity {
             }
         });
 
-        valueEventListener = databaseReference.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                boolean connected = (Boolean) dataSnapshot.getValue();
-                if (connected) {
+                boolean connected = (dataSnapshot.getKey().isEmpty());
+                if (!connected)
                     loadingDialog.dismiss();
-                } else {
-                }
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
-        });
+        };
+
+        databaseReference.addValueEventListener(valueEventListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        databaseReference.getRoot().child(".info/connected").removeEventListener(valueEventListener);
+        databaseReference.removeEventListener(valueEventListener);
         mChatListAdapter.cleanup();
     }
 

@@ -6,7 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.client.Query;
+import com.google.firebase.database.Query;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.Globals;
