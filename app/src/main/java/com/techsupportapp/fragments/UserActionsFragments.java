@@ -260,7 +260,7 @@ public class UserActionsFragments {
          * @param context контекст Activity, где был создан фрагмент.
          */
         public void updateContent(final ArrayList<User> usersList, Context context){
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);;
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
             usersView.setLayoutManager(mLayoutManager);
             usersView.setHasFixedSize(false);
 

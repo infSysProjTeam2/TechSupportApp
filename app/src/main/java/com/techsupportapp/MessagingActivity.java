@@ -1,15 +1,15 @@
 package com.techsupportapp;
 
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,7 +19,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.ChatListAdapter;
+import com.techsupportapp.adapters.ChatRecyclerAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.utility.Globals;
 
@@ -31,7 +31,9 @@ public class MessagingActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
-    private ChatListAdapter mChatListAdapter;
+    private ChatRecyclerAdapter chatRecyclerAdapter;
+
+    RecyclerView recyclerView;
 
     private String mUsername;
     private String mChatRoom;
@@ -96,23 +98,27 @@ public class MessagingActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(databaseReference.limitToLast(150), this);//TODO 150 сообщений - норм?
-        listView.setAdapter(mChatListAdapter);
-        mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
+        recyclerView = (RecyclerView) findViewById(R.id.listChat);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(MessagingActivity.this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(mLayoutManager);
+        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this);//TODO 150 сообщений - норм?
+        recyclerView.setAdapter(chatRecyclerAdapter);
+        chatRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                listView.setSelection(mChatListAdapter.getCount() - 1);
+                recyclerView.scrollToPosition(chatRecyclerAdapter.getItemCount() - 1);
             }
         });
 
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                boolean connected = (dataSnapshot.getKey().isEmpty());
-                if (!connected)
+                boolean connected = !(dataSnapshot.getKey().isEmpty());
+                if (connected) {
                     loadingDialog.dismiss();
+                    databaseReference.removeEventListener(valueEventListener);
+                }
             }
 
             @Override
@@ -120,7 +126,7 @@ public class MessagingActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
         };
-
+        chatRecyclerAdapter.notifyDataSetChanged();
         databaseReference.addValueEventListener(valueEventListener);
     }
 
@@ -128,7 +134,7 @@ public class MessagingActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
         databaseReference.removeEventListener(valueEventListener);
-        mChatListAdapter.cleanup();
+        chatRecyclerAdapter.cleanup();
     }
 
     private void sendMessage() {

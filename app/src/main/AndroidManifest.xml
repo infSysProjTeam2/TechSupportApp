@@ -41,7 +41,8 @@
         <activity
             android:name=".UserActionsActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".ChartsActivity"
             android:label="@string/app_name"
@@ -58,7 +59,7 @@
             android:name=".MessagingActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".PreferencesActivity"
             android:label="@string/app_name"
