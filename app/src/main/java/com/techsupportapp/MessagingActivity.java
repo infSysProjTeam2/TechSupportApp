@@ -111,6 +111,7 @@ public class MessagingActivity extends AppCompatActivity {
             }
         });
 
+
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
