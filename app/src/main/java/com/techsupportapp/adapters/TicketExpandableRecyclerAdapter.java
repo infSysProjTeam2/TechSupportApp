@@ -139,21 +139,24 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             final String userId = visibleItems.get(position).ticket.getUserId();
             final String adminId = visibleItems.get(position).ticket.getAdminId();
 
+            final Ticket currentTicket = visibleItems.get(position).ticket;
+
+
             if (Globals.currentUser.getRole() != User.SIMPLE_USER){
-                authorText.setText(visibleItems.get(position).ticket.getUserName());
-                titleText = visibleItems.get(position).ticket.getUserName();
+                authorText.setText(currentTicket.getUserName());
+                titleText = currentTicket.getUserName();
             }
             else if (adminId == null || adminId.equals("")) {
                 authorText.setText("Не установлено");
                 titleText = authorText.getText().toString();
             } else {
-                authorText.setText(visibleItems.get(position).ticket.getAdminName());
-                titleText = visibleItems.get(position).ticket.getAdminName();
+                authorText.setText(currentTicket.getAdminName());
+                titleText = currentTicket.getAdminName();
             }
 
-            dateText.setText(visibleItems.get(position).ticket.getCreateDate());
-            topicText.setText(visibleItems.get(position).ticket.getTopic());
-            descText.setText(visibleItems.get(position).ticket.getMessage());
+            dateText.setText(currentTicket.getCreateDate());
+            topicText.setText(currentTicket.getTopic());
+            descText.setText(currentTicket.getMessage());
             ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
             ticketImage.setOnClickListener(new View.OnClickListener() {
@@ -182,16 +185,41 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         visibleItems.get(position).ticket.addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
 
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).setValue(visibleItems.get(position).ticket);
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
+                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(currentTicket.getTicketId()).setValue(currentTicket);
+                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
 
-                                        DatabaseStorage.updateLogFile(context, visibleItems.get(position).ticket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
+                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         dialog.cancel();
+                                    }
+                                })
+                                .show();
+                    }
+                });
+            } else {
+                rootView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new MaterialDialog.Builder(context)
+                                .title("Заявка " + currentTicket.getTicketId())
+                                .items(new String[]{"Показать лог", "Показать историю чата"})
+                                .itemsCallback(new MaterialDialog.ListCallback() {
+                                    @Override
+                                    public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                        if (which == 0) {
+                                            new MaterialDialog.Builder(context)
+                                                    .title("Лог")
+                                                    .content(DatabaseStorage.getLogText(currentTicket.getTicketId()))
+                                                    .positiveText(android.R.string.ok)
+                                                    .show();
+                                        } else {
+
+                                        }
+
                                     }
                                 })
                                 .show();
