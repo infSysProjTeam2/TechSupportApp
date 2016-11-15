@@ -1,20 +1,20 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/listChat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipToPadding="false"
         android:scrollbars="vertical"
         android:overScrollMode="never"
+        android:stackFromBottom="true"
         android:layout_above="@+id/listFooter"/>
 
     <LinearLayout
         android:id="@+id/listFooter"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:orientation="horizontal">
@@ -22,7 +22,8 @@
         <EditText
             android:id="@+id/messageInput"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingLeft="5dp"
             android:layout_weight="1"
             android:inputType="textShortMessage"
             android:lines="1"
@@ -35,6 +36,4 @@
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_send" />
     </LinearLayout>
-
-
 </RelativeLayout>

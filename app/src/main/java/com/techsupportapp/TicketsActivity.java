@@ -30,6 +30,7 @@ import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 import com.techsupportapp.utility.ItemClickSupport;
@@ -196,6 +197,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                     selectedTicket.removeAdmin();
                                     databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
                                     databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                    DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
                                 }
                             })
                             .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -218,6 +220,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_CLOSED, Globals.currentUser);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -239,6 +242,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {

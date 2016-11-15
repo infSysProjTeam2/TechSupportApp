@@ -1,10 +1,10 @@
 package com.techsupportapp.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.FragmentManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -13,16 +13,33 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
-import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
+import com.techsupportapp.TicketsActivity;
+import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,6 +56,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     private final ArrayList<User> users;
     private FragmentManager fragmentManager;
     private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
 
     public TicketExpandableRecyclerAdapter(int type, Context context, DatabaseReference databaseReference, ArrayList<TicketListItem> values, ArrayList<User> users, FragmentManager fragmentManager) {
         super(context);
@@ -140,21 +158,24 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             final String userId = visibleItems.get(position).ticket.getUserId();
             final String adminId = visibleItems.get(position).ticket.getAdminId();
 
+            final Ticket currentTicket = visibleItems.get(position).ticket;
+
+
             if (Globals.currentUser.getRole() != User.SIMPLE_USER){
-                authorText.setText(visibleItems.get(position).ticket.getUserName());
-                titleText = visibleItems.get(position).ticket.getUserName();
+                authorText.setText(currentTicket.getUserName());
+                titleText = currentTicket.getUserName();
             }
             else if (adminId == null || adminId.equals("")) {
                 authorText.setText("Не установлено");
                 titleText = authorText.getText().toString();
             } else {
-                authorText.setText(visibleItems.get(position).ticket.getAdminName());
-                titleText = visibleItems.get(position).ticket.getAdminName();
+                authorText.setText(currentTicket.getAdminName());
+                titleText = currentTicket.getAdminName();
             }
 
-            dateText.setText(visibleItems.get(position).ticket.getCreateDate());
-            topicText.setText(visibleItems.get(position).ticket.getTopic());
-            descText.setText(visibleItems.get(position).ticket.getMessage());
+            dateText.setText(currentTicket.getCreateDate());
+            topicText.setText(currentTicket.getTopic());
+            descText.setText(currentTicket.getMessage());
             ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
             ticketImage.setOnClickListener(new View.OnClickListener() {
@@ -183,14 +204,100 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         visibleItems.get(position).ticket.addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
 
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).setValue(visibleItems.get(position).ticket);
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
+                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(currentTicket.getTicketId()).setValue(currentTicket);
+                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
+
+                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         dialog.cancel();
+                                    }
+                                })
+                                .show();
+                    }
+                });
+            } else {
+                rootView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(final View v) {
+                        new MaterialDialog.Builder(context)
+                                .title("Заявка " + currentTicket.getTicketId())
+                                .items(new String[]{"Показать лог", "Показать историю чата"})
+                                .itemsCallback(new MaterialDialog.ListCallback() {
+                                    @Override
+                                    public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                                        if (which == 0) {
+                                            final MaterialDialog materialDialog = new MaterialDialog.Builder(context)
+                                                    .title("Лог")
+                                                    .content("Загрузка...")
+                                                    .positiveText(android.R.string.ok)
+                                                    .show();
+
+                                            final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(currentTicket.getTicketId() + ".log");
+                                            try {
+                                                final File localFile = File.createTempFile(currentTicket.getTicketId(), "log");
+
+                                                storageReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                        try {
+                                                            FileInputStream fis = new FileInputStream(localFile);
+                                                            BufferedReader br = new BufferedReader(new InputStreamReader(fis));
+
+                                                            String result = "";
+                                                            String line = null;
+                                                            while ((line = br.readLine()) != null) {
+                                                                result += line;
+                                                                result += "\n";
+                                                            }
+                                                            br.close();
+                                                            materialDialog.setContent(result);
+                                                        } catch (FileNotFoundException e){
+                                                            e.printStackTrace();
+                                                        } catch (IOException e){
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                });
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        } else {
+                                            final MaterialDialog materialDialog = new MaterialDialog.Builder(context)
+                                                    .title("История чата")
+                                                    .content("Загрузка...")
+                                                    .positiveText(android.R.string.ok)
+                                                    .show();
+
+                                            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId());
+
+                                            valueEventListener = new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    ArrayList<ChatMessage> chatMessages = new ArrayList<>();
+                                                    for (DataSnapshot snapshot: dataSnapshot.getChildren())
+                                                        chatMessages.add(snapshot.getValue(ChatMessage.class));
+                                                    databaseReference.removeEventListener(valueEventListener);
+
+                                                    String result = "";
+                                                    for (ChatMessage chatMessage : chatMessages) {
+                                                        result += chatMessage.getAuthor() + ", " + chatMessage.getMessageTime() + "\n";
+                                                        result += chatMessage.getMessage() + "\n\n";
+                                                    }
+
+                                                    materialDialog.setContent(result);
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+                                                }
+                                            };
+                                            databaseReference.addValueEventListener(valueEventListener);
+                                        }
+
                                     }
                                 })
                                 .show();

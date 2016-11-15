@@ -40,23 +40,23 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         childEventListener = this.mRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String previousChildName) {
-                ChatMessage model = dataSnapshot.getValue(ChatMessage.class);
+                ChatMessage chatMessage = dataSnapshot.getValue(ChatMessage.class);
                 String key = dataSnapshot.getKey();
 
-                if ((model.isUnread() && !(model.getUserId().equals(Globals.currentUser.getLogin()))))
+                if ((chatMessage.isUnread() && !(chatMessage.getUserId().equals(Globals.currentUser.getLogin()))))
                     mRef.getRef().child(key).child("unread").setValue(false);
 
                 if (previousChildName == null) {
-                    chatMessages.add(0, model);
+                    chatMessages.add(0, chatMessage);
                     keys.add(0, key);
                 } else {
                     int previousIndex = keys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == chatMessages.size()) {
-                        chatMessages.add(model);
+                        chatMessages.add(chatMessage);
                         keys.add(key);
                     } else {
-                        chatMessages.add(nextIndex, model);
+                        chatMessages.add(nextIndex, chatMessage);
                         keys.add(nextIndex, key);
                     }
                 }
@@ -67,17 +67,16 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 String key = dataSnapshot.getKey();
-                ChatMessage newModel = dataSnapshot.getValue(ChatMessage.class);
+                ChatMessage newChatMessage = dataSnapshot.getValue(ChatMessage.class);
                 int index = keys.indexOf(key);
 
-                chatMessages.set(index, newModel);
+                chatMessages.set(index, newChatMessage);
 
                 notifyDataSetChanged();
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
                 String key = dataSnapshot.getKey();
                 int index = keys.indexOf(key);
 
@@ -89,23 +88,22 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String previousChildName) {
-
                 String key = dataSnapshot.getKey();
-                ChatMessage newModel = dataSnapshot.getValue(ChatMessage.class);
+                ChatMessage newChatMessage = dataSnapshot.getValue(ChatMessage.class);
                 int index = keys.indexOf(key);
                 chatMessages.remove(index);
                 keys.remove(index);
                 if (previousChildName == null) {
-                    chatMessages.add(0, newModel);
+                    chatMessages.add(0, newChatMessage);
                     keys.add(0, key);
                 } else {
                     int previousIndex = keys.indexOf(previousChildName);
                     int nextIndex = previousIndex + 1;
                     if (nextIndex == chatMessages.size()) {
-                        chatMessages.add(newModel);
+                        chatMessages.add(newChatMessage);
                         keys.add(key);
                     } else {
-                        chatMessages.add(nextIndex, newModel);
+                        chatMessages.add(nextIndex, newChatMessage);
                         keys.add(nextIndex, key);
                     }
                 }
@@ -153,14 +151,18 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position) {
-        ChatMessage chatMessage = (chatMessages.get(position));
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        ChatMessage chatMessage = chatMessages.get(position);
         try {
             holder.authorText.setText(chatMessage.getAuthor() + ": ");
             holder.messageText.setText(chatMessage.getMessage());
             holder.messageTime.setText(chatMessage.getMessageTime());
-            if (!chatMessage.isUnread())
+
+            if (chatMessage.isUnread())
+                holder.unread.setText("Непрочит.");
+            else
                 holder.unread.setText("");
+
             holder.userImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
