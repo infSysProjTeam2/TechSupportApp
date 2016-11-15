@@ -36,9 +36,6 @@ public class DatabaseStorage {
     public static int ACTION_SOLVED = 3;
     public static int ACTION_WITHDRAWN = 4;
 
-    private static String result;
-    private static boolean finished;
-
     public static void updateLogFile(Context context, String ticketId, final int action, final User currentUser){
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(ticketId + ".log");
 
@@ -100,52 +97,5 @@ public class DatabaseStorage {
         } catch (IOException e){
             e.printStackTrace();
         }
-    }
-
-    public static String getLogText(String ticketId){
-        final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(ticketId + ".log");
-        finished = false;
-
-        try {
-            final File localFile = File.createTempFile(ticketId, "log");
-
-            storageReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Log.e("Error", "Successful download");
-
-                    try {
-                        FileInputStream fis = new FileInputStream(localFile);
-                        BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-
-                        result = "";
-                        String line = null;
-                        while ((line = br.readLine()) != null) {
-                            result += line;
-                            result += "\n";
-                        }
-                        br.close();
-                        finished = true;
-                    } catch (FileNotFoundException e){
-                        e.printStackTrace();
-                    } catch (IOException e){
-                        e.printStackTrace();
-                    }
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Log.e("Error", "Error occurred while downloading");
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        do {
-            if (finished)
-                break;
-        } while (!finished);
-        return result;
     }
 }
