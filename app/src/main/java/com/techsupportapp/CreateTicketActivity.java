@@ -28,6 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -192,6 +193,9 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
                         databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
+
+                        DatabaseStorage.updateLogFile(CreateTicketActivity.this, newTicket.getTicketId(), DatabaseStorage.ACTION_CREATED, Globals.currentUser);
+
                         finish();
                     }
                     catch (Exception e){

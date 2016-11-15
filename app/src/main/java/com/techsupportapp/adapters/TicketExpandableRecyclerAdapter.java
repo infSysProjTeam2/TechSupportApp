@@ -14,9 +14,11 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DatabaseReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
 import com.techsupportapp.R;
+import com.techsupportapp.TicketsActivity;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -182,6 +184,8 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).setValue(visibleItems.get(position).ticket);
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(visibleItems.get(position).ticket.getTicketId()).removeValue();
+
+                                        DatabaseStorage.updateLogFile(context, visibleItems.get(position).ticket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {
