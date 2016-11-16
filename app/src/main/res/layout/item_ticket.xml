@@ -49,22 +49,23 @@
                     >
 
                     <TextView
-                        android:id="@+id/ticketAuthor"
+                        android:id="@+id/ticketTopic"
                         android:layout_width="0dp"
                         android:maxWidth="100dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
+                        android:ellipsize="end"
+                        android:maxLines="1"
                         android:textSize="17sp"
                         android:textColor="#3d3d3d"
-                        android:text="userName"
+                        android:text="Тема"
                         />
 
                     <TextView
                         android:id="@+id/ticketDate"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:singleLine="true"
+                        android:maxLines="1"
                         android:textSize="10sp"
                         android:textColor="#999999"
                         android:text="Apr 16, 2015"
@@ -90,24 +91,26 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:id = "@+id/authorLabel"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingTop="4dp"
                             android:maxLines="1"
                             android:textSize="12sp"
                             android:textColor="#999999"
-                            android:text="Тема:"
+                            android:text="Автор:"
                             android:paddingRight="6dp" />
 
                         <TextView
-                            android:id="@+id/ticketTopic"
+                            android:id="@+id/ticketAuthor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingTop="4dp"
+                            android:ellipsize="end"
                             android:maxLines="1"
                             android:textSize="12sp"
                             android:textColor="#999999"
-                            android:text="Тема"
+                            android:text="автор"
                             android:paddingRight="20dp" />
 
                     </LinearLayout>
@@ -132,7 +135,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingTop="4dp"
-                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:maxLines="1"
                             android:textSize="12sp"
                             android:textColor="#999999"
                             android:text="Описание"

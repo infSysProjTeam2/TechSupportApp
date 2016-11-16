@@ -160,17 +160,11 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
             authorText.setText(currentTicket.getUserName());
 
-            if (type == TYPE_CLOSED)
-                authorText.setText(authorText.getText().toString() + "\nрешена " + currentTicket.getAdminName());
-
             dateText.setText(currentTicket.getCreateDate());
             topicText.setText(currentTicket.getTopic());
-            if (currentTicket.getMessage().length() > 10)
-                descText.setText(currentTicket.getMessage().substring(0, 10) + "...");
-            else
-                descText.setText(currentTicket.getMessage());
+            descText.setText(currentTicket.getMessage());
 
-            ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getUserName(), context));
+            ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getTopic(), context));
 
             ticketImage.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -187,10 +181,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                     @Override
                     public void onClick(View v) {
                         new MaterialDialog.Builder(context)
-                                .title("Принять заявку")
-                                .content("Вы действительно хотите принять заявку?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
+                                .title(currentTicket.getTopic() + "\nПолное описание заявки:")
+                                .content(currentTicket.getMessage())
+                                .positiveText("Принять")
+                                .negativeText(android.R.string.cancel)
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

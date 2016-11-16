@@ -34,6 +34,7 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         TextView topicText;
         TextView descText;
         ImageView ticketImage;
+        TextView authorLabel;
 
         public ViewHolder(View view) {
             super(view);
@@ -42,6 +43,7 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
             dateText = (TextView) view.findViewById(R.id.ticketDate);
             topicText = (TextView) view.findViewById(R.id.ticketTopic);
             descText = (TextView) view.findViewById(R.id.ticketDesc);
+            authorLabel = (TextView) view.findViewById(R.id.authorLabel);
         }
     }
 
@@ -70,21 +72,20 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
             titleText = values.get(position).getUserName();
         }
         else if (adminId == null || adminId.equals("")) {
-            holder.authorText.setText("Не установлено");
+            holder.authorText.setText("не установлено");
+            holder.authorLabel.setText("Консультант:");
             titleText = holder.authorText.getText().toString();
         } else {
             holder.authorText.setText(values.get(position).getAdminName());
+            holder.authorLabel.setText("Консультант:");
             titleText = values.get(position).getAdminName();
         }
 
         holder.dateText.setText(values.get(position).getCreateDate());
         holder.topicText.setText(values.get(position).getTopic());
-        if (values.get(position).getMessage().length() > 10)
-            holder.descText.setText(values.get(position).getMessage().substring(0, 10) + "...");
-        else
-            holder.descText.setText(values.get(position).getMessage());
+        holder.descText.setText(values.get(position).getMessage());
 
-        holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
+        holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getTopic(), context));
 
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
