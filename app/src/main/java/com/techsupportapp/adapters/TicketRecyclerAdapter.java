@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
@@ -78,7 +79,11 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
 
         holder.dateText.setText(values.get(position).getCreateDate());
         holder.topicText.setText(values.get(position).getTopic());
-        holder.descText.setText(values.get(position).getMessage());
+        if (values.get(position).getMessage().length() > 10)
+            holder.descText.setText(values.get(position).getMessage().substring(0, 10) + "...");
+        else
+            holder.descText.setText(values.get(position).getMessage());
+
         holder.ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
 
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {

@@ -153,38 +153,30 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         }
 
         public void bind(final int position) {
-            final String titleText;
-
             final String userId = visibleItems.get(position).ticket.getUserId();
             final String adminId = visibleItems.get(position).ticket.getAdminId();
 
             final Ticket currentTicket = visibleItems.get(position).ticket;
 
+            authorText.setText(currentTicket.getUserName());
 
-            if (Globals.currentUser.getRole() != User.SIMPLE_USER){
-                authorText.setText(currentTicket.getUserName());
-                titleText = currentTicket.getUserName();
-            }
-            else if (adminId == null || adminId.equals("")) {
-                authorText.setText("Не установлено");
-                titleText = authorText.getText().toString();
-            } else {
-                authorText.setText(currentTicket.getAdminName());
-                titleText = currentTicket.getAdminName();
-            }
+            if (type == TYPE_CLOSED)
+                authorText.setText(authorText.getText().toString() + "\nрешена " + currentTicket.getAdminName());
 
             dateText.setText(currentTicket.getCreateDate());
             topicText.setText(currentTicket.getTopic());
-            descText.setText(currentTicket.getMessage());
-            ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(titleText, context));
+            if (currentTicket.getMessage().length() > 10)
+                descText.setText(currentTicket.getMessage().substring(0, 10) + "...");
+            else
+                descText.setText(currentTicket.getMessage());
+
+            ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getUserName(), context));
 
             ticketImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!titleText.equals("Не установлено")) {
-                        BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
-                        bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
-                    }
+                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
+                    bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
                 }
             });
 
@@ -254,12 +246,22 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                                                 result += "\n";
                                                             }
                                                             br.close();
+
+                                                            result = result.substring(0, result.length()-2);
+                                                            result = result.replaceAll(": ", ":\n");
                                                             materialDialog.setContent(result);
                                                         } catch (FileNotFoundException e){
                                                             e.printStackTrace();
+                                                            materialDialog.setContent("Ошибка загрузки");
                                                         } catch (IOException e){
                                                             e.printStackTrace();
+                                                            materialDialog.setContent("Ошибка загрузки");
                                                         }
+                                                    }
+                                                }).addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception exception) {
+                                                        materialDialog.setContent("Ошибка загрузки");
                                                     }
                                                 });
                                             } catch (IOException e) {
@@ -284,15 +286,17 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
                                                     String result = "";
                                                     for (ChatMessage chatMessage : chatMessages) {
-                                                        result += chatMessage.getAuthor() + ", " + chatMessage.getMessageTime() + "\n";
+                                                        result += chatMessage.getAuthor() + ", " + chatMessage.getMessageTime() + ":\n";
                                                         result += chatMessage.getMessage() + "\n\n";
                                                     }
+                                                    result = result.substring(0, result.length()-2);
 
                                                     materialDialog.setContent(result);
                                                 }
 
                                                 @Override
                                                 public void onCancelled(DatabaseError databaseError) {
+                                                    materialDialog.setContent("Ошибка загрузки");
                                                 }
                                             };
                                             databaseReference.addValueEventListener(valueEventListener);
