@@ -36,7 +36,6 @@ public class MessagingActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
 
-    private String mUsername;
     private String mChatRoom;
     private String topic;
 
@@ -50,7 +49,6 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        mUsername = getIntent().getExtras().getString("userName");
         mChatRoom = getIntent().getExtras().getString("chatRoom");
         topic = getIntent().getExtras().getString("topic");
 

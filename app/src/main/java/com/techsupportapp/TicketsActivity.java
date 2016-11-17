@@ -164,7 +164,6 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
                 Intent intent = new Intent(TicketsActivity.this, MessagingActivity.class);
                 if (role != User.SIMPLE_USER) {
-                    intent.putExtra("userName", ticketsList.get(position).getUserName());
                     intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
                     intent.putExtra("topic", ticketsList.get(position).getTopic());
                 }
@@ -174,7 +173,6 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                         return;
                     }
                     else {
-                        intent.putExtra("userName", ticketsList.get(position).getAdminName());
                         intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
                         intent.putExtra("topic", ticketsList.get(position).getTopic());
                     }
