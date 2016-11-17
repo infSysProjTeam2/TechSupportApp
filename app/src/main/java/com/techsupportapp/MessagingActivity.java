@@ -36,8 +36,8 @@ public class MessagingActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
 
-    private String mUsername;
     private String mChatRoom;
+    private String topic;
 
     private EditText inputText;
     private ImageButton sendBtn;
@@ -49,8 +49,8 @@ public class MessagingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        mUsername = getIntent().getExtras().getString("userName");
         mChatRoom = getIntent().getExtras().getString("chatRoom");
+        topic = getIntent().getExtras().getString("topic");
 
         showLoadingDialog();
         initializeComponents();
@@ -58,14 +58,14 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        databaseReference = FirebaseDatabase.getInstance().getReference("chat/" + mChatRoom);
+        databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        setTitle("Чат с " + mUsername);
+        setTitle(topic);
     }
 
     private void setEvents(){
