@@ -145,13 +145,13 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private static String getDatabaseUserPath(User unVerifiedUser) throws Exception {
         int role = unVerifiedUser.getRole();
         if (role == User.SIMPLE_USER)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
         else if (role == User.DEPARTMENT_MEMBER)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_WORKER_TABLE;
         else if (role == User.ADMINISTRATOR)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE;
         else if (role == User.DEPARTMENT_CHIEF)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE;
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
     }
 
@@ -160,7 +160,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!search) {
-                    unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE);
+                    unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE);
                     adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                     unverifiedUsersView.setAdapter(adapter);
                     adapter.notifyDataSetChanged();
@@ -441,7 +441,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
                             search = false;
 
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                            databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                             Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -475,7 +475,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                                 MenuItemCompat.collapseActionView(searchMenu);
                             search = false;
 
-                            databaseRef.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                            databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                             Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
                         }
                     });

@@ -171,14 +171,14 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                     String newRightDate = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).format(Calendar.getInstance().getTime());
                     try {
                         if (rightDate == null) {
-                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).setValue(newRightDate);
-                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX).setValue(newRightDate);
+                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
                         }
                         else if (!newRightDate.equals(rightDate))
-                            databaseReference.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
                         Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
-                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
-                        databaseReference.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
+                        databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
+                        databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
                         finish();
                     }
@@ -193,8 +193,8 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ticketCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
-                rightDate = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class);
+                ticketCount = dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
+                rightDate = dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class);
             }
 
             @Override

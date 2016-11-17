@@ -13,8 +13,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -28,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.services.MessagingService;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.io.IOException;
@@ -49,6 +48,7 @@ public class SignInActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
 
     private boolean isDownloaded;
+    private boolean hasListener;
 
     //endregion
 
@@ -63,6 +63,35 @@ public class SignInActivity extends AppCompatActivity {
     private CheckBox rememberPasCB;
 
     private ProgressDialog loadingDialog;
+
+    //endregion
+
+    //region Listeners
+
+    private ValueEventListener databaseListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - НАЧАТО");
+            isDownloaded = false;
+            unverifiedLoginList.clear();
+
+            userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            unverifiedLoginList = Globals.Downloads.Strings.getUnverifiedLogins(dataSnapshot);
+
+            isDownloaded = true;
+            if (loadingDialog != null){
+                closeLoadingDialog();
+                signInBut.callOnClick();
+                loadingDialog = null;
+            }
+            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - ЗАВЕРШЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+        }
+    };
 
     //endregion
 
@@ -125,7 +154,13 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Globals.logInfoAPK(SignInActivity.this, "onResume - ВЫПОЛНЕН");
 
+        if (!hasListener) {
+            Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УСТАНОВЛЕН");
+            databaseReference.addValueEventListener(databaseListener);
+            hasListener = true;
+        }
         SharedPreferences settings = getPreferences(0);
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
@@ -227,10 +262,11 @@ public class SignInActivity extends AppCompatActivity {
 
         rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
         setTitle("Авторизация");
         isDownloaded = false;
+        hasListener = false;
     }
 
     /**
@@ -278,30 +314,6 @@ public class SignInActivity extends AppCompatActivity {
             }
         });
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - НАЧАТО");
-                isDownloaded = false;
-                unverifiedLoginList.clear();
-
-                userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-                unverifiedLoginList = Globals.Downloads.Strings.getUnverifiedLogins(dataSnapshot);
-
-                isDownloaded = true;
-                if (loadingDialog != null){
-                    closeLoadingDialog();
-                    signInBut.callOnClick();
-                }
-                Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - ЗАВЕРШЕНО");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
-            }
-        });
-
         passwordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -343,6 +355,10 @@ public class SignInActivity extends AppCompatActivity {
             MessagingService.startMessagingService(getApplicationContext());
             Globals.logInfoAPK(SignInActivity.this, "Служба - ЗАПУЩЕНА");
         }
+
+        Globals.logInfoAPK(getApplicationContext(), "Прослушиватель - УДАЛЕН");
+        databaseReference.removeEventListener(databaseListener);
+        hasListener = false;
 
         Globals.currentUser = user;
         startActivity(new Intent(SignInActivity.this, TicketsOverviewActivity.class));

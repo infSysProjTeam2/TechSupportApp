@@ -131,8 +131,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 try {
                                     chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
                                             User.SIMPLE_USER, usersList.get(userPosition).getLogin(), "Wayward Pines");
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
                                 }
                                 catch (Exception e) {
                                     e.printStackTrace();
@@ -148,8 +148,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             try {
                                 chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
                                         User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), "Wayward Pines");
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
+                                databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                             }
                             catch (Exception e) {
                                 e.printStackTrace();
@@ -231,13 +231,13 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPasswordRepeat.getText().toString(),
                                         usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), "Wayward Pines");
                                 if (chUser.getRole() == User.ADMINISTRATOR)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 else if (chUser.getRole() == User.SIMPLE_USER)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                 else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
-                                    databaseRef.child(DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                    databaseRef.child(DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
 
                             }
                             catch (Exception e) {

@@ -45,7 +45,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     private String mNickname;
     private int role;
 
-    private DatabaseReference databaseRef;
+    private DatabaseReference databaseUserReference;
+    private DatabaseReference databaseTicketReference;
     private ArrayList<Ticket> ticketsOverviewList = new ArrayList<Ticket>();
     private ArrayList<User> usersList = new ArrayList<User>();
 
@@ -54,6 +55,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     private ImageView currUserImage;
 
     private View bottomSheetBehaviorView;
+
+    private boolean isDownloaded;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +78,10 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
+        databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_TICKET_TABLE);
+
+        isDownloaded = false;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(mNickname);
@@ -120,25 +126,14 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
+        databaseUserReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+                isDownloaded = false;
                 usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-
-                if (role != User.SIMPLE_USER) {
-                    ticketsOverviewList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
-                    ticketsOverview.setLayoutManager(mLayoutManager);
-                    ticketsOverview.setHasFixedSize(false);
-                    ticketsOverview.setAdapter(adapter);
-                } else {
-                    ticketsOverviewList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
-                    ticketsOverviewList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
-                    ticketsOverview.setLayoutManager(mLayoutManager);
-                    ticketsOverview.setHasFixedSize(false);
-                    ticketsOverview.setAdapter(adapter);
-                }
+                isDownloaded = true;
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - ЗАКОНЧЕНО");
             }
 
             @Override
@@ -146,6 +141,37 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
             }
         });
+
+        databaseTicketReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - БЛОКИРОВАНО");
+                while (!isDownloaded);
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - НАЧАТО");
+                if (role != User.SIMPLE_USER) {
+                    ticketsOverviewList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, mUserId);
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                    ticketsOverview.setLayoutManager(mLayoutManager);
+                    ticketsOverview.setHasFixedSize(false);
+                    ticketsOverview.setAdapter(adapter);
+                } else {
+                    ticketsOverviewList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
+                    ticketsOverviewList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
+                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                    ticketsOverview.setLayoutManager(mLayoutManager);
+                    ticketsOverview.setHasFixedSize(false);
+                    ticketsOverview.setAdapter(adapter);
+                }
+                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - ЗАКОНЧЕНО");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
         ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
                     @Override
                     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
@@ -182,8 +208,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     selectedTicket.removeAdmin();
-                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                    databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                 }
                             });
 
@@ -208,7 +234,7 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                     }
                                 });
 
@@ -231,8 +257,8 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
                                 builder.setPositiveButton("Да", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        databaseRef.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                        databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                     }
                                 });
 

@@ -33,7 +33,8 @@ public class SignUpActivity extends AppCompatActivity {
 
     //region Fields
 
-    private DatabaseReference databaseReference;
+    private DatabaseReference databaseUserReference;
+    private DatabaseReference databaseIndexReference;
     private ArrayList<String> loginList = new ArrayList<String>();
     private int userCount;
 
@@ -53,6 +54,38 @@ public class SignUpActivity extends AppCompatActivity {
     private RadioButton workerRadBtn;
     private RadioButton adminRadBtn;
     private RadioButton chiefRadBtn;
+
+    //endregion
+
+    //region
+
+    ValueEventListener databaseUserListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(SignUpActivity.this, "Скачивание логинов всех пользователей - НАЧАТО");
+            loginList = Globals.Downloads.Strings.getAllLogins(dataSnapshot);
+            Globals.logInfoAPK(SignUpActivity.this, "Скачивание логинов всех пользователей - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener databaseIndexListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(SignUpActivity.this, "Обновление индексов - НАЧАТО");
+            userCount = dataSnapshot.getValue(int.class);
+            Globals.logInfoAPK(SignUpActivity.this, "Обновление индексов - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     //endregion
 
@@ -100,7 +133,8 @@ public class SignUpActivity extends AppCompatActivity {
         adminRadBtn = (RadioButton)findViewById(R.id.adminRadBtn);
         chiefRadBtn = (RadioButton)findViewById(R.id.chiefRadBtn);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
+        databaseIndexReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_USER_INDEX_COUNTER);
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -110,18 +144,8 @@ public class SignUpActivity extends AppCompatActivity {
      * Создание методов для событий
      */
     private void setEvents() {
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                loginList = Globals.Downloads.Strings.getAllLogins(dataSnapshot);
-                userCount = dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).getValue(int.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        databaseUserReference.addValueEventListener(databaseUserListener);
+        databaseIndexReference.addValueEventListener(databaseIndexListener);
 
         repeatPasswordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -199,7 +223,7 @@ public class SignUpActivity extends AppCompatActivity {
     private void tryAddUser(){
         if (isFieldsContentCorrect()) {
             try {
-                databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
+                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE).child("user_" + userCount)
                         .setValue(new User("user_" + userCount++, false, loginET.getText().toString(),
                                 passwordET.getText().toString(), checkRole(), userNameET.getText().toString(),
                                 workPlaceET.getText().toString()));
@@ -207,9 +231,18 @@ public class SignUpActivity extends AppCompatActivity {
                 Globals.showLongTimeToast(getApplicationContext(), "Ошибка при присвоении прав пользователю, обратитесь к разработчику");
             }
 
-            databaseReference.child(DatabaseVariables.Indexes.DATABASE_USER_INDEX_COUNTER).setValue(userCount);
+            databaseIndexReference.setValue(userCount);
             Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
+            databaseUserReference.removeEventListener(databaseUserListener);
+            databaseIndexReference.removeEventListener(databaseIndexListener);
             SignUpActivity.super.finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        databaseUserReference.removeEventListener(databaseUserListener);
+        databaseIndexReference.removeEventListener(databaseIndexListener);
+        super.onBackPressed();
     }
 }

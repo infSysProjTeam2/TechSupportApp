@@ -296,17 +296,17 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                firstDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
-                lastDateTV.setText(dataSnapshot.child(DatabaseVariables.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
+                firstDateTV.setText(dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
+                lastDateTV.setText(dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
 
                 if (firstDateTV.getText() == "" || lastDateTV.getText() == ""){
                     firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
                     lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
                 }
 
-                long markedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
-                long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
-                long allTicketsCount = dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
+                long markedTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
+                long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
+                long allTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
 
                 String firstDate = firstDateTV.getText().toString();
                 SpannableString contentFirst = new SpannableString(firstDate);

@@ -154,8 +154,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             public void onDataChange(DataSnapshot dataSnapshot) {
                 usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
 
-                listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-                listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+                listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_SOLVED_TICKET_TABLE);
                 listOfMyClosedTickets.clear();
 
                 for (Ticket ticket : listOfSolvedTickets)
@@ -318,8 +318,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                             viewOfAvailableTickets.setAdapter(adapter);
                             adapter.notifyDataSetChanged();
 
-                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
-                            databaseRef.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
+                            databaseRef.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).setValue(listOfAvailableTickets.get(position));
+                            databaseRef.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(listOfAvailableTickets.get(position).getTicketId()).removeValue();
                         }
                     });
 

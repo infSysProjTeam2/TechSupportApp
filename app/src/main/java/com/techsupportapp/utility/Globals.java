@@ -117,10 +117,10 @@ public class Globals {
              */
             public static ArrayList<User> getVerifiedUserList(DataSnapshot dataSnapshot) {
                 ArrayList<User> resultList = new ArrayList<User>();
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE));
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE));
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE));
                 return resultList;
             }
 
@@ -148,7 +148,7 @@ public class Globals {
              */
             public static ArrayList<String> getUnverifiedLogins(DataSnapshot dataSnapshot) {
                 ArrayList<String> resultList = new ArrayList<String>();
-                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
                     resultList.add(userRecord.getValue(User.class).getLogin());
                 return resultList;
             }
@@ -179,7 +179,7 @@ public class Globals {
 
             public static ArrayList<String> getUserMarkedTicketIDs(DataSnapshot dataSnapshot, String userId){
                 ArrayList<String> resultList = new ArrayList<String>();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()){
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()){
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     if (ticket.getUserId().equals(userId))
                         resultList.add(ticket.getTicketId());
@@ -199,7 +199,7 @@ public class Globals {
              */
             public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin) {
                 ArrayList<Ticket> resultList = new ArrayList<Ticket>();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     if (ticket.getAdminId().equals(overseerLogin))
                         resultList.add(ticket);
@@ -238,9 +238,9 @@ public class Globals {
             }
 
             public static ArrayList<Ticket> getAllTickets(DataSnapshot dataSnapshot) {
-                ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE);
-                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
-                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE));
+                ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE);
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_SOLVED_TICKET_TABLE));
                 return resultList;
             }
 
