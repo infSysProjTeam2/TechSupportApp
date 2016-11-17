@@ -117,7 +117,6 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        databaseReference.addValueEventListener(valueEventListener);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
 
         loginET.setText(preferences.getString("Login",""));
@@ -186,6 +185,8 @@ public class SignInActivity extends AppCompatActivity {
             passwordET.setText("");
             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
         }
+
+        closeLoadingDialog();
     }
 
     /**
@@ -200,7 +201,6 @@ public class SignInActivity extends AppCompatActivity {
      */
     private void dataConstruction(){
         initializeComponents();
-        showLoadingDialog();
         setEvents();
     }
 
@@ -264,9 +264,8 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (hasConnection()) {
-                    if (!checkFields())
-                        return;
-                    checkVerificationData();
+                    showLoadingDialog();
+                    databaseReference.addValueEventListener(valueEventListener);
                 }
                 else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
             }
@@ -280,7 +279,9 @@ public class SignInActivity extends AppCompatActivity {
                 userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
                 unverifiedLoginList = Globals.Downloads.getUnverifiedLogins(dataSnapshot);
 
-                closeLoadingDialog();
+                if (!checkFields())
+                    return;
+                checkVerificationData();
             }
 
             @Override
