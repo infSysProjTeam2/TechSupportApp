@@ -166,15 +166,17 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                 if (role != User.SIMPLE_USER) {
                     intent.putExtra("userName", ticketsList.get(position).getUserName());
                     intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
+                    intent.putExtra("topic", ticketsList.get(position).getTopic());
                 }
                 else {
                     if (ticketsList.get(position).getAdminId() == null || ticketsList.get(position).getAdminId().equals("")) {
-                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, пожалуйста подождите", Toast.LENGTH_LONG).show();
                         return;
                     }
                     else {
                         intent.putExtra("userName", ticketsList.get(position).getAdminName());
                         intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
+                        intent.putExtra("topic", ticketsList.get(position).getTopic());
                     }
                 }
                 startActivity(intent);

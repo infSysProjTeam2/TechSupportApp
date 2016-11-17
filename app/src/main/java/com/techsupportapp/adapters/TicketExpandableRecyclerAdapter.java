@@ -193,6 +193,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(currentTicket.getTicketId()).setValue(currentTicket);
                                         databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
 
+                                        //Отправка полного описания заявки в виде первого сообщения в чате
+                                        ChatMessage firstMessage = new ChatMessage(currentTicket.getMessage(), currentTicket.getUserName(), currentTicket.getUserId(), "", false);
+                                        FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId()).push().setValue(firstMessage);
+
                                         DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
                                     }
                                 })
