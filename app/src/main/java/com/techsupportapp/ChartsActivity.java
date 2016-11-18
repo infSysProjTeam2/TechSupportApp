@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -24,6 +25,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -65,10 +67,91 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private TextView lastDateTV;
 
     private DatabaseReference databaseReference;
+    private DatabaseReference firstDateReference;
+    private DatabaseReference lastDateReference;
+
 
     private ArrayList<Ticket> allTickets = new ArrayList<Ticket>();
 
     private HorizontalBarChart horizontalBarChart;
+
+    private boolean isDownloaded;
+
+    //region Listeners
+
+    ValueEventListener firstDateListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление первой даты - НАЧАТО");
+            firstDateTV.setText(dataSnapshot.getValue(String.class));
+
+            if (firstDateTV.getText().equals(""))
+                firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
+
+            String firstDate = firstDateTV.getText().toString();
+            SpannableString contentFirst = new SpannableString(firstDate);
+            contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
+            firstDateTV.setText(contentFirst);
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление первой даты - ЗАВЕРШЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener lastDateListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление последней даты - НАЧАТО");
+            lastDateTV.setText(dataSnapshot.getValue(String.class));
+
+            if (lastDateTV.getText().equals(""))
+                lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
+
+            String lastDate = lastDateTV.getText().toString();
+            SpannableString contentLast = new SpannableString(lastDate);
+            contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
+            lastDateTV.setText(contentLast);
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление последней даты - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener ticketListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление графика - НАЧАТО");
+            while (firstDateTV.getText().equals("") || lastDateTV.getText().equals(""))
+                isDownloaded = true;
+            if (isDownloaded) {
+                Globals.logInfoAPK(ChartsActivity.this, "Прослушиватели - УДАЛЕНЫ");
+                firstDateReference.removeEventListener(firstDateListener);
+                lastDateReference.removeEventListener(lastDateListener);
+                isDownloaded = false;
+            }
+            //TODO рассчет при обновлении для уже выбранной даты - при обновлении даты не обновляются, а тикеты обновляются
+            long markedTicketsCount = dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
+            long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
+            long allTicketsCount = dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount();
+
+            initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
+            allTickets = Globals.Downloads.Tickets.getAllTickets(dataSnapshot);
+            Globals.logInfoAPK(ChartsActivity.this, "Обновление графика - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,9 +168,13 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     private void initializeComponents(){
         initChart();
 
+        isDownloaded = false;
+
         firstDateTV = (TextView)findViewById(R.id.firstDateLabel);
         lastDateTV = (TextView)findViewById(R.id.lastDateLabel);
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        firstDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX);
+        lastDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX);
+        databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_TICKET_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Статистика");
@@ -202,9 +289,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             if (ticketDate.before(lastDate) && ticketDate.after(firstDate)) {
                 if (allTickets.get(i).getTicketState() == Ticket.SOLVED)
                     solvedTicketsCount++;
-                else if (!allTickets.get(i).getAdminId().equals("") && allTickets.get(i).getAdminId() != null)
+                else if (allTickets.get(i).getTicketState() == Ticket.NOT_ACCEPTED)
+                    allTicketsCount++;
+                else if (allTickets.get(i).getTicketState() == Ticket.ACCEPTED)
                     markedTicketsCount++;
-                allTicketsCount++;
             }
         }
         initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
@@ -231,7 +319,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         entries.add(new BarEntry(1 * 20f, markedTicketsCount));
         entries.add(new BarEntry(0, solvedTicketsCount));
 
-        BarDataSet dataSet = new BarDataSet(entries, "Создано, принято, решено");
+        BarDataSet dataSet = new BarDataSet(entries, "Не решено, принято, решено");
 
         dataSet.setColors(ColorTemplate.PASTEL_COLORS);
 
@@ -293,40 +381,9 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             }
         });
 
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                firstDateTV.setText(dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX).getValue(String.class));
-                lastDateTV.setText(dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class));
+        firstDateReference.addValueEventListener(firstDateListener);
 
-                if (firstDateTV.getText() == "" || lastDateTV.getText() == ""){
-                    firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
-                    lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
-                }
-
-                long markedTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildrenCount();
-                long solvedTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_SOLVED_TICKET_TABLE).getChildrenCount();
-                long allTicketsCount = dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).getChildrenCount() + markedTicketsCount + solvedTicketsCount;
-
-                String firstDate = firstDateTV.getText().toString();
-                SpannableString contentFirst = new SpannableString(firstDate);
-                contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
-                firstDateTV.setText(contentFirst);
-
-                String lastDate = lastDateTV.getText().toString();
-                SpannableString contentLast = new SpannableString(lastDate);
-                contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
-                lastDateTV.setText(contentLast);
-
-                initChartData(allTicketsCount, markedTicketsCount, solvedTicketsCount);
-                allTickets = Globals.Downloads.Tickets.getAllTickets(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        lastDateReference.addValueEventListener(lastDateListener);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -395,5 +452,26 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
     private void exit(){
         this.finishAffinity();
+    }
+
+    @Override
+    protected void onResume() {
+        databaseReference.addValueEventListener(ticketListener);
+        Globals.logInfoAPK(ChartsActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        databaseReference.removeEventListener(ticketListener);
+        Globals.logInfoAPK(ChartsActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseReference.removeEventListener(ticketListener);
+        Globals.logInfoAPK(ChartsActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
     }
 }

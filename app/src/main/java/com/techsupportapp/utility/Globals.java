@@ -238,9 +238,9 @@ public class Globals {
             }
 
             public static ArrayList<Ticket> getAllTickets(DataSnapshot dataSnapshot) {
-                ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE);
-                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
-                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.FullPath.Tickets.DATABASE_SOLVED_TICKET_TABLE));
+                ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE));
                 return resultList;
             }
 

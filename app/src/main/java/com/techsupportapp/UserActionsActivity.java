@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -73,6 +74,32 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     private ImageView currUserImage;
 
+    //region Listeners
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if (!search) {
+                unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE);
+                adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
+                unverifiedUsersView.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+
+                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+                adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
+                usersView.setAdapter(adapter1);
+                adapter1.notifyDataSetChanged();
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +118,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
 
     private void initializeComponents(){
         fragmentManager = getSupportFragmentManager();
-        databaseRef = FirebaseDatabase.getInstance().getReference();
+        databaseRef = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Пользователи");
@@ -156,28 +183,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     }
 
     private void setEvents() {
-        databaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!search) {
-                    unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE);
-                    adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
-                    unverifiedUsersView.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
-
-                    usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-                    adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
-                    usersView.setAdapter(adapter1);
-                    adapter1.notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -185,7 +190,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
             }
         });
-
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -534,5 +538,19 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             SecondFragment f = new SecondFragment();
             return f;
         }
+    }
+
+    @Override
+    protected void onResume() {
+        databaseRef.addValueEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseRef.removeEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
     }
 }

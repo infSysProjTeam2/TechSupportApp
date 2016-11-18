@@ -58,6 +58,55 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private boolean isDownloaded;
 
+    //region Listeners
+
+    ValueEventListener ticketListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - БЛОКИРОВАНО");
+            while (!isDownloaded);
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - НАЧАТО");
+            if (role != User.SIMPLE_USER) {
+                ticketsOverviewList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, mUserId);
+                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                ticketsOverview.setLayoutManager(mLayoutManager);
+                ticketsOverview.setHasFixedSize(false);
+                ticketsOverview.setAdapter(adapter);
+            } else {
+                ticketsOverviewList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
+                ticketsOverviewList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
+                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
+                ticketsOverview.setLayoutManager(mLayoutManager);
+                ticketsOverview.setHasFixedSize(false);
+                ticketsOverview.setAdapter(adapter);
+            }
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+            isDownloaded = false;
+            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            isDownloaded = true;
+            Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -126,73 +175,27 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
     }
 
     private void setEvents() {
-        databaseUserReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
-                isDownloaded = false;
-                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-                isDownloaded = true;
-                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание данных зарегистрированных пользователей - ЗАКОНЧЕНО");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        databaseTicketReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - БЛОКИРОВАНО");
-                while (!isDownloaded);
-                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - НАЧАТО");
-                if (role != User.SIMPLE_USER) {
-                    ticketsOverviewList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, mUserId);
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
-                    ticketsOverview.setLayoutManager(mLayoutManager);
-                    ticketsOverview.setHasFixedSize(false);
-                    ticketsOverview.setAdapter(adapter);
-                } else {
-                    ticketsOverviewList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE, mUserId);
-                    ticketsOverviewList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE, mUserId));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsOverviewList, usersList, getSupportFragmentManager());
-                    ticketsOverview.setLayoutManager(mLayoutManager);
-                    ticketsOverview.setHasFixedSize(false);
-                    ticketsOverview.setAdapter(adapter);
-                }
-                Globals.logInfoAPK(TicketsOverviewActivity.this, "Скачивание заявок - ЗАКОНЧЕНО");
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
         ItemClickSupport.addTo(ticketsOverview).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-                    @Override
-                    public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                        Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
-                        if (role != User.SIMPLE_USER) {
-                            intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
-                            intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                        }
-                        else {
-                            if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
-                                Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
-                                return;
-                            }
-                            else {
-                                intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
-                                intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
-                            }
-                        }
-                        startActivity(intent);
+            @Override
+            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                Intent intent = new Intent(TicketsOverviewActivity.this, MessagingActivity.class);
+                if (role != User.SIMPLE_USER) {
+                    intent.putExtra("userName", ticketsOverviewList.get(position).getUserName());
+                    intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
+                }
+                else {
+                    if (ticketsOverviewList.get(position).getAdminId() == null || ticketsOverviewList.get(position).getAdminId().equals("")) {
+                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, подождите", Toast.LENGTH_LONG).show();
+                        return;
                     }
-                });
+                    else {
+                        intent.putExtra("userName", ticketsOverviewList.get(position).getAdminName());
+                        intent.putExtra("chatRoom", ticketsOverviewList.get(position).getTicketId());
+                    }
+                }
+                startActivity(intent);
+            }
+        });
 
         ItemClickSupport.addTo(ticketsOverview).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener () {
                     @Override
@@ -370,5 +373,30 @@ public class TicketsOverviewActivity extends AppCompatActivity implements Naviga
 
     private void exit(){
         this.finishAffinity();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseUserReference.removeEventListener(userListener);
+        databaseTicketReference.removeEventListener(ticketListener);
+        super.onStop();
+        Globals.logInfoAPK(TicketsOverviewActivity.this,  "onStop - ВЫПОЛНЕН");
+    }
+
+    @Override
+    protected void onPause() {
+        databaseUserReference.removeEventListener(userListener);
+        databaseTicketReference.removeEventListener(ticketListener);
+        isDownloaded = false;
+        super.onPause();
+        Globals.logInfoAPK(TicketsOverviewActivity.this,  "onPause - ВЫПОЛНЕН");
+    }
+
+    @Override
+    protected void onResume() {
+        databaseUserReference.addValueEventListener(userListener);
+        databaseTicketReference.addValueEventListener(ticketListener);
+        super.onResume();
+        Globals.logInfoAPK(TicketsOverviewActivity.this,  "onResume - ВЫПОЛНЕН");
     }
 }

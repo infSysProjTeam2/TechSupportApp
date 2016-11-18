@@ -350,13 +350,13 @@ public class SignInActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
 
         savePassAndLogin();
-
+        //TODO загрузку после нажатия на "ВХОД"
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false)) {
             MessagingService.startMessagingService(getApplicationContext());
             Globals.logInfoAPK(SignInActivity.this, "Служба - ЗАПУЩЕНА");
         }
 
-        Globals.logInfoAPK(getApplicationContext(), "Прослушиватель - УДАЛЕН");
+        Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УДАЛЕН");
         databaseReference.removeEventListener(databaseListener);
         hasListener = false;
 
