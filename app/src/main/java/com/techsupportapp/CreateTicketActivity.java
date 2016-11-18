@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -39,7 +40,10 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
 
     //region Fields
 
-    private DatabaseReference databaseReference;
+    private DatabaseReference ticketReference;
+    private DatabaseReference firstDateReference;
+    private DatabaseReference lastDateReference;
+    private DatabaseReference ticketIndexReference;
 
     private int ticketCount;
     private String mUserId;
@@ -56,6 +60,36 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private FloatingActionButton fab;
 
     private ImageView currUserImage;
+
+    //endregion
+
+    //region Listeners
+
+    ValueEventListener ticketIndexListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            ticketCount = dataSnapshot.getValue(int.class);
+            Globals.logInfoAPK(CreateTicketActivity.this, "Обновление количества тикетов - ВЫПОЛНЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener lastDateListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            rightDate = dataSnapshot.getValue(String.class);
+            Globals.logInfoAPK(CreateTicketActivity.this, "Обновление крайней даты - ВЫПОЛНЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     //endregion
 
@@ -129,7 +163,10 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         topicET = (EditText)findViewById(R.id.message_topic_text);
         messageET = (EditText)findViewById(R.id.message_text);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        ticketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+        firstDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX);
+        lastDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX);
+        ticketIndexReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_TICKET_INDEX_COUNTER);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
 
@@ -171,14 +208,14 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                     String newRightDate = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).format(Calendar.getInstance().getTime());
                     try {
                         if (rightDate == null) {
-                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX).setValue(newRightDate);
-                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                            firstDateReference.setValue(newRightDate);
+                            lastDateReference.setValue(newRightDate);
                         }
                         else if (!newRightDate.equals(rightDate))
-                            databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).setValue(newRightDate);
+                            lastDateReference.setValue(newRightDate);
                         Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
-                        databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child("ticket" + ticketCount++).setValue(newTicket);
-                        databaseReference.child(DatabaseVariables.FullPath.Indexes.DATABASE_TICKET_INDEX_COUNTER).setValue(ticketCount);
+                        ticketReference.child("ticket" + ticketCount++).setValue(newTicket);
+                        ticketIndexReference.setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
                         finish();
                     }
@@ -186,20 +223,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                         e.printStackTrace();
                     }
                 }
-            }
-        });
-
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                ticketCount = dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_TICKET_INDEX_COUNTER).getValue(int.class);
-                rightDate = dataSnapshot.child(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX).getValue(String.class);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         });
 
@@ -216,4 +239,27 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         this.finishAffinity();
     }
 
+    @Override
+    protected void onPause() {
+        ticketIndexReference.removeEventListener(ticketIndexListener);
+        lastDateReference.removeEventListener(lastDateListener);
+        Globals.logInfoAPK(CreateTicketActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        ticketIndexReference.addValueEventListener(ticketIndexListener);
+        lastDateReference.addValueEventListener(lastDateListener);
+        Globals.logInfoAPK(CreateTicketActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        ticketIndexReference.removeEventListener(ticketIndexListener);
+        lastDateReference.removeEventListener(lastDateListener);
+        Globals.logInfoAPK(CreateTicketActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
+    }
 }

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -80,6 +79,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             if (!search) {
+                Globals.logInfoAPK(UserActionsActivity.this, "Скачивание данных пользователей - НАЧАТО");
                 unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE);
                 adapter = new UnverifiedUserRecyclerAdapter(getApplicationContext(), unverifiedUsersList);
                 unverifiedUsersView.setAdapter(adapter);
@@ -89,6 +89,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 adapter1 = new UserRecyclerAdapter(getApplicationContext(), usersList);
                 usersView.setAdapter(adapter1);
                 adapter1.notifyDataSetChanged();
+                Globals.logInfoAPK(UserActionsActivity.this, "Скачивание данных пользователей - ОКОНЧЕНО");
             }
         }
 
@@ -545,6 +546,13 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         databaseRef.addValueEventListener(userListener);
         Globals.logInfoAPK(UserActionsActivity.this, "onResume - ВЫПОЛНЕН");
         super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        databaseRef.removeEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onStop();
     }
 
     @Override
