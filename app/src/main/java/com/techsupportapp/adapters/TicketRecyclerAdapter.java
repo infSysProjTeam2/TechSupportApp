@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
@@ -61,24 +60,20 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        final String titleText;
-
+    public void onBindViewHolder(final ViewHolder holder, int pos) {
+        final int position = holder.getAdapterPosition();
         final String userId = values.get(position).getUserId();
         final String adminId = values.get(position).getAdminId();
 
         if (Globals.currentUser.getRole() != User.SIMPLE_USER){
             holder.authorText.setText(values.get(position).getUserName());
-            titleText = values.get(position).getUserName();
         }
         else if (adminId == null || adminId.equals("")) {
             holder.authorText.setText("не установлено");
             holder.authorLabel.setText("Консультант:");
-            titleText = holder.authorText.getText().toString();
         } else {
             holder.authorText.setText(values.get(position).getAdminName());
             holder.authorLabel.setText("Консультант:");
-            titleText = values.get(position).getAdminName();
         }
 
         holder.dateText.setText(values.get(position).getCreateDate());
@@ -90,7 +85,7 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!titleText.equals("Не установлено")) {
+                if (values.get(position).getAdminName() != null) {
                     BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
                     bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
                 }
