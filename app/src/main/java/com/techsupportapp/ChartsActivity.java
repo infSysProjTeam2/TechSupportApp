@@ -1,12 +1,13 @@
 package com.techsupportapp;
 
 import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -15,8 +16,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +23,8 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
@@ -40,8 +41,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
@@ -55,9 +56,6 @@ import java.util.Locale;
 public class ChartsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private int oneDayMilliSec = 86400000;
-
-    private String mUserId;
-    private String mNickname;
 
     private ImageView currUserImage;
 
@@ -80,6 +78,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     ValueEventListener firstDateListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            //TODO пофиксить текст, переезжающий на другую строку
             Globals.logInfoAPK(ChartsActivity.this, "Обновление первой даты - НАЧАТО");
             firstDateTV.setText(dataSnapshot.getValue(String.class));
 
@@ -155,10 +154,6 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_charts);
-
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
-
         initializeComponents();
         setEvents();
     }
@@ -173,6 +168,10 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         firstDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_FIRST_DATE_INDEX);
         lastDateReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_LAST_DATE_INDEX);
         databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
+
+        firstDateTV.setPaintFlags(firstDateTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        lastDateTV.setPaintFlags(lastDateTV.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Статистика");
@@ -190,12 +189,12 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(mNickname, ChartsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ChartsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         userType.setText("Начальник отдела");
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.userActions).setVisible(false);
 
         initChartData(0, 0, 0);
     }
@@ -391,46 +390,47 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
 
         if (id == R.id.listOfTickets) {
             Intent intent = new Intent(ChartsActivity.this, ListOfTicketsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
-        } else if (id == R.id.listOfChannels) {
             finish();
-        } else if (id == R.id.signUpUser) {
+        } else if (id == R.id.acceptedTickets) {
+            finish();
+        } else if (id == R.id.userActions) {
             Intent intent = new Intent(ChartsActivity.this, UserActionsActivity.class);
-            intent.putExtra("uuid", mUserId);
-            intent.putExtra("nickname", mNickname);
             startActivity(intent);
+            finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(ChartsActivity.this);
             return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-
-            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (PreferenceManager.getDefaultSharedPreferences(ChartsActivity.this).getBoolean("allowNotifications", false)) {
-                        MessagingService.stopMessagingService(getApplicationContext());
-                        Globals.logInfoAPK(ChartsActivity.this, "Служба - ОСТАНОВЛЕНА");
-                    }
-                    exit();
-                }
-            });
-
-            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.setCancelable(false);
-            builder.setMessage("Вы действительно хотите закрыть приложение?");
-            builder.show();
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (PreferenceManager.getDefaultSharedPreferences(ChartsActivity.this).getBoolean("allowNotifications", false)) {
+                                MessagingService.stopMessagingService(getApplicationContext());
+                                Globals.logInfoAPK(ChartsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                            }
+                            ChartsActivity.this.finishAffinity();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

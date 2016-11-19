@@ -1,25 +1,27 @@
 package com.techsupportapp;
 
-import android.app.ProgressDialog;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-import com.techsupportapp.adapters.ChatListAdapter;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.techsupportapp.adapters.ChatRecyclerAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
-import com.techsupportapp.utility.DatabaseVariables;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.Globals;
 
 import java.text.SimpleDateFormat;
@@ -28,25 +30,27 @@ import java.util.Locale;
 
 public class MessagingActivity extends AppCompatActivity {
 
-    private Firebase mFirebaseRef;
-    private ValueEventListener mConnectedListener;
-    private ChatListAdapter mChatListAdapter;
+    private DatabaseReference databaseReference;
+    private ValueEventListener valueEventListener;
+    private ChatRecyclerAdapter chatRecyclerAdapter;
 
-    private String mUsername;
+    RecyclerView recyclerView;
+
     private String mChatRoom;
+    private String topic;
 
     private EditText inputText;
     private ImageButton sendBtn;
 
-    private ProgressDialog loadingDialog;
+    private MaterialDialog loadingDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_messaging);
 
-        mUsername = getIntent().getExtras().getString("userName");
         mChatRoom = getIntent().getExtras().getString("chatRoom");
+        topic = getIntent().getExtras().getString("topic");
 
         showLoadingDialog();
         initializeComponents();
@@ -54,15 +58,14 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void initializeComponents() {
-        mFirebaseRef.setAndroidContext(MessagingActivity.this);
-        mFirebaseRef = new Firebase(DatabaseVariables.FIREBASE_URL).child("chat").child(mChatRoom);
+        databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        setTitle("Чат с " + mUsername);
+        setTitle(topic);
     }
 
     private void setEvents(){
@@ -85,49 +88,55 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     private void showLoadingDialog(){
-        loadingDialog = new ProgressDialog(this);
-        loadingDialog.setMessage("Загрузка...");
-        loadingDialog.setCancelable(false);
-        loadingDialog.setInverseBackgroundForced(false);
-        loadingDialog.show();
+        loadingDialog = new MaterialDialog.Builder(this)
+                .content("Загрузка...")
+                .progress(true, 0)
+                .progressIndeterminateStyle(true)
+                .cancelable(false)
+                .show();
     }
 
-        @Override
+    @Override
     public void onStart() {
         super.onStart();
-        final ListView listView = (ListView)findViewById(R.id.listChat);
-        mChatListAdapter = new ChatListAdapter(mFirebaseRef.limit(150), this);
-        listView.setAdapter(mChatListAdapter);
-        mChatListAdapter.registerDataSetObserver(new DataSetObserver() {
+        recyclerView = (RecyclerView) findViewById(R.id.listChat);
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(MessagingActivity.this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(mLayoutManager);
+        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this);
+        recyclerView.setAdapter(chatRecyclerAdapter);
+        chatRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                listView.setSelection(mChatListAdapter.getCount() - 1);
+                recyclerView.scrollToPosition(chatRecyclerAdapter.getItemCount() - 1);
             }
         });
 
-        mConnectedListener = mFirebaseRef.getRoot().child(".info/connected").addValueEventListener(new ValueEventListener() {
+
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                boolean connected = (Boolean) dataSnapshot.getValue();
+                boolean connected = !(dataSnapshot.getKey().isEmpty());
                 if (connected) {
                     loadingDialog.dismiss();
-                } else {
+                    databaseReference.removeEventListener(valueEventListener);
                 }
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
             }
-        });
+        };
+        chatRecyclerAdapter.notifyDataSetChanged();
+        databaseReference.addValueEventListener(valueEventListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mFirebaseRef.getRoot().child(".info/connected").removeEventListener(mConnectedListener);
-        mChatListAdapter.cleanup();
+        databaseReference.removeEventListener(valueEventListener);
+        chatRecyclerAdapter.cleanup();
     }
 
     private void sendMessage() {
@@ -139,7 +148,7 @@ public class MessagingActivity extends AppCompatActivity {
         messageTime = formatter.format(Calendar.getInstance().getTime());
         if (!input.equals("")) {
             ChatMessage chatMessage = new ChatMessage(input, Globals.currentUser.getUserName(), Globals.currentUser.getLogin(), messageTime, true);
-            mFirebaseRef.push().setValue(chatMessage);
+            databaseReference.push().setValue(chatMessage);
             inputText.setText("");
         }
     }

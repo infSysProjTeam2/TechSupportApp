@@ -1,10 +1,10 @@
 package com.techsupportapp;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -21,13 +21,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.BottomSheetFragment;
 import com.techsupportapp.databaseClasses.Ticket;
+import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
@@ -46,8 +49,6 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     private DatabaseReference ticketIndexReference;
 
     private int ticketCount;
-    private String mUserId;
-    private String mNickname;
     private String rightDate;
 
     //endregion
@@ -98,10 +99,7 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_ticket);
 
-        mUserId = getIntent().getExtras().getString("uuid");
-        mNickname = getIntent().getExtras().getString("nickname");
         initializeComponents();
-
         setEvents();
     }
 
@@ -120,38 +118,40 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.listOfChannels) {
+        if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
             Globals.showAbout(CreateTicketActivity.this);
-            return true;
+        } else if (id == R.id.logOut) {
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+            finish();
         } else if (id == R.id.exit) {
-            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
-
-            builder.setPositiveButton("Закрыть приложение", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (PreferenceManager.getDefaultSharedPreferences(CreateTicketActivity.this).getBoolean("allowNotifications", false)) {
-                        MessagingService.stopMessagingService(getApplicationContext());
-                        Globals.logInfoAPK(CreateTicketActivity.this, "Служба - ОСТАНОВЛЕНА");
-                    }
-                    exit();
-                }
-            });
-
-            builder.setNegativeButton("Отмена", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
-
-            builder.setCancelable(false);
-            builder.setMessage("Вы действительно хотите закрыть приложение?");
-            builder.show();
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (PreferenceManager.getDefaultSharedPreferences(CreateTicketActivity.this).getBoolean("allowNotifications", false)) {
+                                MessagingService.stopMessagingService(getApplicationContext());
+                                Globals.logInfoAPK(CreateTicketActivity.this, "Служба - ОСТАНОВЛЕНА");
+                            }
+                            CreateTicketActivity.this.finishAffinity();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -186,15 +186,15 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(mNickname, CreateTicketActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), CreateTicketActivity.this)));
 
-        userName.setText(mNickname);
+        userName.setText(Globals.currentUser.getUserName());
         userType.setText("Пользователь");
 
         Menu nav_menu = navigationView.getMenu();
-        nav_menu.findItem(R.id.signUpUser).setVisible(false);
+        nav_menu.findItem(R.id.userActions).setVisible(false);
         nav_menu.findItem(R.id.charts).setVisible(false);
-        nav_menu.findItem(R.id.listOfChannels).setTitle("Список ваших заявок");
+        nav_menu.findItem(R.id.acceptedTickets).setTitle("Список ваших заявок");
         nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
     }
 
@@ -213,10 +213,13 @@ public class CreateTicketActivity extends AppCompatActivity implements Navigatio
                         }
                         else if (!newRightDate.equals(rightDate))
                             lastDateReference.setValue(newRightDate);
-                        Ticket newTicket = new Ticket("ticket" + ticketCount, mUserId, mNickname, topicET.getText().toString(), messageET.getText().toString());
+                        Ticket newTicket = new Ticket("ticket" + ticketCount, Globals.currentUser.getLogin(), Globals.currentUser.getUserName(), topicET.getText().toString(), messageET.getText().toString());
                         ticketReference.child("ticket" + ticketCount++).setValue(newTicket);
                         ticketIndexReference.setValue(ticketCount);
                         Toast.makeText(getApplicationContext(), "Заявка добалена", Toast.LENGTH_LONG).show();
+
+                        DatabaseStorage.updateLogFile(CreateTicketActivity.this, newTicket.getTicketId(), DatabaseStorage.ACTION_CREATED, Globals.currentUser);
+
                         finish();
                     }
                     catch (Exception e){

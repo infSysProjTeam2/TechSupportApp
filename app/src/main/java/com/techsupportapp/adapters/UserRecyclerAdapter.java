@@ -51,7 +51,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
         try {
             holder.userNameText.setText(values.get(position).getUserName());
             holder.userPermission.setText(getStringRole(values.get(position)));
-            holder.userImage.setImageBitmap(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context));
+            holder.userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context)));
         }
         catch (Exception e) {
             Globals.showLongTimeToast(context, e.getMessage() + "Обратитесь к разработчику");
