@@ -21,7 +21,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.ChatRecyclerAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
-import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.Globals;
 
 import java.text.SimpleDateFormat;

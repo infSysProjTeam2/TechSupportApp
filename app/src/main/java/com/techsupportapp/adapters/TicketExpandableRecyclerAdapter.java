@@ -4,12 +4,10 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -25,7 +23,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
 import com.techsupportapp.R;
-import com.techsupportapp.TicketsActivity;
 import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
@@ -44,6 +41,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+/**
+ * Адаптер для ExpandableRecyclerView с разделением заявок на категории
+ * @author ahgpoug
+ */
 public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<TicketExpandableRecyclerAdapter.TicketListItem> {
     private static final int TYPE_TICKET = 1001;
 
@@ -58,6 +59,14 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
 
+    /**
+     * Передача информации в адаптер
+     * @param type тип адаптера. TYPE_AVAILABLE - список доступных заявок. TYPE_MYCLOSED - список заявок, закрытых текущим пользователм. TYPE_CLOSED - список всех закрытых заявок.
+     * @param databaseReference ссылка на базу данных
+     * @param values список заявок, определенных типом списка (type)
+     * @param users список пользователей
+     * @param fragmentManager менеджер фрагментов
+     */
     public TicketExpandableRecyclerAdapter(int type, Context context, DatabaseReference databaseReference, ArrayList<TicketListItem> values, ArrayList<User> users, FragmentManager fragmentManager) {
         super(context);
 
@@ -70,6 +79,9 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         setItems(values);
     }
 
+    /**
+     * Метод запоминания раскрытых категорий
+     */
     private void checkExpanded(){
         if (type == TYPE_AVAILABLE) {
             Globals.expandedItemsAvailable.clear();
@@ -90,28 +102,43 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     }
 
 
+    /**
+     * Метод, вызывающийся при раскрытии категории
+     */
     @Override
     public void expandItems(int position, boolean notify) {
         super.expandItems(position, notify);
         checkExpanded();
     }
 
+    /**
+     * Метод, вызывающийся при закрытии категории
+     */
     @Override
     public void collapseItems(int position, boolean notify) {
         super.collapseItems(position, notify);
         checkExpanded();
     }
 
+    /**
+     * Объект списка заявок
+     */
     public static class TicketListItem extends ExpandableRecyclerAdapter.ListItem {
         public String text;
         public Ticket ticket;
 
+        /**
+         * Название категории
+         */
         public TicketListItem(String group) {
             super(TYPE_HEADER);
 
             text = group;
         }
 
+        /**
+         * Заявка внутри категории
+         */
         public TicketListItem(Ticket ticket) {
             super(TYPE_TICKET);
 
@@ -119,6 +146,9 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         }
     }
 
+    /**
+     * ViewHolder для заголовков
+     */
     public class HeaderViewHolder extends ExpandableRecyclerAdapter.HeaderViewHolder {
         TextView name;
 
@@ -135,6 +165,9 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         }
     }
 
+    /**
+     * ViewHolder для заявок
+     */
     public class TicketViewHolder extends ExpandableRecyclerAdapter.ViewHolder {
         TextView authorText;
         TextView dateText;
