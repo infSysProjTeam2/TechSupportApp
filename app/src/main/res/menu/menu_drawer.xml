@@ -2,27 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:title="Специальное">
-            <menu>
-                <item
-                    android:id="@+id/listOfChannels"
-                    android:icon="@drawable/ic_message_black_24dp"
-                    android:title="Список принятых заявок" />
-                <item
-                    android:id="@+id/listOfTickets"
-                    android:icon="@drawable/ic_report_black_24dp"
-                    android:title="Список возможных заявок" />
-                <item
-                    android:id="@+id/signUpUser"
-                    android:icon="@drawable/ic_person_black_24dp"
-                    android:title="Пользователи" />
-                <item
-                    android:id="@+id/charts"
-                    android:icon="@drawable/ic_show_chart_black_24dp"
-                    android:title="Статистика" />
-            </menu>
-        </item>
-
+        <item
+            android:id="@+id/acceptedTickets"
+            android:icon="@drawable/ic_message_black_24dp"
+            android:title="Список принятых заявок" />
+        <item
+            android:id="@+id/listOfTickets"
+            android:icon="@drawable/ic_report_black_24dp"
+            android:title="Список заявок" />
+        <item
+            android:id="@+id/userActions"
+            android:icon="@drawable/ic_person_black_24dp"
+            android:title="Пользователи" />
+        <item
+            android:id="@+id/charts"
+            android:icon="@drawable/ic_show_chart_black_24dp"
+            android:title="Статистика" />
     </group>
 
     <item android:title="Основное">
@@ -36,9 +31,13 @@
                 android:icon="@drawable/ic_info_black_24dp"
                 android:title="О программе" />
             <item
+                android:id="@+id/logOut"
+                android:icon="@drawable/ic_exit_to_app_black_24dp"
+                android:title="Выйти из пользователя" />
+            <item
                 android:id="@+id/exit"
                 android:icon="@drawable/ic_close_black_24dp"
-                android:title="Выход" />
+                android:title="Закрыть приложение" />
         </menu>
     </item>
 

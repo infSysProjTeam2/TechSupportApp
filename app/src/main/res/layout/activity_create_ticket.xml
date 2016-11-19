@@ -41,12 +41,14 @@
                 android:textSize="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="30dp" />
+                android:paddingTop="8dp" />
 
             <EditText
                 android:id="@+id/message_topic_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:maxLength="30"
                 android:maxLines="1"/>
 
             <TextView
