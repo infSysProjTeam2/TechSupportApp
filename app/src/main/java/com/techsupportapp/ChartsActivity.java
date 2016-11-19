@@ -85,10 +85,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             if (firstDateTV.getText().equals(""))
                 firstDateTV.setText(dateToString(Calendar.getInstance().getTime()));
 
-            String firstDate = firstDateTV.getText().toString();
-            SpannableString contentFirst = new SpannableString(firstDate);
-            contentFirst.setSpan(new UnderlineSpan(), 0, firstDate.length(), 0);
-            firstDateTV.setText(contentFirst);
+            firstDateTV.getText().toString();
             Globals.logInfoAPK(ChartsActivity.this, "Обновление первой даты - ЗАВЕРШЕНО");
         }
 
@@ -107,10 +104,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
             if (lastDateTV.getText().equals(""))
                 lastDateTV.setText(dateToString(Calendar.getInstance().getTime()));
 
-            String lastDate = lastDateTV.getText().toString();
-            SpannableString contentLast = new SpannableString(lastDate);
-            contentLast.setSpan(new UnderlineSpan(), 0, lastDate.length(), 0);
-            lastDateTV.setText(contentLast);
+            lastDateTV.getText().toString();
             Globals.logInfoAPK(ChartsActivity.this, "Обновление последней даты - ЗАКОНЧЕНО");
         }
 

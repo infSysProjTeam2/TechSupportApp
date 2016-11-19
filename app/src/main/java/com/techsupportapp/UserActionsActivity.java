@@ -61,7 +61,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             if (!search) {
                 Globals.logInfoAPK(UserActionsActivity.this, "Скачивание данных пользователей - НАЧАТО");
                 unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE);
-                if (!mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, databaseReference, search))
+                if (!mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search))
                     MenuItemCompat.collapseActionView(searchMenu);
 
 
@@ -176,7 +176,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     MenuItemCompat.collapseActionView(searchMenu);
                     search = false;
 
-                    mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, databaseReference, search);
+                    mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search);
                     mSectionsPagerAdapter.updateSecondFragment(usersList, UserActionsActivity.this);
                 }
             }
@@ -280,7 +280,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
-                    mSectionsPagerAdapter.updateFirstFragment(newUnverifiedUsersList, UserActionsActivity.this, databaseReference, search);
+                    mSectionsPagerAdapter.updateFirstFragment(newUnverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search);
                 }
                 else
                 {

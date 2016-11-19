@@ -50,7 +50,7 @@ public class UnverifiedUserRecyclerAdapter extends RecyclerView.Adapter<Unverifi
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         holder.userNameText.setText(values.get(position).getUserName());
         holder.userDateText.setText(values.get(position).getRegistrationDate());
-        holder.userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context)));
+        holder.userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(values.get(position).getUserName(), context)));
     }
 
     @Override
