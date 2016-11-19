@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 
@@ -12,15 +13,49 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.R;
 import com.techsupportapp.SignInActivity;
+import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.utility.Globals;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class MessagingService extends Service {
 
-    DatabaseReference databaseRef;
-    ChildEventListener childEventListener;
+    private DatabaseReference databaseRef;
+    private ChildEventListener childEventListener;
+
+    private ArrayList<Counter> counterList = new ArrayList<Counter>();
+    private ArrayList<String> ticketIDList;
+
+    private NotificationManager notificationManager;
+
+    private class Counter{
+        int count;
+        String ticketId;
+
+        private Counter(String ticketId, int count){
+            this.ticketId = ticketId;
+            this.count = count;
+        }
+    }
 
     public MessagingService() {
+    }
+
+    public static void startMessagingService(Context context){
+        Intent intent = new Intent(context, MessagingService.class);
+        intent.addCategory("MessagingService");
+        context.startService(intent);
+    }
+
+    public static void stopMessagingService(Context context){
+        Intent intent = new Intent(context, MessagingService.class);
+        intent.addCategory("MessagingService");
+        context.stopService(intent);
     }
 
     @Override
@@ -31,10 +66,19 @@ public class MessagingService extends Service {
     @Override
     public void onCreate()
     {
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
         databaseRef = FirebaseDatabase.getInstance().getReference();
         childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Globals.logInfoAPK(MessagingService.this, "База данных - ЧТЕНИЕ - ОБНОВЛЕНИЕ УЗЛОВ");
+                if (!dataSnapshot.getValue(ChatMessage.class).getUserId().equals(Globals.currentUser.getLogin()) && dataSnapshot.getValue(ChatMessage.class).isUnread()) {
+                    int index = Collections.binarySearch(ticketIDList, dataSnapshot.getRef().getParent().getKey());
+                    counterList.get(index).count++;
+                    Globals.logInfoAPK(MessagingService.this, "База данных - УВЕЛИЧЕНИЕ СЧЕТЧИКА");
+                }
+                //TODO для администратора
                 showNotification();
             }
 
@@ -58,39 +102,50 @@ public class MessagingService extends Service {
 
             }
         };
+
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Globals.logInfoAPK(MessagingService.this, "База данных - ОБНОВЛЕНИЕ ДАННЫХ");
+                if (Globals.currentUser.getRole() == User.SIMPLE_USER) {
+                    ticketIDList = Globals.Downloads.Strings.getUserMarkedTicketIDs(dataSnapshot, Globals.currentUser.getLogin());
+                    for (int i = 0; i < ticketIDList.size(); i++) {
+                        counterList.add(new Counter(ticketIDList.get(i), 0));
+                        databaseRef.child("chat").child(ticketIDList.get(i)).addChildEventListener(childEventListener);
+                    }
+                }
+                //TODO для администратора
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        databaseRef.addChildEventListener(childEventListener);
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy()
     {
-        databaseRef.removeEventListener(childEventListener);
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER)
+            for (int i = 0; i < counterList.size(); i++)
+                databaseRef.child("chat").child(counterList.get(i).ticketId).removeEventListener(childEventListener);
     }
 
     private void showNotification(){
-        Intent intent = new Intent(this, SignInActivity.class);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        Notification.Builder builder = new Notification.Builder(this)
-                .setTicker("Новые сообщения")
+        long messagesCount = 0;
+        for (int i = 0; i < counterList.size(); i++)
+            messagesCount += counterList.get(i).count;
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
                 .setContentTitle("Новые сообщения")
-                .setContentText("Новые сообщения")
-                .setSmallIcon(R.mipmap.icon)
-                .addAction(R.mipmap.ic_launcher, "Просмотр", pIntent);;
-
-        Notification notification = new Notification.InboxStyle(builder)
-                .addLine("Первое сообщение")
-                .addLine("Второе сообщение")
-                .addLine("Третье сообщение")
-                .addLine("Четвертое сообщение")
-                .setSummaryText("+2 more").build();
-
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                .setContentText("Количество новых сообщений " + messagesCount)
+                .setSmallIcon(R.mipmap.icon);
+        Notification notification = builder.build();
         notificationManager.notify(3, notification);
     }
 }

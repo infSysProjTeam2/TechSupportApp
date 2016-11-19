@@ -7,6 +7,8 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -16,6 +18,8 @@ import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 
 import java.util.ArrayList;
+
+import static com.techsupportapp.utility.Globals.Downloads.Users.getVerifiedUserList;
 
 public class Globals {
 
@@ -76,7 +80,7 @@ public class Globals {
          * @param bitmap Изображение, форму которого необходимо изменить.
          * @return Возвращает закругленную картинку (класс Bitmap).
          */
-        public static Bitmap getclip(Bitmap bitmap) {
+        public static Bitmap getClip(Bitmap bitmap) {
             Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                     bitmap.getHeight(), Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(output);
@@ -94,122 +98,150 @@ public class Globals {
         }
     }
 
+    public static void logInfoAPK(Context context, String message){
+        String activity = context.toString();
+        activity = activity.substring(activity.lastIndexOf('.') + 1, activity.indexOf("@"));
+        Log.i("APK001/" + activity, message);
+    }
+
     public static class Downloads {
 
-        /**
-         * Метод, скачивающий из базы данных всех подтвержденных пользователей, независимо от прав.
-         * @param dataSnapshot Снимок базы данных.
-         * @return Всех подтвержденных пользователей.
-         */
-        public static ArrayList<User> getVerifiedUserList(DataSnapshot dataSnapshot) {
-            ArrayList<User> resultList = new ArrayList<User>();
-            resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE));
-            resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE));
-            resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
-            resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE));
-            return resultList;
-        }
+        public static class Users {
 
-        /**
-         * Метод, скачивающий из базы данных подтвержденных пользователей с определенными правами.
-         * @param dataSnapshot Снимок базы данных.
-         * @param databaseTablePath Путь в базе данных к необходимой категории подтвержденных пользователей.
-         * @return Всех подтвержденных пользователей с определенными правами.
-         */
-        public static ArrayList<User> getSpecificVerifiedUserList(DataSnapshot dataSnapshot, String databaseTablePath) {
-            ArrayList<User> resultList = new ArrayList<User>();
-            for (DataSnapshot userRecord : dataSnapshot.child(databaseTablePath).getChildren())
-                resultList.add(userRecord.getValue(User.class));
-            return resultList;
-        }
-
-        /**
-         * Метод, скачивающий из базы данных логины неподтвержденных пользователей.
-         * @param dataSnapshot Снимок базы данных.
-         * @return Логины неподтвержденных пользователей.
-         */
-        public static ArrayList<String> getUnverifiedLogins(DataSnapshot dataSnapshot) {
-            ArrayList<String> resultList = new ArrayList<String>();
-            for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
-                resultList.add(userRecord.getValue(User.class).getLogin());
-            return resultList;
-        }
-
-        /**
-         * Метод, скачивающий из базы данных логины либо подтвержденных, либо неподтвержденных пользователей.
-         * @param dataSnapshot Снимок базы данных.
-         * @return Логины выбранной категории пользователей.
-         */
-        public static ArrayList<String> getVerifiedLogins(DataSnapshot dataSnapshot) {
-            ArrayList<String> resultList = new ArrayList<String>();
-            ArrayList<User> userList = getVerifiedUserList(dataSnapshot);
-            for (User user : userList)
-                resultList.add(user.getLogin());
-            return resultList;
-        }
-
-        /**
-         * Метод, скачивающий из базы данных логины всех пользователей.
-         * @param dataSnapshot Снимок базы данных.
-         * @return Логины всех пользователей.
-         */
-        public static ArrayList<String> getAllLogins(DataSnapshot dataSnapshot) {
-            ArrayList<String> resultList = getUnverifiedLogins(dataSnapshot);
-            resultList.addAll(getVerifiedLogins(dataSnapshot));
-            return resultList;
-        }
-
-        /**
-         * Метод, скачивающий из базы данных все заявки, ответственным за которые является определенный работник.
-         * @param dataSnapshot Снимок базы данных.
-         * @param overseerLogin Логин ответственного, заявки которого нужно получить.
-         * @return Заявки определенного ответственного.
-         */
-        public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin){
-            ArrayList<Ticket> resultList = new ArrayList<Ticket>();
-            for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
-                Ticket ticket = ticketRecord.getValue(Ticket.class);
-                if (ticket.getAdminId().equals(overseerLogin))
-                    resultList.add(ticket);
+            /**
+             * Метод, скачивающий из базы данных всех подтвержденных пользователей, независимо от прав.
+             * @param dataSnapshot Снимок базы данных.
+             * @return Всех подтвержденных пользователей.
+             */
+            public static ArrayList<User> getVerifiedUserList(DataSnapshot dataSnapshot) {
+                ArrayList<User> resultList = new ArrayList<User>();
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE));
+                return resultList;
             }
-            return resultList;
-        }
 
-        /**
-         * Метод, скачивающий из базы данных заявки определнного пользователя, находящиеся в определенном состоянии.
-         * @param dataSnapshot Снимок базы данных.
-         * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
-         * @param userLogin Логин пользователя.
-         * @return Заявки определенного пользователя, находящиеся в определенном состоянии.
-         */
-        public static ArrayList<Ticket> getUserSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath, String userLogin){
-            ArrayList<Ticket> resultList = new ArrayList<Ticket>();
-            for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren()) {
-                Ticket markedTicket = ticketRecord.getValue(Ticket.class);
-                if (markedTicket.getUserId().equals(userLogin))
-                    resultList.add(markedTicket);
+            /**
+             * Метод, скачивающий из базы данных подтвержденных пользователей с определенными правами.
+             * @param dataSnapshot Снимок базы данных.
+             * @param databaseTablePath Путь в базе данных к необходимой категории подтвержденных пользователей.
+             * @return Всех подтвержденных пользователей с определенными правами.
+             */
+            public static ArrayList<User> getSpecificVerifiedUserList(DataSnapshot dataSnapshot, String databaseTablePath) {
+                ArrayList<User> resultList = new ArrayList<User>();
+                for (DataSnapshot userRecord : dataSnapshot.child(databaseTablePath).getChildren())
+                    resultList.add(userRecord.getValue(User.class));
+                return resultList;
             }
-            return resultList;
+
         }
 
-        /**
-         *  Метод, скачивающий из базы данных все заявки, находящиеся в определенном состоянии.
-         * @param dataSnapshot Снимок базы данных.
-         * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
-         * @return Заявки, находящиеся в определенном состоянии.
-         */
-        public static ArrayList<Ticket> getSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath){
-            ArrayList<Ticket> resultList = new ArrayList<Ticket>();
-            for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren())
-                resultList.add(ticketRecord.getValue(Ticket.class));
-            return resultList;
+        public static class Strings {
+
+            /**
+             * Метод, скачивающий из базы данных логины неподтвержденных пользователей.
+             * @param dataSnapshot Снимок базы данных.
+             * @return Логины неподтвержденных пользователей.
+             */
+            public static ArrayList<String> getUnverifiedLogins(DataSnapshot dataSnapshot) {
+                ArrayList<String> resultList = new ArrayList<String>();
+                for (DataSnapshot userRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE).getChildren())
+                    resultList.add(userRecord.getValue(User.class).getLogin());
+                return resultList;
+            }
+
+            /**
+             * Метод, скачивающий из базы данных логины либо подтвержденных, либо неподтвержденных пользователей.
+             * @param dataSnapshot Снимок базы данных.
+             * @return Логины выбранной категории пользователей.
+             */
+            public static ArrayList<String> getVerifiedLogins(DataSnapshot dataSnapshot) {
+                ArrayList<String> resultList = new ArrayList<String>();
+                ArrayList<User> userList = getVerifiedUserList(dataSnapshot);
+                for (User user : userList)
+                    resultList.add(user.getLogin());
+                return resultList;
+            }
+
+            /**
+             * Метод, скачивающий из базы данных логины всех пользователей.
+             * @param dataSnapshot Снимок базы данных.
+             * @return Логины всех пользователей.
+             */
+            public static ArrayList<String> getAllLogins(DataSnapshot dataSnapshot) {
+                ArrayList<String> resultList = getUnverifiedLogins(dataSnapshot);
+                resultList.addAll(getVerifiedLogins(dataSnapshot));
+                return resultList;
+            }
+
+            public static ArrayList<String> getUserMarkedTicketIDs(DataSnapshot dataSnapshot, String userId){
+                ArrayList<String> resultList = new ArrayList<String>();
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()){
+                    Ticket ticket = ticketRecord.getValue(Ticket.class);
+                    if (ticket.getUserId().equals(userId))
+                        resultList.add(ticket.getTicketId());
+                }
+                return resultList;
+            }
+
         }
 
-        public static ArrayList<Ticket> getAllTickets(DataSnapshot dataSnapshot){
-            ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE);
-            resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
-            resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE));
-            return resultList;
+        public static class Tickets {
+
+            /**
+             * Метод, скачивающий из базы данных все заявки, ответственным за которые является определенный работник.
+             * @param dataSnapshot Снимок базы данных.
+             * @param overseerLogin Логин ответственного, заявки которого нужно получить.
+             * @return Заявки определенного ответственного.
+             */
+            public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin) {
+                ArrayList<Ticket> resultList = new ArrayList<Ticket>();
+                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                    Ticket ticket = ticketRecord.getValue(Ticket.class);
+                    if (ticket.getAdminId().equals(overseerLogin))
+                        resultList.add(ticket);
+                }
+                return resultList;
+            }
+
+            /**
+             * Метод, скачивающий из базы данных заявки определнного пользователя, находящиеся в определенном состоянии.
+             * @param dataSnapshot Снимок базы данных.
+             * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
+             * @param userLogin Логин пользователя.
+             * @return Заявки определенного пользователя, находящиеся в определенном состоянии.
+             */
+            public static ArrayList<Ticket> getUserSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath, String userLogin) {
+                ArrayList<Ticket> resultList = new ArrayList<Ticket>();
+                for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren()) {
+                    Ticket markedTicket = ticketRecord.getValue(Ticket.class);
+                    if (markedTicket.getUserId().equals(userLogin))
+                        resultList.add(markedTicket);
+                }
+                return resultList;
+            }
+
+            /**
+             * Метод, скачивающий из базы данных все заявки, находящиеся в определенном состоянии.
+             * @param dataSnapshot Снимок базы данных.
+             * @param databaseTablePath Путь в базе данных к необходимой категории заявок.
+             * @return Заявки, находящиеся в определенном состоянии.
+             */
+            public static ArrayList<Ticket> getSpecificTickets(DataSnapshot dataSnapshot, String databaseTablePath) {
+                ArrayList<Ticket> resultList = new ArrayList<Ticket>();
+                for (DataSnapshot ticketRecord : dataSnapshot.child(databaseTablePath).getChildren())
+                    resultList.add(ticketRecord.getValue(Ticket.class));
+                return resultList;
+            }
+
+            public static ArrayList<Ticket> getAllTickets(DataSnapshot dataSnapshot) {
+                ArrayList<Ticket> resultList = getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE));
+                resultList.addAll(getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE));
+                return resultList;
+            }
+
         }
 
     }

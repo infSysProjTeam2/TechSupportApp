@@ -2,6 +2,7 @@ package com.techsupportapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -12,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,14 +31,17 @@ import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.fragments.ListOfTicketsFragments;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-    private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
+
+    private static DatabaseReference databaseUserReference;
+    private static DatabaseReference databaseTicketReference;
+
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<>();
@@ -47,6 +52,48 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
     private ImageView currUserImage;
 
+    //region Listeners
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
+        }
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener ticketListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
+            listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
+            listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+            listOfMyClosedTickets.clear();
+
+            for (Ticket ticket : listOfSolvedTickets)
+                if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
+                    listOfMyClosedTickets.add(ticket);
+
+            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
+            mSectionsPagerAdapter.updateSecondFragment(listOfMyClosedTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateThirdFragment(listOfSolvedTickets, usersList, ListOfTicketsActivity.this);
+
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,24 +101,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
 
         initializeComponents();
         setEvents();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        databaseReference.removeEventListener(valueEventListener);
     }
 
     @Override
@@ -86,7 +115,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void initializeComponents() {
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
+        databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список заявок");
@@ -104,7 +134,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
 
         mSectionsPagerAdapter = new ListOfTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -136,29 +166,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void setEvents() {
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-
-                listOfAvailableTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-                listOfSolvedTickets = Globals.Downloads.getSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE);
-                listOfMyClosedTickets.clear();
-
-                for (Ticket ticket : listOfSolvedTickets)
-                    if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
-                        listOfMyClosedTickets.add(ticket);
-
-                mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, databaseReference);
-                mSectionsPagerAdapter.updateSecondFragment(listOfMyClosedTickets, usersList, ListOfTicketsActivity.this);
-                mSectionsPagerAdapter.updateThirdFragment(listOfSolvedTickets, usersList, ListOfTicketsActivity.this);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,6 +207,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (PreferenceManager.getDefaultSharedPreferences(ListOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
+                                MessagingService.stopMessagingService(getApplicationContext());
+                                Log.e("СЛУЖБА", "ОСТАНОВЛЕНА");
+                            }
                             ListOfTicketsActivity.this.finishAffinity();
                         }
                     })
@@ -215,5 +226,29 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        databaseTicketReference.addValueEventListener(ticketListener);
+        databaseUserReference.addValueEventListener(userListener);
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        databaseTicketReference.removeEventListener(ticketListener);
+        databaseUserReference.removeEventListener(userListener);
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseTicketReference.removeEventListener(ticketListener);
+        databaseUserReference.removeEventListener(userListener);
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
     }
 }

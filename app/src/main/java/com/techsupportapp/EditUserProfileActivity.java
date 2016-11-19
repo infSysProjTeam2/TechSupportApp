@@ -30,8 +30,7 @@ import java.util.Comparator;
 
 public class EditUserProfileActivity extends AppCompatActivity{
 
-    private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
+    private DatabaseReference databaseUserReference;
 
     private ArrayList<User> usersList = new ArrayList<User>();
 
@@ -49,6 +48,25 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private String newPassword = "";
 
+    //region Listeners
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(EditUserProfileActivity.this, "Загрузка данных зарегистрированных пользователей - НАЧАТА");
+            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            setData();
+            Globals.logInfoAPK(EditUserProfileActivity.this, "Загрузка данных зарегистрированных пользователей - ЗАКОНЧЕНА");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,26 +78,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
         setEvents();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
     private void initializeComponents(){
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -101,18 +101,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
     }
 
     private void setEvents(){
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-                setData();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
 
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,8 +118,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                         try {
                                             chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
                                                     User.SIMPLE_USER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
-                                            databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                            databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
+                                            databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                            databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
@@ -145,8 +133,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                     try {
                                         chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
                                                 User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
-                                        databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                        databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
+                                        databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                        databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -184,13 +172,13 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPassword,
                                     usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
                             if (chUser.getRole() == User.ADMINISTRATOR)
-                                databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.SIMPLE_USER)
-                                databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
-                                databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
-                                databaseReference.child(DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -297,5 +285,26 @@ public class EditUserProfileActivity extends AppCompatActivity{
             finish();
         }
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    protected void onPause() {
+        databaseUserReference.removeEventListener(userListener);
+        Globals.logInfoAPK(EditUserProfileActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseUserReference.removeEventListener(userListener);
+        Globals.logInfoAPK(EditUserProfileActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        databaseUserReference.addValueEventListener(userListener);
+        Globals.logInfoAPK(EditUserProfileActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
     }
 }

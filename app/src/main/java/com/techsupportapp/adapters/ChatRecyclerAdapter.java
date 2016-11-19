@@ -169,7 +169,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
                     //TODO что-то сделать
                 }
             });
-            holder.userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
+            holder.userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
         }
         catch (Exception e) {
             Globals.showLongTimeToast(context, e.getMessage() + "Обратитесь к разработчику");

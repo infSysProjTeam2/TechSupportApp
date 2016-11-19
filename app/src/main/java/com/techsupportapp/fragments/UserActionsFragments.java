@@ -176,7 +176,7 @@ public class UserActionsFragments {
 
                                         result = false;
 
-                                        databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                        databaseReference.child(DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                                         Toast.makeText(context, "Пользователь добавлен в базу данных", Toast.LENGTH_LONG).show();
                                     }
                                 })
@@ -210,7 +210,7 @@ public class UserActionsFragments {
                                     //Удалиние заявки на регистрацию
                                     result = false;
 
-                                    databaseReference.child(DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
+                                    databaseReference.child(DatabaseVariables.FullPath.Users.DATABASE_UNVERIFIED_USER_TABLE).child(selectedUser.getBranchId()).removeValue();
                                     Globals.showLongTimeToast(context, "Заявка пользователя была успешно отклонена");
                                 }
                             })
