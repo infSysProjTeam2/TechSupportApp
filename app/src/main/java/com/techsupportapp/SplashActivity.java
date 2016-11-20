@@ -83,7 +83,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void signIn(User user){
-        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false))
             startService(new Intent(this, MessagingService.class));

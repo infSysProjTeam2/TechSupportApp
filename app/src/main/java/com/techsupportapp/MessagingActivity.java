@@ -1,10 +1,13 @@
 package com.techsupportapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -21,6 +24,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.adapters.ChatRecyclerAdapter;
 import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.databaseClasses.User;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.Globals;
 
 import java.text.SimpleDateFormat;
@@ -153,10 +158,27 @@ public class MessagingActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        if (Globals.currentUser.getRole() != User.SIMPLE_USER)
+            inflater.inflate(R.menu.menu_messaging, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == android.R.id.home)
             onBackPressed();
+        else if (id == R.id.action_send_request){
+            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm, MMM dd", Locale.ENGLISH);
+            String messageTime = formatter.format(Calendar.getInstance().getTime());
+
+            DatabaseStorage.updateLogFile(MessagingActivity.this, mChatRoom, DatabaseStorage.ACTION_REQUESTED_TO_CLOSE, Globals.currentUser);
+
+            ChatMessage chatMessage = new ChatMessage("not answered", "System", Globals.currentUser.getLogin(), messageTime, true);
+            databaseReference.push().setValue(chatMessage);
+        }
         return super.onOptionsItemSelected(item);
     }
 

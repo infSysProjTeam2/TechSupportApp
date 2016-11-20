@@ -28,6 +28,9 @@ public class DatabaseStorage {
     public static int ACTION_CLOSED = 2;
     public static int ACTION_SOLVED = 3;
     public static int ACTION_WITHDRAWN = 4;
+    public static int ACTION_REQUESTED_TO_CLOSE = 5;
+    public static int ACTION_REQUEST_REJECTED = 6;
+    public static int ACTION_REQUEST_ACCEPTED = 7;
 
     public static void updateLogFile(Context context, String ticketId, final int action, final User currentUser){
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(ticketId + ".log");
@@ -69,6 +72,12 @@ public class DatabaseStorage {
                 text = ": заявка объявлена решенной пользователем ";
             else if (action == ACTION_WITHDRAWN)
                 text = ": заявка отозвана пользователем ";
+            else if (action == ACTION_REQUESTED_TO_CLOSE)
+                text = ": отправлен запрос на закрытие заявки пользователем ";
+            else if (action == ACTION_REQUEST_REJECTED)
+                text = ": запрос на закрытие зявки отклонен пользователем ";
+            else if (action == ACTION_REQUEST_ACCEPTED)
+                text = ": запрос на закрытие зявки принят пользователем ";
 
             String data = (currentTime + text + currentUser.getUserName());
 
