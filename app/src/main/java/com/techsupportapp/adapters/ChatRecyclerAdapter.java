@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,15 +16,18 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
+import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapter.ViewHolder> {
+public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_LEFT = 0;
     private static final int TYPE_RIGHT = 1;
+    private static final int TYPE_REQUEST_IN = 2;
+    private static final int TYPE_REQUEST_OUT = 3;
 
     private Query mRef;
     private Context context;
@@ -119,20 +123,42 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
         });
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolderMessage extends RecyclerView.ViewHolder {
         private TextView authorText;
         private TextView messageText;
         private TextView messageTime;
         private TextView unread;
         private ImageView userImage;
 
-        private ViewHolder(View view) {
+        private ViewHolderMessage(View view) {
             super(view);
             authorText = (TextView) view.findViewById(R.id.messageAuthor);
             messageText = (TextView) view.findViewById(R.id.messageText);
             messageTime = (TextView) view.findViewById(R.id.messageTime);
             unread = (TextView) view.findViewById(R.id.unread);
             userImage = (ImageView) view.findViewById(R.id.userImage);
+        }
+    }
+
+    class ViewHolderRequestIn extends RecyclerView.ViewHolder {
+        private TextView requestText;
+        private Button rejectRequest;
+        private Button acceptRequest;
+
+        private ViewHolderRequestIn(View view) {
+            super(view);
+            requestText = (TextView) view.findViewById(R.id.requestText);
+            rejectRequest = (Button) view.findViewById(R.id.rejectRequest);
+            acceptRequest = (Button) view.findViewById(R.id.acceptRequest);
+        }
+    }
+
+    class ViewHolderRequestOut extends RecyclerView.ViewHolder {
+        private TextView requestText;
+
+        private ViewHolderRequestOut(View view) {
+            super(view);
+            requestText = (TextView) view.findViewById(R.id.requestText);
         }
     }
 
@@ -143,33 +169,89 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_LEFT)
-            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_left, parent, false));
-        else
-            return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_right, parent, false));
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        switch(viewType) {
+            case TYPE_LEFT:
+                return new ViewHolderMessage(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_left, parent, false));
+            case TYPE_RIGHT:
+                return new ViewHolderMessage(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_right, parent, false));
+            case TYPE_REQUEST_IN:
+                return new ViewHolderRequestIn(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_request_in, parent, false));
+            case TYPE_REQUEST_OUT:
+                return new ViewHolderRequestOut(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_request_out, parent, false));
+            default:
+                return new ViewHolderMessage(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_message_left, parent, false));
+        }
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
         ChatMessage chatMessage = chatMessages.get(position);
         try {
-            holder.authorText.setText(chatMessage.getAuthor() + ": ");
-            holder.messageText.setText(chatMessage.getMessage());
-            holder.messageTime.setText(chatMessage.getMessageTime());
+            if (viewHolder.getItemViewType() == TYPE_LEFT || viewHolder.getItemViewType() == TYPE_RIGHT) {
+                ViewHolderMessage holder = (ViewHolderMessage) viewHolder;
+                holder.authorText.setText(chatMessage.getAuthor() + ": ");
+                holder.messageText.setText(chatMessage.getMessage());
+                holder.messageTime.setText(chatMessage.getMessageTime());
 
-            if (chatMessage.isUnread())
-                holder.unread.setText("Непрочит.");
-            else
-                holder.unread.setText("");
+                if (chatMessage.isUnread())
+                    holder.unread.setText("Непрочит.");
+                else
+                    holder.unread.setText("");
 
-            holder.userImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO что-то сделать
+                holder.userImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO что-то сделать
+                    }
+                });
+                holder.userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
+            } else if (viewHolder.getItemViewType() == TYPE_REQUEST_IN){
+                final ViewHolderRequestIn holder = (ViewHolderRequestIn) viewHolder;
+                if (chatMessage.getMessage().equals("not answered")) {
+                    holder.requestText.setText("Получен запрос на закрытие заявки");
+                    holder.rejectRequest.setVisibility(View.VISIBLE);
+                    holder.acceptRequest.setVisibility(View.VISIBLE);
+                    holder.rejectRequest.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mRef.getRef().child(keys.get(position)).child("message").setValue("rejected");
+                            holder.rejectRequest.setText("Запрос отклонен");
+                            holder.rejectRequest.setVisibility(View.GONE);
+                            holder.acceptRequest.setVisibility(View.GONE);
+                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_REJECTED, Globals.currentUser);
+                        }
+                    });
+
+                    holder.acceptRequest.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mRef.getRef().child(keys.get(position)).child("message").setValue("accepted");
+                            holder.rejectRequest.setText("Запрос принят");
+                            holder.rejectRequest.setVisibility(View.GONE);
+                            holder.acceptRequest.setVisibility(View.GONE);
+                            //TODO сделать закрытие заявки
+                            DatabaseStorage.updateLogFile(context, mRef.getRef().getKey(), DatabaseStorage.ACTION_REQUEST_ACCEPTED, Globals.currentUser);
+                        }
+                    });
+                } else {
+                    if (chatMessage.getMessage().equals("accepted"))
+                        holder.requestText.setText("Запрос принят");
+                    else
+                        holder.requestText.setText("Запрос отклонен");
+
+                    holder.rejectRequest.setVisibility(View.GONE);
+                    holder.acceptRequest.setVisibility(View.GONE);
                 }
-            });
-            holder.userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
+            } else {
+                final ViewHolderRequestOut holder = (ViewHolderRequestOut) viewHolder;
+                if (chatMessage.getMessage().equals("not answered"))
+                    holder.requestText.setText("Запрос отправлен");
+                else if (chatMessage.getMessage().equals("rejected"))
+                    holder.requestText.setText("Запрос отклонен");
+                else
+                    holder.requestText.setText("Запрос принят");
+            }
         }
         catch (Exception e) {
             Globals.showLongTimeToast(context, e.getMessage() + "Обратитесь к разработчику");
@@ -189,9 +271,14 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<ChatRecyclerAdapte
     @Override
     public int getItemViewType(int position)
     {
-        if (!(chatMessages.get(position).getUserId().equals(Globals.currentUser.getLogin())))
+        ChatMessage chatMessage = chatMessages.get(position);
+        if (!(chatMessage.getUserId().equals(Globals.currentUser.getLogin())) && !chatMessage.getAuthor().equals("System"))
             return TYPE_LEFT;
-        else
+        else if ((chatMessage.getUserId().equals(Globals.currentUser.getLogin())) && !chatMessage.getAuthor().equals("System"))
             return TYPE_RIGHT;
+        else if (!(chatMessage.getUserId().equals(Globals.currentUser.getLogin()) && chatMessage.getAuthor().equals("System")))
+            return TYPE_REQUEST_IN;
+        else
+            return TYPE_REQUEST_OUT;
     }
 }

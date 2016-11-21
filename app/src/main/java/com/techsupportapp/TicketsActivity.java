@@ -187,6 +187,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                     }
                 }
                 startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
             }
         });
 

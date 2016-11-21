@@ -344,7 +344,7 @@ public class SignInActivity extends AppCompatActivity {
      * @param user Данные пользователя для входа в систему.
      */
     private void signIn(User user){
-        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
 
         savePassAndLogin();
         //TODO загрузку после нажатия на "ВХОД"

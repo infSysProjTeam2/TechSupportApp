@@ -98,6 +98,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_of_tickets);
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
         initializeComponents();
         setEvents();
@@ -111,7 +112,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             drawer.closeDrawer(GravityCompat.START);
         else
             finish();
-
     }
 
     private void initializeComponents() {
