@@ -123,7 +123,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         });
     }
 
-    class ViewHolderMessage extends RecyclerView.ViewHolder {
+    private class ViewHolderMessage extends RecyclerView.ViewHolder {
         private TextView authorText;
         private TextView messageText;
         private TextView messageTime;
@@ -140,7 +140,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    class ViewHolderRequestIn extends RecyclerView.ViewHolder {
+    private class ViewHolderRequestIn extends RecyclerView.ViewHolder {
         private TextView requestText;
         private Button rejectRequest;
         private Button acceptRequest;
@@ -153,7 +153,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    class ViewHolderRequestOut extends RecyclerView.ViewHolder {
+    private class ViewHolderRequestOut extends RecyclerView.ViewHolder {
         private TextView requestText;
 
         private ViewHolderRequestOut(View view) {
@@ -205,7 +205,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         //TODO что-то сделать
                     }
                 });
-                holder.userImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
+                holder.userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
             } else if (viewHolder.getItemViewType() == TYPE_REQUEST_IN){
                 final ViewHolderRequestIn holder = (ViewHolderRequestIn) viewHolder;
                 if (chatMessage.getMessage().equals("not answered")) {

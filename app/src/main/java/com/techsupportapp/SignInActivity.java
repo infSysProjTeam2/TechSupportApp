@@ -48,7 +48,6 @@ public class SignInActivity extends AppCompatActivity {
     private ArrayList<String> unverifiedLoginList = new ArrayList<String>();
 
     private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
 
     private boolean isDownloaded;
     private boolean hasListener;
@@ -138,8 +137,21 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        savePassAndLogin();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        savePassAndLogin();
+    }
+
+    @Override
     protected void onDestroy() {
         android.os.Process.killProcess(android.os.Process.myPid()); //TODO is it necessary?
+        savePassAndLogin();
         super.onDestroy();
     }
 
@@ -163,7 +175,7 @@ public class SignInActivity extends AppCompatActivity {
             databaseReference.addValueEventListener(databaseListener);
             hasListener = true;
         }
-        SharedPreferences settings = getPreferences(0);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
         rememberPasCB.setChecked(settings.getBoolean("cbState", false));

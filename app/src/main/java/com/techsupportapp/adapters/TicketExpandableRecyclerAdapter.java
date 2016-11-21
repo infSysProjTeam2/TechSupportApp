@@ -124,8 +124,8 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
      * Объект списка заявок
      */
     public static class TicketListItem extends ExpandableRecyclerAdapter.ListItem {
-        public String text;
-        public Ticket ticket;
+        private String text;
+        private Ticket ticket;
 
         /**
          * Название категории
@@ -149,10 +149,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     /**
      * ViewHolder для заголовков
      */
-    public class HeaderViewHolder extends ExpandableRecyclerAdapter.HeaderViewHolder {
-        TextView name;
+    private class HeaderViewHolder extends ExpandableRecyclerAdapter.HeaderViewHolder {
+        private TextView name;
 
-        public HeaderViewHolder(View view) {
+        private HeaderViewHolder(View view) {
             super(view, (ImageView) view.findViewById(R.id.item_arrow));
 
             name = (TextView) view.findViewById(R.id.item_header_name);
@@ -168,14 +168,14 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     /**
      * ViewHolder для заявок
      */
-    public class TicketViewHolder extends ExpandableRecyclerAdapter.ViewHolder {
-        TextView authorText;
-        TextView dateText;
-        TextView topicText;
-        TextView descText;
-        ImageView ticketImage;
+    private class TicketViewHolder extends ExpandableRecyclerAdapter.ViewHolder {
+        private TextView authorText;
+        private TextView dateText;
+        private TextView topicText;
+        private TextView descText;
+        private ImageView ticketImage;
 
-        public TicketViewHolder(View view) {
+        private TicketViewHolder(View view) {
             super(view);
 
             ticketImage = (ImageView) view.findViewById(R.id.ticketImage);
@@ -185,7 +185,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             descText = (TextView) view.findViewById(R.id.ticketDesc);
         }
 
-        public void bind(final int position) {
+        private void bind(final int position) {
             final String userId = visibleItems.get(position).ticket.getUserId();
             final String adminId = visibleItems.get(position).ticket.getAdminId();
 
