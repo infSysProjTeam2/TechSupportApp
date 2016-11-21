@@ -32,7 +32,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private DatabaseReference databaseUserReference;
 
-    private ArrayList<User> usersList = new ArrayList<User>();
+    private ArrayList<User> usersList = new ArrayList<>();
 
     private String mUserId;
 
