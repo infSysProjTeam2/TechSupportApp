@@ -27,15 +27,15 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     private final ArrayList<User> users;
     private FragmentManager fragmentManager;
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        TextView authorText;
-        TextView dateText;
-        TextView topicText;
-        TextView descText;
-        ImageView ticketImage;
-        TextView authorLabel;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private TextView authorText;
+        private TextView dateText;
+        private TextView topicText;
+        private TextView descText;
+        private ImageView ticketImage;
+        private TextView authorLabel;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             super(view);
             ticketImage = (ImageView) view.findViewById(R.id.ticketImage);
             authorText = (TextView) view.findViewById(R.id.ticketAuthor);

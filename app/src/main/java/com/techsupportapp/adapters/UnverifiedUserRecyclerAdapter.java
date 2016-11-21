@@ -20,12 +20,12 @@ public class UnverifiedUserRecyclerAdapter extends RecyclerView.Adapter<Unverifi
     private final ArrayList<User> values;
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
-        public ImageView userImage;
-        public TextView userNameText;
-        public TextView userDateText;
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private ImageView userImage;
+        private TextView userNameText;
+        private TextView userDateText;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             super(view);
             userImage = (ImageView) view.findViewById(R.id.userImage);
             userNameText = (TextView) view.findViewById(R.id.userName);

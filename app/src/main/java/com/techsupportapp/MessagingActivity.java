@@ -38,7 +38,7 @@ public class MessagingActivity extends AppCompatActivity {
     private ValueEventListener valueEventListener;
     private ChatRecyclerAdapter chatRecyclerAdapter;
 
-    RecyclerView recyclerView;
+    private RecyclerView recyclerView;
 
     private String mChatRoom;
     private String topic;
