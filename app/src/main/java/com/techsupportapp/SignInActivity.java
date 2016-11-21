@@ -29,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.services.MessagingService;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
@@ -49,6 +50,9 @@ public class SignInActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private ValueEventListener valueEventListener;
 
+    private boolean isDownloaded;
+    private boolean hasListener;
+
     //endregion
 
     //region Composite Controls
@@ -62,6 +66,35 @@ public class SignInActivity extends AppCompatActivity {
     private CheckBox rememberPasCB;
 
     private MaterialDialog loadingDialog;
+
+    //endregion
+
+    //region Listeners
+
+    private ValueEventListener databaseListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - НАЧАТО");
+            isDownloaded = false;
+            unverifiedLoginList.clear();
+
+            userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            unverifiedLoginList = Globals.Downloads.Strings.getUnverifiedLogins(dataSnapshot);
+
+            isDownloaded = true;
+            if (loadingDialog != null){
+                closeLoadingDialog();
+                signInBut.callOnClick();
+                loadingDialog = null;
+            }
+            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - ЗАВЕРШЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
+        }
+    };
 
     //endregion
 
@@ -105,6 +138,12 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        android.os.Process.killProcess(android.os.Process.myPid()); //TODO is it necessary?
+        super.onDestroy();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_sign_up) {
@@ -117,24 +156,19 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SignInActivity.this);
+        Globals.logInfoAPK(SignInActivity.this, "onResume - ВЫПОЛНЕН");
 
-        loginET.setText(preferences.getString("Login",""));
-        passwordET.setText(preferences.getString("Password",""));
-        rememberPasCB.setChecked(preferences.getBoolean("cbState", false));
+        if (!hasListener) {
+            Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УСТАНОВЛЕН");
+            databaseReference.addValueEventListener(databaseListener);
+            hasListener = true;
+        }
+        SharedPreferences settings = getPreferences(0);
+        loginET.setText(settings.getString("Login",""));
+        passwordET.setText(settings.getString("Password",""));
+        rememberPasCB.setChecked(settings.getBoolean("cbState", false));
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        databaseReference.removeEventListener(valueEventListener);
-    }
     //endregion
 
     /**
@@ -185,8 +219,6 @@ public class SignInActivity extends AppCompatActivity {
             passwordET.setText("");
             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
         }
-
-        closeLoadingDialog();
     }
 
     /**
@@ -226,9 +258,11 @@ public class SignInActivity extends AppCompatActivity {
 
         rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
         setTitle("Авторизация");
+        isDownloaded = false;
+        hasListener = false;
     }
 
     /**
@@ -264,31 +298,17 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (hasConnection()) {
-                    showLoadingDialog();
-                    databaseReference.addValueEventListener(valueEventListener);
+                    if (!isDownloaded) {
+                        showLoadingDialog();
+                        return;
+                    }
+                    if (!checkFields())
+                        return;
+                    checkVerificationData();
                 }
                 else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
             }
         });
-
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                unverifiedLoginList.clear();
-
-                userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-                unverifiedLoginList = Globals.Downloads.getUnverifiedLogins(dataSnapshot);
-
-                if (!checkFields())
-                    return;
-                checkVerificationData();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), "Ошибка в работе базы данных. Обратитесь к администратору компании или разработчику", Toast.LENGTH_LONG).show();
-            }
-        };
 
         passwordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -327,9 +347,15 @@ public class SignInActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
 
         savePassAndLogin();
+        //TODO загрузку после нажатия на "ВХОД"
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false)) {
+            MessagingService.startMessagingService(getApplicationContext());
+            Globals.logInfoAPK(SignInActivity.this, "Служба - ЗАПУЩЕНА");
+        }
 
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false))
-            startService(new Intent(this, MessagingService.class));
+        Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УДАЛЕН");
+        databaseReference.removeEventListener(databaseListener);
+        hasListener = false;
 
         Globals.currentUser = user;
         startActivity(new Intent(SignInActivity.this, TicketsActivity.class));

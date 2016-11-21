@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.services.MessagingService;
+import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public class SplashActivity extends AppCompatActivity {
                 valueEventListener = new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        ArrayList<User> userList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
+                        ArrayList<User> userList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
                         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(SplashActivity.this);
                         checkVerificationData(userList, preferences.getString("Login", ""), preferences.getString("Password", ""));
                     }
@@ -69,7 +70,7 @@ public class SplashActivity extends AppCompatActivity {
                         SplashActivity.this.finish();
                     }
                 };
-                databaseReference = FirebaseDatabase.getInstance().getReference();
+                databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
             } else {
                 Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
                 showSignInActivity();

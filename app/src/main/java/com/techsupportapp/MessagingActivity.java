@@ -106,7 +106,7 @@ public class MessagingActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.listChat);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(MessagingActivity.this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(mLayoutManager);
-        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this);//TODO 150 сообщений - норм?
+        chatRecyclerAdapter = new ChatRecyclerAdapter(databaseReference.limitToLast(150), MessagingActivity.this);
         recyclerView.setAdapter(chatRecyclerAdapter);
         chatRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
