@@ -44,8 +44,8 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
 
     private int role;
 
-    private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
+    private DatabaseReference databaseUserReference;
+    private DatabaseReference databaseTicketReference;
 
     private ArrayList<Ticket> ticketsList = new ArrayList<Ticket>();
     private ArrayList<User> usersList = new ArrayList<User>();
@@ -53,6 +53,57 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
     private ImageView currUserImage;
 
     private TicketRecyclerAdapter adapter;
+
+    private boolean isDownloaded;
+
+    //region Listeners
+
+    ValueEventListener ticketListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(TicketsActivity.this, "Скачивание заявок - БЛОКИРОВАНО");
+            while (!isDownloaded);
+            Globals.logInfoAPK(TicketsActivity.this, "Скачивание заявок - НАЧАТО");
+            if (role != User.SIMPLE_USER) {
+                ticketsList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
+                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
+                ticketsView.setLayoutManager(mLayoutManager);
+                ticketsView.setHasFixedSize(false);
+                ticketsView.setAdapter(adapter);
+            } else {
+                ticketsList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
+                ticketsList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
+                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
+                ticketsView.setLayoutManager(mLayoutManager);
+                ticketsView.setHasFixedSize(false);
+                ticketsView.setAdapter(adapter);
+            }
+            Globals.logInfoAPK(TicketsActivity.this, "Скачивание заявок - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Globals.logInfoAPK(TicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+            isDownloaded = false;
+            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+            isDownloaded = true;
+            Globals.logInfoAPK(TicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ЗАКОНЧЕНО");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,30 +115,15 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         setEvents();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
     private void initializeComponents(){
         ticketsView = (RecyclerView)findViewById(R.id.ticketsOverview);
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
 
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
+        databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
+
+        isDownloaded = false;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Список принятых заявок");
@@ -105,7 +141,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), TicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), TicketsActivity.this)));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(Globals.currentUser.getUserName());
@@ -132,33 +168,6 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
     }
 
     private void setEvents() {
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-
-                if (role != User.SIMPLE_USER) {
-                    ticketsList = Globals.Downloads.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
-                    ticketsView.setLayoutManager(mLayoutManager);
-                    ticketsView.setHasFixedSize(false);
-                    ticketsView.setAdapter(adapter);
-                } else {
-                    ticketsList = Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
-                    ticketsList.addAll(Globals.Downloads.getUserSpecificTickets(dataSnapshot, DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
-                    adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
-                    ticketsView.setLayoutManager(mLayoutManager);
-                    ticketsView.setHasFixedSize(false);
-                    ticketsView.setAdapter(adapter);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
         ItemClickSupport.addTo(ticketsView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
             @Override
             public void onItemClicked(RecyclerView recyclerView, int position, View v) {
@@ -196,8 +205,8 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                     selectedTicket.removeAdmin();
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                    databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                     DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
                                 }
                             })
@@ -220,7 +229,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                         DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_CLOSED, Globals.currentUser);
                                     }
                                 })
@@ -241,8 +250,8 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                        databaseReference.child(DatabaseVariables.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
+                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
                                         DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser);
                                     }
                                 })
@@ -350,5 +359,30 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onStop() {
+        databaseUserReference.removeEventListener(userListener);
+        databaseTicketReference.removeEventListener(ticketListener);
+        super.onStop();
+        Globals.logInfoAPK(TicketsActivity.this,  "onStop - ВЫПОЛНЕН");
+    }
+
+    @Override
+    protected void onPause() {
+        databaseUserReference.removeEventListener(userListener);
+        databaseTicketReference.removeEventListener(ticketListener);
+        isDownloaded = false;
+        super.onPause();
+        Globals.logInfoAPK(TicketsActivity.this,  "onPause - ВЫПОЛНЕН");
+    }
+
+    @Override
+    protected void onResume() {
+        databaseUserReference.addValueEventListener(userListener);
+        databaseTicketReference.addValueEventListener(ticketListener);
+        super.onResume();
+        Globals.logInfoAPK(TicketsActivity.this,  "onResume - ВЫПОЛНЕН");
     }
 }

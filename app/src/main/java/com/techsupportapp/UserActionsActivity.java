@@ -2,6 +2,7 @@ package com.techsupportapp;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
@@ -31,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.fragments.UserActionsFragments;
+import com.techsupportapp.services.MessagingService;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
 
@@ -40,17 +42,42 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private ViewPager viewPager;
     private UserActionsFragments.SectionsPagerAdapter mSectionsPagerAdapter;
 
-    private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
-
     private ArrayList<User> unverifiedUsersList = new ArrayList<User>();
     private ArrayList<User> usersList = new ArrayList<User>();
+
+    private static DatabaseReference databaseRef;
 
     private MenuItem searchMenu;
     private SearchView searchView;
     private static boolean search;
 
     private ImageView currUserImage;
+
+    //region Listeners
+
+    ValueEventListener userListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if (!search) {
+                Globals.logInfoAPK(UserActionsActivity.this, "Скачивание данных пользователей - НАЧАТО");
+                unverifiedUsersList = Globals.Downloads.Users.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_UNVERIFIED_USER_TABLE);
+                if (!mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search))
+                    MenuItemCompat.collapseActionView(searchMenu);
+
+
+                usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
+                mSectionsPagerAdapter.updateSecondFragment(usersList, UserActionsActivity.this);
+                Globals.logInfoAPK(UserActionsActivity.this, "Скачивание данных пользователей - ОКОНЧЕНО");
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    //endregion
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,26 +90,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         setEvents();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        databaseReference.addValueEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        databaseReference.removeEventListener(valueEventListener);
-    }
-
     private void initializeComponents(){
-        databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseRef = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("Пользователи");
@@ -100,7 +109,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getclip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), UserActionsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), UserActionsActivity.this)));
 
         mSectionsPagerAdapter = new UserActionsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -136,37 +145,17 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     public static String getDatabaseUserPath(User unVerifiedUser) throws Exception {
         int role = unVerifiedUser.getRole();
         if (role == User.SIMPLE_USER)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
         else if (role == User.DEPARTMENT_MEMBER)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_WORKER_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_WORKER_TABLE;
         else if (role == User.ADMINISTRATOR)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE;
         else if (role == User.DEPARTMENT_CHIEF)
-            return DatabaseVariables.Users.DATABASE_VERIFIED_CHIEF_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE;
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
     }
 
     private void setEvents() {
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (!search) {
-                    unverifiedUsersList = Globals.Downloads.getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.Users.DATABASE_UNVERIFIED_USER_TABLE);
-                    if (!mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, databaseReference, search))
-                        MenuItemCompat.collapseActionView(searchMenu);
-
-
-                    usersList = Globals.Downloads.getVerifiedUserList(dataSnapshot);
-                    mSectionsPagerAdapter.updateSecondFragment(usersList, UserActionsActivity.this);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,7 +163,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                 bottomSheetDialogFragment.show(getSupportFragmentManager(), bottomSheetDialogFragment.getTag());
             }
         });
-
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -188,7 +176,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     MenuItemCompat.collapseActionView(searchMenu);
                     search = false;
 
-                    mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, databaseReference, search);
+                    mSectionsPagerAdapter.updateFirstFragment(unverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search);
                     mSectionsPagerAdapter.updateSecondFragment(usersList, UserActionsActivity.this);
                 }
             }
@@ -243,6 +231,10 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            if (PreferenceManager.getDefaultSharedPreferences(UserActionsActivity.this).getBoolean("allowNotifications", false)) {
+                                MessagingService.stopMessagingService(getApplicationContext());
+                                Globals.logInfoAPK(UserActionsActivity.this, "Служба - ОСТАНОВЛЕНА");
+                            }
                             UserActionsActivity.this.finishAffinity();
                         }
                     })
@@ -288,7 +280,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
                             newUnverifiedUsersList.add(unverifiedUser);
                     }
 
-                    mSectionsPagerAdapter.updateFirstFragment(newUnverifiedUsersList, UserActionsActivity.this, databaseReference, search);
+                    mSectionsPagerAdapter.updateFirstFragment(newUnverifiedUsersList, UserActionsActivity.this, FirebaseDatabase.getInstance().getReference(), search);
                 }
                 else
                 {
@@ -329,5 +321,26 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onResume() {
+        databaseRef.addValueEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onResume - ВЫПОЛНЕН");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        databaseRef.removeEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onPause - ВЫПОЛНЕН");
+        super.onStop();
+    }
+
+    @Override
+    protected void onStop() {
+        databaseRef.removeEventListener(userListener);
+        Globals.logInfoAPK(UserActionsActivity.this, "onStop - ВЫПОЛНЕН");
+        super.onStop();
     }
 }
