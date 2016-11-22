@@ -206,16 +206,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
             ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getTopic(), context));
 
-            ticketImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (type == TYPE_AVAILABLE) {
-                        BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
-                        bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
-                    }
-                }
-            });
-
             View rootView = ticketImage.getRootView();
 
             if (type == TYPE_AVAILABLE) {
@@ -348,32 +338,4 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                 break;
         }
     }
-
-    private User getUser(String userId, String adminId) {
-        String find;
-        find = userId;
-
-        if (Globals.currentUser.getLogin().equals(userId))
-            find = adminId;
-
-        ArrayList<String> idList = new ArrayList<>();
-        Collections.sort(users, new Comparator<User>() {
-            @Override
-            public int compare(User lhs, User rhs) {
-                return lhs.getLogin().compareTo(rhs.getLogin());
-            }
-        });
-
-        for (int i = 0; i < users.size(); i++)
-            idList.add(users.get(i).getLogin());
-        int index = Collections.binarySearch(idList, find, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return lhs.compareTo(rhs);
-            }
-        });
-
-        return users.get(index);
-    }
-
 }
