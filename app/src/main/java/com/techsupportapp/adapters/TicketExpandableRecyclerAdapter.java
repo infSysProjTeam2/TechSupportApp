@@ -1,6 +1,7 @@
 package com.techsupportapp.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -13,8 +14,6 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
@@ -22,6 +21,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
+import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.databaseClasses.Ticket;
@@ -44,12 +44,20 @@ import java.util.Comparator;
 /**
  * Адаптер для ExpandableRecyclerView с разделением заявок на категории
  * @author ahgpoug
+ *
+ *
+ *
+ * ДО ЧЕГО ЖЕ ТЫ ОТЧАЯЛСЯ, РАЗ ЗАШЕЛ СЮДА?
+ *
+ *
+ *
+ *
  */
 public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<TicketExpandableRecyclerAdapter.TicketListItem> {
     private static final int TYPE_TICKET = 1001;
 
     public static final int TYPE_AVAILABLE = 1;
-    public static final int TYPE_MYCLOSED = 2;
+    public static final int TYPE_ACTIVE = 2;
     public static final int TYPE_CLOSED = 3;
 
     private Context context;
@@ -57,11 +65,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
     private final ArrayList<User> users;
     private FragmentManager fragmentManager;
     private DatabaseReference databaseReference;
-    private ValueEventListener valueEventListener;
 
     /**
      * Передача информации в адаптер
-     * @param type тип адаптера. TYPE_AVAILABLE - список доступных заявок. TYPE_MYCLOSED - список заявок, закрытых текущим пользователм. TYPE_CLOSED - список всех закрытых заявок.
+     * @param type тип адаптера. TYPE_AVAILABLE - список доступных заявок. TYPE_ACTIVE - список заявок, закрытых текущим пользователм. TYPE_CLOSED - список всех закрытых заявок.
      * @param databaseReference ссылка на базу данных
      * @param values список заявок, определенных типом списка (type)
      * @param users список пользователей
@@ -88,11 +95,11 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             for (int i = 0; i < getItemCount(); i++)
                 if (getItemViewType(i) == TYPE_HEADER && isExpanded(i))
                     Globals.expandedItemsAvailable.add(i);
-        } else if (type == TYPE_MYCLOSED){
-            Globals.expandedItemsMyClosed.clear();
+        } else if (type == TYPE_ACTIVE){
+            Globals.expandedItemsActive.clear();
             for (int i = 0; i < getItemCount(); i++)
                 if (getItemViewType(i) == TYPE_HEADER && isExpanded(i))
-                    Globals.expandedItemsMyClosed.add(i);
+                    Globals.expandedItemsActive.add(i);
         } else if (type == TYPE_CLOSED){
             Globals.expandedItemsClosed.clear();
             for (int i = 0; i < getItemCount(); i++)
@@ -185,7 +192,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             descText = (TextView) view.findViewById(R.id.ticketDesc);
         }
 
-        private void bind(final int position) {
+        private void bind(int position) {
             final String userId = visibleItems.get(position).ticket.getUserId();
             final String adminId = visibleItems.get(position).ticket.getAdminId();
 
@@ -202,8 +209,10 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             ticketImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
-                    bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
+                    if (type == TYPE_AVAILABLE) {
+                        BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
+                        bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
+                    }
                 }
             });
 
@@ -221,7 +230,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        visibleItems.get(position).ticket.addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
+                                        currentTicket.addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
 
                                         databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).child(currentTicket.getTicketId()).setValue(currentTicket);
                                         databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
@@ -299,38 +308,12 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                                 e.printStackTrace();
                                             }
                                         } else {
-                                            final MaterialDialog materialDialog = new MaterialDialog.Builder(context)
-                                                    .title("История чата")
-                                                    .content("Загрузка...")
-                                                    .positiveText(android.R.string.ok)
-                                                    .show();
-
-                                            final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId());
-
-                                            valueEventListener = new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                                    ArrayList<ChatMessage> chatMessages = new ArrayList<>();
-                                                    for (DataSnapshot snapshot: dataSnapshot.getChildren())
-                                                        chatMessages.add(snapshot.getValue(ChatMessage.class));
-                                                    databaseReference.removeEventListener(valueEventListener);
-
-                                                    String result = "";
-                                                    for (ChatMessage chatMessage : chatMessages) {
-                                                        result += chatMessage.getAuthor() + ", " + chatMessage.getMessageTime() + ":\n";
-                                                        result += chatMessage.getMessage() + "\n\n";
-                                                    }
-                                                    result = result.substring(0, result.length()-2);
-
-                                                    materialDialog.setContent(result);
-                                                }
-
-                                                @Override
-                                                public void onCancelled(DatabaseError databaseError) {
-                                                    materialDialog.setContent("Ошибка загрузки");
-                                                }
-                                            };
-                                            databaseReference.addValueEventListener(valueEventListener);
+                                            Intent intent = new Intent(context, MessagingActivity.class);
+                                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                            intent.putExtra("chatRoom", currentTicket.getTicketId());
+                                            intent.putExtra("topic", currentTicket.getTopic());
+                                            intent.putExtra("isActive", false);
+                                            context.startActivity(intent);
                                         }
 
                                     }

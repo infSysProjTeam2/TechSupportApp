@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +32,7 @@ import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
+import com.techsupportapp.fragments.MyTicketsFragments;
 import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
@@ -38,10 +41,6 @@ import com.techsupportapp.utility.ItemClickSupport;
 import java.util.ArrayList;
 
 public class TicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-    private RecyclerView ticketsView;
-    private LinearLayoutManager mLayoutManager;
-
     private int role;
 
     private DatabaseReference databaseUserReference;
@@ -52,7 +51,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
 
     private ImageView currUserImage;
 
-    private TicketRecyclerAdapter adapter;
+    private MyTicketsFragments.SectionsPagerAdapter sectionsPagerAdapter;
 
     private boolean isDownloaded;
 
@@ -66,17 +65,27 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
             Globals.logInfoAPK(TicketsActivity.this, "Скачивание заявок - НАЧАТО");
             if (role != User.SIMPLE_USER) {
                 ticketsList = Globals.Downloads.Tickets.getOverseerTicketList(dataSnapshot, Globals.currentUser.getLogin());
-                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
-                ticketsView.setLayoutManager(mLayoutManager);
-                ticketsView.setHasFixedSize(false);
-                ticketsView.setAdapter(adapter);
+                sectionsPagerAdapter.updateFirstFragment(TicketsActivity.this, ticketsList, usersList);
+
+                ArrayList<Ticket> listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
+
+                for (Ticket ticket : listOfSolvedTickets)
+                    if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
+                        listOfMyClosedTickets.add(ticket);
+                sectionsPagerAdapter.updateSecondFragment(TicketsActivity.this, listOfMyClosedTickets, usersList);
             } else {
                 ticketsList = Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE, Globals.currentUser.getLogin());
                 ticketsList.addAll(Globals.Downloads.Tickets.getUserSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE, Globals.currentUser.getLogin()));
-                adapter = new TicketRecyclerAdapter(getApplicationContext(), ticketsList, usersList, getSupportFragmentManager());
-                ticketsView.setLayoutManager(mLayoutManager);
-                ticketsView.setHasFixedSize(false);
-                ticketsView.setAdapter(adapter);
+                sectionsPagerAdapter.updateFirstFragment(TicketsActivity.this, ticketsList, usersList);
+
+                ArrayList<Ticket> listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+                ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
+
+                for (Ticket ticket : listOfSolvedTickets)
+                    if (ticket.getUserId().equals(Globals.currentUser.getLogin()))
+                        listOfMyClosedTickets.add(ticket);
+                sectionsPagerAdapter.updateSecondFragment(TicketsActivity.this, listOfMyClosedTickets, usersList);
             }
             Globals.logInfoAPK(TicketsActivity.this, "Скачивание заявок - ЗАКОНЧЕНО");
         }
@@ -116,17 +125,13 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
     }
 
     private void initializeComponents(){
-        ticketsView = (RecyclerView)findViewById(R.id.ticketsOverview);
-
-        mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false);
-
         databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
         databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
 
         isDownloaded = false;
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Список принятых заявок");
+        toolbar.setTitle("Мои заявки");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -142,6 +147,15 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
         currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), TicketsActivity.this)));
+
+        sectionsPagerAdapter = new MyTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
+
+        ViewPager viewPager = (ViewPager) findViewById(R.id.viewPager);
+        viewPager.setOffscreenPageLimit(2);
+        viewPager.setAdapter(sectionsPagerAdapter);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(Globals.currentUser.getUserName());
@@ -162,112 +176,11 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
             userType.setText("Пользователь");
             nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
-            nav_menu.findItem(R.id.acceptedTickets).setTitle("Список созданных заявок");
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
     }
 
     private void setEvents() {
-        ItemClickSupport.addTo(ticketsView).setOnItemClickListener(new ItemClickSupport.OnItemClickListener() {
-            @Override
-            public void onItemClicked(RecyclerView recyclerView, int position, View v) {
-                Intent intent = new Intent(TicketsActivity.this, MessagingActivity.class);
-                if (role != User.SIMPLE_USER) {
-                    intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                    intent.putExtra("topic", ticketsList.get(position).getTopic());
-                }
-                else {
-                    if (ticketsList.get(position).getAdminId() == null || ticketsList.get(position).getAdminId().equals("")) {
-                        Toast.makeText(getApplicationContext(), "Администратор еще не просматривал ваше сообщение, пожалуйста подождите", Toast.LENGTH_LONG).show();
-                        return;
-                    }
-                    else {
-                        intent.putExtra("chatRoom", ticketsList.get(position).getTicketId());
-                        intent.putExtra("topic", ticketsList.get(position).getTopic());
-                    }
-                }
-                startActivity(intent);
-                overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
-            }
-        });
-
-        ItemClickSupport.addTo(ticketsView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener () {
-            @Override
-            public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                if (role == User.DEPARTMENT_CHIEF) {
-                    final Ticket selectedTicket = ticketsList.get(position);
-                    new MaterialDialog.Builder(TicketsActivity.this)
-                            .title("Отказ от заявки пользователя " + selectedTicket.getUserName())
-                            .content("Вы действительно хотите отказаться от данной заявки?")
-                            .positiveText(android.R.string.yes)
-                            .negativeText(android.R.string.no)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    selectedTicket.removeAdmin();
-                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                    databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                    DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
-                                }
-                            })
-                            .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    dialog.cancel();
-                                }
-                            })
-                            .show();
-                }
-                else if (role == User.SIMPLE_USER){
-                    final Ticket selectedTicket = ticketsList.get(position);
-                    if (selectedTicket.getAdminId() == null || selectedTicket.getAdminId().equals("")) {
-                        new MaterialDialog.Builder(TicketsActivity.this)
-                                .title("Отзыв заявки " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
-                                .content("Вы действительно хотите отозвать данную заявку?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
-                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                        DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_CLOSED, Globals.currentUser);
-                                    }
-                                })
-                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        dialog.cancel();
-                                    }
-                                })
-                                .show();
-                    }
-                    else {
-                        new MaterialDialog.Builder(TicketsActivity.this)
-                                .title("Подтверждение решения проблемы по заявке " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
-                                .content("Ваша проблема действительно была решена?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
-                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                        DatabaseStorage.updateLogFile(TicketsActivity.this, selectedTicket.getTicketId(), DatabaseStorage.ACTION_SOLVED, Globals.currentUser);
-                                    }
-                                })
-                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        dialog.cancel();
-                                    }
-                                })
-                                .show();
-                    }
-                }
-                return true;
-            }
-        });
-
         currUserImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -374,6 +287,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         databaseUserReference.removeEventListener(userListener);
         databaseTicketReference.removeEventListener(ticketListener);
         isDownloaded = false;
+        overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
         super.onPause();
         Globals.logInfoAPK(TicketsActivity.this,  "onPause - ВЫПОЛНЕН");
     }

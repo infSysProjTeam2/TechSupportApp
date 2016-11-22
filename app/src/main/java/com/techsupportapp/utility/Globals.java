@@ -26,7 +26,7 @@ public class Globals {
     public static User currentUser;
 
     public static ArrayList<Integer> expandedItemsAvailable = new ArrayList<>();
-    public static ArrayList<Integer> expandedItemsMyClosed = new ArrayList<>();
+    public static ArrayList<Integer> expandedItemsActive = new ArrayList<>();
     public static ArrayList<Integer> expandedItemsClosed = new ArrayList<>();
 
     /**

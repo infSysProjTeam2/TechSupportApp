@@ -69,7 +69,7 @@ public class UserActionsFragments {
                 case 0:
                     return "Не авторизованные";
                 case 1:
-                    return "Все";
+                    return "Авторизованные";
             }
             return null;
         }
