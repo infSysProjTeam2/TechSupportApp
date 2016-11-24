@@ -42,6 +42,7 @@ public class MessagingActivity extends AppCompatActivity {
 
     private String mChatRoom;
     private String topic;
+    private boolean isActive;
 
     private EditText inputText;
     private ImageButton sendBtn;
@@ -55,6 +56,7 @@ public class MessagingActivity extends AppCompatActivity {
 
         mChatRoom = getIntent().getExtras().getString("chatRoom");
         topic = getIntent().getExtras().getString("topic");
+        isActive = getIntent().getExtras().getBoolean("isActive");
 
         showLoadingDialog();
         initializeComponents();
@@ -65,6 +67,11 @@ public class MessagingActivity extends AppCompatActivity {
         databaseReference = FirebaseDatabase.getInstance().getReference("chat").child(mChatRoom);
         inputText = (EditText) findViewById(R.id.messageInput);
         sendBtn = (ImageButton) findViewById(R.id.sendButton);
+
+        if (!isActive) {
+            inputText.setEnabled(false);
+            sendBtn.setEnabled(false);
+        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -160,7 +167,7 @@ public class MessagingActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        if (Globals.currentUser.getRole() != User.SIMPLE_USER)
+        if (Globals.currentUser.getRole() != User.SIMPLE_USER && isActive)
             inflater.inflate(R.menu.menu_messaging, menu);
         return true;
     }

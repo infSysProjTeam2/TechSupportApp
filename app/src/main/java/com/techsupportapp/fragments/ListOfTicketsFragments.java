@@ -66,9 +66,9 @@ public class ListOfTicketsFragments {
                 case 0:
                     return "Доступные";
                 case 1:
-                    return "Решенные мной";
+                    return "Активные";
                 case 2:
-                    return "Решенные";
+                    return "Закрытые";
             }
             return null;
         }
@@ -224,7 +224,7 @@ public class ListOfTicketsFragments {
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
             //Создание нового адаптера для viewOfMyClosedTickets
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_MYCLOSED, context, null, ticketListItems, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_ACTIVE, context, null, ticketListItems, usersList, getFragmentManager());
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -235,7 +235,7 @@ public class ListOfTicketsFragments {
 
             //Раскрытие категорий, которые были раскрыты ранее
             try {
-                for (int position : Globals.expandedItemsMyClosed)
+                for (int position : Globals.expandedItemsActive)
                     adapter.expandItems(position, true);
             } catch (Exception e){
                 e.printStackTrace();

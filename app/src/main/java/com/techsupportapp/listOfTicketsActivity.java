@@ -43,8 +43,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     private DatabaseReference databaseTicketReference;
 
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<>();
-    private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
-    private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<>();
+    private ArrayList<Ticket> listOfActiveTickets = new ArrayList<>();
+    private ArrayList<Ticket> listOfClosedTickets = new ArrayList<>();
 
     private ArrayList<User> usersList = new ArrayList<>();
 
@@ -72,16 +72,12 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         public void onDataChange(DataSnapshot dataSnapshot) {
             Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
             listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
-            listOfSolvedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
-            listOfMyClosedTickets.clear();
-
-            for (Ticket ticket : listOfSolvedTickets)
-                if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
-                    listOfMyClosedTickets.add(ticket);
+            listOfClosedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
+            listOfActiveTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
 
             mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
-            mSectionsPagerAdapter.updateSecondFragment(listOfMyClosedTickets, usersList, ListOfTicketsActivity.this);
-            mSectionsPagerAdapter.updateThirdFragment(listOfSolvedTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ListOfTicketsActivity.this);
 
             Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
         }
@@ -118,7 +114,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("Список заявок");
+        toolbar.setTitle("Все заявки");
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

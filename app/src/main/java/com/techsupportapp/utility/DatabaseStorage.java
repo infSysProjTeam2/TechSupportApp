@@ -75,9 +75,9 @@ public class DatabaseStorage {
             else if (action == ACTION_REQUESTED_TO_CLOSE)
                 text = ": отправлен запрос на закрытие заявки пользователем ";
             else if (action == ACTION_REQUEST_REJECTED)
-                text = ": запрос на закрытие зявки отклонен пользователем ";
+                text = ": запрос на закрытие заявки отклонен пользователем ";
             else if (action == ACTION_REQUEST_ACCEPTED)
-                text = ": запрос на закрытие зявки принят пользователем ";
+                text = ": запрос на закрытие заявки принят пользователем ";
 
             String data = (currentTime + text + currentUser.getUserName());
 
