@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -21,11 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
-import com.techsupportapp.TicketsActivity;
-import com.techsupportapp.UserActionsActivity;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
-import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
-import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseStorage;
@@ -36,7 +31,7 @@ import com.techsupportapp.utility.ItemClickSupport;
 import java.util.ArrayList;
 
 /**
- * Класс для фрагментов ViewPager, находящегося в TicketsActivity.class.
+ * Класс для фрагментов ViewPager, находящегося в MyTicketsActivity.class.
  * @author ahgpoug
  */
 public class MyTicketsFragments {
