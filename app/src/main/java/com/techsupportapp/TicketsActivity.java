@@ -225,7 +225,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
 
         if (id == R.id.listOfTickets) {
             if (role != User.SIMPLE_USER) {
-                Intent intent = new Intent(TicketsActivity.this, ListOfTicketsActivity.class);
+                Intent intent = new Intent(TicketsActivity.this, ScheduleOfTicketsActivity.class);
                 startActivity(intent);
             }
             else

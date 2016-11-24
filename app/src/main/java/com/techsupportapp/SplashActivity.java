@@ -53,7 +53,7 @@ public class SplashActivity extends AppCompatActivity {
     private void tryToConnect(){
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         if (preferences.getString("Login","").equals("") || preferences.getString("Password","").equals("")){
-            showSignInActivity();
+            showNextActivity();
         } else {
             if (hasConnection()) {
                 valueEventListener = new ValueEventListener() {
@@ -73,12 +73,12 @@ public class SplashActivity extends AppCompatActivity {
                 databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
             } else {
                 Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
-                showSignInActivity();
+                showNextActivity();
             }
         }
     }
 
-    private void showSignInActivity(){
+    private void showNextActivity(){
         startActivity(new Intent(SplashActivity.this, SignInActivity.class));
         SplashActivity.this.finish();
     }
@@ -90,7 +90,9 @@ public class SplashActivity extends AppCompatActivity {
             startService(new Intent(this, MessagingService.class));
 
         Globals.currentUser = user;
-        startActivity(new Intent(SplashActivity.this, TicketsActivity.class));
+        if (user.getRole() != User.MANAGER)
+            startActivity(new Intent(SplashActivity.this, TicketsActivity.class));
+        else startActivity(new Intent(SplashActivity.this, ManagerActivity.class));
         SplashActivity.this.finish();
     }
 
@@ -99,13 +101,13 @@ public class SplashActivity extends AppCompatActivity {
         while (!login.equals(userList.get(i).getLogin()) && ++i < userList.size());
         if (i >= userList.size()) {
             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
-            showSignInActivity();
+            showNextActivity();
         }
         else if (login.equals(userList.get(i).getLogin()) && password.equals(userList.get(i).getPassword()))
             signIn(userList.get(i));
         else {
             Toast.makeText(getApplicationContext(), "Логин и/или пароль введен неверно. Повторите попытку", Toast.LENGTH_LONG).show();
-            showSignInActivity();
+            showNextActivity();
         }
     }
 

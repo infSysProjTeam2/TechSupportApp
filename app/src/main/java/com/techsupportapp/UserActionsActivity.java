@@ -139,6 +139,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             return resultString + "АДМИНИСТРАТОРА";
         else if (role == User.DEPARTMENT_CHIEF)
             return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
+        else if (role == User.MANAGER)
+            return resultString + "ДИСПЕТЧЕРА";
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
     }
 
@@ -152,6 +154,8 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE;
         else if (role == User.DEPARTMENT_CHIEF)
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE;
+        else if (role == User.MANAGER)
+            return  DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_MANAGER_TABLE;
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя");
     }
 
@@ -206,7 +210,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
+            Intent intent = new Intent(UserActionsActivity.this, ScheduleOfTicketsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {

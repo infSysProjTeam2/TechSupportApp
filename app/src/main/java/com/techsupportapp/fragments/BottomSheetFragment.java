@@ -158,5 +158,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             accessLevelTV.setText("Администратор");
         else if (role == User.DEPARTMENT_CHIEF)
             accessLevelTV.setText("Начальник отдела");
+        else if (role == User.MANAGER)
+            accessLevelTV.setText("Диспетчер");
     }
 }

@@ -33,6 +33,11 @@ public class User {
      */
     public final static int DEPARTMENT_CHIEF = 4;
 
+    /**
+     * Диспетчер службы поддержки. Распределяет заявки между консультантами.
+     */
+    public final static int MANAGER = 8;
+
     //endregion
 
     //region Fields
@@ -103,7 +108,7 @@ public class User {
         this.branchId = branchId;
         this.login = login;
         this.password = password;
-        if (role != 0 && role != 1 && role != 2 && role != 4)
+        if (role != 0 && role != 1 && role != 2 && role != 4 && role != 8)
             throw new IllegalArgumentException("Аргумент role имеет не дозволительное значение. Используте класс User");
 
         this.role = role;

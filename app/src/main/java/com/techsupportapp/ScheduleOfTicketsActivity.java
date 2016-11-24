@@ -37,7 +37,7 @@ import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
-public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class ScheduleOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private DatabaseReference databaseUserReference;
     private DatabaseReference databaseTicketReference;
@@ -57,9 +57,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     ValueEventListener userListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
             usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
+            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
         }
         @Override
         public void onCancelled(DatabaseError databaseError) {
@@ -70,16 +70,16 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     ValueEventListener ticketListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
+            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
             listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
             listOfClosedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
             listOfActiveTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
 
-            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
-            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ListOfTicketsActivity.this);
-            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ScheduleOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
+            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ScheduleOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ScheduleOfTicketsActivity.this);
 
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
+            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
         }
 
         @Override
@@ -129,7 +129,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ScheduleOfTicketsActivity.this)));
 
         mSectionsPagerAdapter = new ListOfTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -178,18 +178,18 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.userActions) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
+            Intent intent = new Intent(ScheduleOfTicketsActivity.this, UserActionsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {
-            Intent intent = new Intent(ListOfTicketsActivity.this, ChartsActivity.class);
+            Intent intent = new Intent(ScheduleOfTicketsActivity.this, ChartsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
-            Globals.showAbout(ListOfTicketsActivity.this);
+            Globals.showAbout(ScheduleOfTicketsActivity.this);
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
@@ -202,11 +202,11 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            if (PreferenceManager.getDefaultSharedPreferences(ListOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
+                            if (PreferenceManager.getDefaultSharedPreferences(ScheduleOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
                                 MessagingService.stopMessagingService(getApplicationContext());
                                 Log.e("СЛУЖБА", "ОСТАНОВЛЕНА");
                             }
-                            ListOfTicketsActivity.this.finishAffinity();
+                            ScheduleOfTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -227,7 +227,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     protected void onResume() {
         databaseTicketReference.addValueEventListener(ticketListener);
         databaseUserReference.addValueEventListener(userListener);
-        Globals.logInfoAPK(ListOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
         super.onResume();
     }
 
@@ -235,7 +235,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     protected void onPause() {
         databaseTicketReference.removeEventListener(ticketListener);
         databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(ListOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
         super.onPause();
     }
 
@@ -243,7 +243,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     protected void onStop() {
         databaseTicketReference.removeEventListener(ticketListener);
         databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(ListOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
         super.onStop();
     }
 }
