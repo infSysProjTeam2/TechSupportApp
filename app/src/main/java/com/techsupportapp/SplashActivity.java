@@ -92,7 +92,8 @@ public class SplashActivity extends AppCompatActivity {
         Globals.currentUser = user;
         if (user.getRole() != User.MANAGER)
             startActivity(new Intent(SplashActivity.this, TicketsActivity.class));
-        else startActivity(new Intent(SplashActivity.this, ManagerActivity.class));
+        else
+            startActivity(new Intent(SplashActivity.this, ListOfTicketsActivity.class));
         SplashActivity.this.finish();
     }
 

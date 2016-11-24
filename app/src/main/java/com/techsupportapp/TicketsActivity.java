@@ -11,15 +11,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -28,15 +25,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techsupportapp.adapters.TicketRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.fragments.MyTicketsFragments;
-import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
-import com.techsupportapp.utility.ItemClickSupport;
 
 import java.util.ArrayList;
 
@@ -159,20 +153,21 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(Globals.currentUser.getUserName());
+
         if (role == User.ADMINISTRATOR) {
             userType.setText("Администратор");
             nav_menu.findItem(R.id.charts).setVisible(false);
-        }
-        else if (role == User.DEPARTMENT_CHIEF) {
+            nav_menu.findItem(R.id.listOfTickets).setVisible(false);
+        } else if (role == User.DEPARTMENT_CHIEF) {
             userType.setText("Начальник отдела");
             nav_menu.findItem(R.id.userActions).setVisible(false);
-        }
-        else if (role == User.DEPARTMENT_MEMBER){
+            nav_menu.findItem(R.id.listOfTickets).setVisible(false);
+        } else if (role == User.DEPARTMENT_MEMBER){
             userType.setText("Работник отдела");
             nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
-        }
-        else {
+            nav_menu.findItem(R.id.listOfTickets).setVisible(false);
+        } else {
             userType.setText("Пользователь");
             nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
@@ -225,7 +220,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
 
         if (id == R.id.listOfTickets) {
             if (role != User.SIMPLE_USER) {
-                Intent intent = new Intent(TicketsActivity.this, ScheduleOfTicketsActivity.class);
+                Intent intent = new Intent(TicketsActivity.this, ListOfTicketsActivity.class);
                 startActivity(intent);
             }
             else
@@ -287,7 +282,8 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
         databaseUserReference.removeEventListener(userListener);
         databaseTicketReference.removeEventListener(ticketListener);
         isDownloaded = false;
-        overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
+        //overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
+        //TODO переделать
         super.onPause();
         Globals.logInfoAPK(TicketsActivity.this,  "onPause - ВЫПОЛНЕН");
     }

@@ -355,6 +355,6 @@ public class SignInActivity extends AppCompatActivity {
         Globals.currentUser = user;
         if (user.getRole() != User.MANAGER)
             startActivity(new Intent(SignInActivity.this, TicketsActivity.class));
-        else startActivity(new Intent(SignInActivity.this, ManagerActivity.class));
+        else startActivity(new Intent(SignInActivity.this, ListOfTicketsActivity.class));
     }
 }

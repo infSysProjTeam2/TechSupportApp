@@ -2,7 +2,6 @@ package com.techsupportapp;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -384,7 +383,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         int id = item.getItemId();
 
         if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(ChartsActivity.this, ScheduleOfTicketsActivity.class);
+            Intent intent = new Intent(ChartsActivity.this, ListOfTicketsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.acceptedTickets) {

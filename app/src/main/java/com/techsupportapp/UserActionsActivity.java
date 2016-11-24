@@ -210,7 +210,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(UserActionsActivity.this, ScheduleOfTicketsActivity.class);
+            Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {
