@@ -36,7 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private DatabaseReference databaseUserReference;
     private DatabaseReference databaseIndexReference;
-    private ArrayList<String> loginList = new ArrayList<String>();
+    private ArrayList<String> loginList = new ArrayList<>();
     private int userCount;
 
     //endregion

@@ -39,14 +39,14 @@ import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private static DatabaseReference databaseUserReference;
-    private static DatabaseReference databaseTicketReference;
+    private DatabaseReference databaseUserReference;
+    private DatabaseReference databaseTicketReference;
 
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfSolvedTickets = new ArrayList<>();
 
-    private static ArrayList<User> usersList = new ArrayList<>();
+    private ArrayList<User> usersList = new ArrayList<>();
 
     private ListOfTicketsFragments.SectionsPagerAdapter mSectionsPagerAdapter;
 
@@ -111,7 +111,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             drawer.closeDrawer(GravityCompat.START);
         else
             finish();
-
     }
 
     private void initializeComponents() {

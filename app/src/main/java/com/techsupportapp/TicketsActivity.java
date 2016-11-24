@@ -47,8 +47,8 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
     private DatabaseReference databaseUserReference;
     private DatabaseReference databaseTicketReference;
 
-    private ArrayList<Ticket> ticketsList = new ArrayList<Ticket>();
-    private ArrayList<User> usersList = new ArrayList<User>();
+    private ArrayList<Ticket> ticketsList = new ArrayList<>();
+    private ArrayList<User> usersList = new ArrayList<>();
 
     private ImageView currUserImage;
 
@@ -187,6 +187,7 @@ public class TicketsActivity extends AppCompatActivity implements NavigationView
                     }
                 }
                 startActivity(intent);
+                overridePendingTransition(R.anim.anim_slide_from_right, R.anim.anim_slide_to_left);
             }
         });
 

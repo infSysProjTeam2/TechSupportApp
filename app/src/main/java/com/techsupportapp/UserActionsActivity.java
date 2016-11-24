@@ -42,14 +42,14 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
     private ViewPager viewPager;
     private UserActionsFragments.SectionsPagerAdapter mSectionsPagerAdapter;
 
-    private ArrayList<User> unverifiedUsersList = new ArrayList<User>();
-    private ArrayList<User> usersList = new ArrayList<User>();
+    private ArrayList<User> unverifiedUsersList = new ArrayList<>();
+    private ArrayList<User> usersList = new ArrayList<>();
 
-    private static DatabaseReference databaseRef;
+    private DatabaseReference databaseRef;
 
     private MenuItem searchMenu;
     private SearchView searchView;
-    private static boolean search;
+    private boolean search;
 
     private ImageView currUserImage;
 
