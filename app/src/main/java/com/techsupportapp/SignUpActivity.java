@@ -60,9 +60,7 @@ public class SignUpActivity extends AppCompatActivity {
     ValueEventListener databaseUserListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(SignUpActivity.this, "Скачивание логинов всех пользователей - НАЧАТО");
             loginList = Globals.Downloads.Strings.getAllLogins(dataSnapshot);
-            Globals.logInfoAPK(SignUpActivity.this, "Скачивание логинов всех пользователей - ЗАКОНЧЕНО");
         }
 
         @Override
@@ -74,9 +72,7 @@ public class SignUpActivity extends AppCompatActivity {
     ValueEventListener databaseIndexListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(SignUpActivity.this, "Обновление индексов - НАЧАТО");
             userCount = dataSnapshot.getValue(int.class);
-            Globals.logInfoAPK(SignUpActivity.this, "Обновление индексов - ЗАКОНЧЕНО");
         }
 
         @Override
@@ -111,6 +107,8 @@ public class SignUpActivity extends AppCompatActivity {
             return User.ADMINISTRATOR;
         else if (spinner.getText().toString().equals("Начальник отдела"))
             return User.DEPARTMENT_CHIEF;
+        else if (spinner.getText().toString().equals("Диспетчер"))
+            return  User.MANAGER;
         else return User.SIMPLE_USER;
     }
 
@@ -128,7 +126,7 @@ public class SignUpActivity extends AppCompatActivity {
         databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
         databaseIndexReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_USER_INDEX_COUNTER);
 
-        String[] roles_array = new String[] {"Пользователь", "Работник отдела", "Администратор", "Начальник отдела" };
+        String[] roles_array = new String[] {"Пользователь", "Работник отдела", "Администратор", "Начальник отдела", "Диспетчер"};
 
         spinner = (BetterSpinner) findViewById(R.id.spinner);
         spinner.setAdapter(new ArrayAdapter<>(SignUpActivity.this, android.R.layout.simple_dropdown_item_1line, roles_array));
@@ -142,9 +140,6 @@ public class SignUpActivity extends AppCompatActivity {
      * Создание методов для событий
      */
     private void setEvents() {
-        databaseUserReference.addValueEventListener(databaseUserListener);
-        databaseIndexReference.addValueEventListener(databaseIndexListener);
-
         repeatPasswordET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -239,9 +234,16 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    protected void onResume() {
+        super.onResume();
+        databaseUserReference.addValueEventListener(databaseUserListener);
+        databaseIndexReference.addValueEventListener(databaseIndexListener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         databaseUserReference.removeEventListener(databaseUserListener);
         databaseIndexReference.removeEventListener(databaseIndexListener);
-        super.onBackPressed();
     }
 }

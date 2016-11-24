@@ -27,7 +27,7 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden"/>
         <activity
-            android:name=".ListOfTicketsActivity"
+            android:name=".ScheduleOfTicketsActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -64,6 +64,10 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".PreferencesActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ManagerActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"/>
         <service

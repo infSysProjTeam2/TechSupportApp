@@ -74,6 +74,8 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
             return "Администратор";
         else if (role == User.DEPARTMENT_CHIEF)
             return "Начальник отдела";
+        else if (role == User.MANAGER)
+            return "Диспетчер";
         else throw new Exception("Передана нулевая ссылка или неверно указаны права пользователя.");
     }
 }
