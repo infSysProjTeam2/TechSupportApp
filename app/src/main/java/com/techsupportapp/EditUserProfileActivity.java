@@ -179,6 +179,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            else if (chUser.getRole() == User.MANAGER)
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
 
                         } catch (Exception e) {
                             e.printStackTrace();

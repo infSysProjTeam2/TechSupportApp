@@ -119,6 +119,7 @@ public class Globals {
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE));
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE));
                 return resultList;
             }
 

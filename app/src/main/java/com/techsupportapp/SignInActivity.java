@@ -50,7 +50,6 @@ public class SignInActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
 
     private boolean isDownloaded;
-    private boolean hasListener;
 
     //endregion
 
@@ -73,7 +72,6 @@ public class SignInActivity extends AppCompatActivity {
     private ValueEventListener databaseListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - НАЧАТО");
             isDownloaded = false;
             unverifiedLoginList.clear();
 
@@ -86,7 +84,6 @@ public class SignInActivity extends AppCompatActivity {
                 signInBut.callOnClick();
                 loadingDialog = null;
             }
-            Globals.logInfoAPK(SignInActivity.this, "Скачивание данных пользователей - ЗАВЕРШЕНО");
         }
 
         @Override
@@ -149,13 +146,6 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        android.os.Process.killProcess(android.os.Process.myPid()); //TODO is it necessary?
-        savePassAndLogin();
-        super.onDestroy();
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_sign_up) {
@@ -168,13 +158,7 @@ public class SignInActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Globals.logInfoAPK(SignInActivity.this, "onResume - ВЫПОЛНЕН");
 
-        if (!hasListener) {
-            Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УСТАНОВЛЕН");
-            databaseReference.addValueEventListener(databaseListener);
-            hasListener = true;
-        }
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         loginET.setText(settings.getString("Login",""));
         passwordET.setText(settings.getString("Password",""));
@@ -274,7 +258,6 @@ public class SignInActivity extends AppCompatActivity {
 
         setTitle("Авторизация");
         isDownloaded = false;
-        hasListener = false;
     }
 
     /**
@@ -311,6 +294,7 @@ public class SignInActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if (hasConnection()) {
                     if (!isDownloaded) {
+                        databaseReference.addValueEventListener(databaseListener);
                         showLoadingDialog();
                         return;
                     }
@@ -326,15 +310,17 @@ public class SignInActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (hasConnection()) {
+                    if (!isDownloaded) {
+                        databaseReference.addValueEventListener(databaseListener);
+                        showLoadingDialog();
+                        return true;
+                    }
                     if (!checkFields())
-                        return false;
+                        return true;
                     checkVerificationData();
-                    return true;
                 }
-                else {
-                    Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
-                    return false;
-                }
+                else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
+                return true;
             }
         });
     }
@@ -359,17 +345,16 @@ public class SignInActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Вход выполнен", Toast.LENGTH_SHORT).show();
 
         savePassAndLogin();
-        //TODO загрузку после нажатия на "ВХОД"
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("allowNotifications", false)) {
             MessagingService.startMessagingService(getApplicationContext());
             Globals.logInfoAPK(SignInActivity.this, "Служба - ЗАПУЩЕНА");
         }
 
-        Globals.logInfoAPK(SignInActivity.this, "Прослушиватель - УДАЛЕН");
         databaseReference.removeEventListener(databaseListener);
-        hasListener = false;
 
         Globals.currentUser = user;
-        startActivity(new Intent(SignInActivity.this, TicketsActivity.class));
+        if (user.getRole() != User.MANAGER)
+            startActivity(new Intent(SignInActivity.this, TicketsActivity.class));
+        else startActivity(new Intent(SignInActivity.this, ManagerActivity.class));
     }
 }
