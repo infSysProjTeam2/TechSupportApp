@@ -183,7 +183,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_HEADER:
-                return new HeaderViewHolder(inflate(R.layout.item_ticket_header, parent));
+                return new HeaderViewHolder(inflate(R.layout.item_user_header, parent));
             case TYPE_TICKET:
             default:
                 return new TicketViewHolder(inflate(R.layout.item_ticket, parent));
