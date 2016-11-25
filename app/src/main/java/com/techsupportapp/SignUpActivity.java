@@ -103,8 +103,6 @@ public class SignUpActivity extends AppCompatActivity {
             return User.SIMPLE_USER;
         else if (spinner.getText().toString().equals("Работник отдела"))
             return User.DEPARTMENT_MEMBER;
-        else if (spinner.getText().toString().equals("Администратор"))
-            return User.ADMINISTRATOR;
         else if (spinner.getText().toString().equals("Начальник отдела"))
             return User.DEPARTMENT_CHIEF;
         else if (spinner.getText().toString().equals("Диспетчер"))
@@ -126,7 +124,7 @@ public class SignUpActivity extends AppCompatActivity {
         databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
         databaseIndexReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_USER_INDEX_COUNTER);
 
-        String[] roles_array = new String[] {"Пользователь", "Работник отдела", "Администратор", "Начальник отдела", "Диспетчер"};
+        String[] roles_array = new String[] {"Пользователь", "Работник отдела", "Начальник отдела", "Диспетчер"};
 
         spinner = (BetterSpinner) findViewById(R.id.spinner);
         spinner.setAdapter(new ArrayAdapter<>(SignUpActivity.this, android.R.layout.simple_dropdown_item_1line, roles_array));

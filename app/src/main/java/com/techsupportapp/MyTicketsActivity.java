@@ -65,7 +65,7 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
                 ArrayList<Ticket> listOfMyClosedTickets = new ArrayList<>();
 
                 for (Ticket ticket : listOfSolvedTickets)
-                    if (ticket.getAdminId().equals(Globals.currentUser.getLogin()))
+                    if (ticket.getSpecialistId().equals(Globals.currentUser.getLogin()))
                         listOfMyClosedTickets.add(ticket);
                 sectionsPagerAdapter.updateSecondFragment(MyTicketsActivity.this, listOfMyClosedTickets, usersList);
             } else {
@@ -154,22 +154,16 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
         Menu nav_menu = navigationView.getMenu();
         userName.setText(Globals.currentUser.getUserName());
 
-        if (role == User.ADMINISTRATOR) {
-            userType.setText("Администратор");
-            nav_menu.findItem(R.id.charts).setVisible(false);
-            nav_menu.findItem(R.id.listOfTickets).setVisible(false);
-        } else if (role == User.DEPARTMENT_CHIEF) {
+        nav_menu.findItem(R.id.userActions).setVisible(false);
+        if (role == User.DEPARTMENT_CHIEF) {
             userType.setText("Начальник отдела");
-            nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.listOfTickets).setVisible(false);
         } else if (role == User.DEPARTMENT_MEMBER){
             userType.setText("Работник отдела");
-            nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
             nav_menu.findItem(R.id.listOfTickets).setVisible(false);
         } else {
             userType.setText("Пользователь");
-            nav_menu.findItem(R.id.userActions).setVisible(false);
             nav_menu.findItem(R.id.charts).setVisible(false);
             nav_menu.findItem(R.id.listOfTickets).setTitle("Создать заявку");
         }
@@ -228,9 +222,6 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
                 Intent intent = new Intent(MyTicketsActivity.this, CreateTicketActivity.class);
                 startActivity(intent);
             }
-        } else if (id == R.id.userActions) {
-            Intent intent = new Intent(MyTicketsActivity.this, UserActionsActivity.class);
-            startActivity(intent);
         } else if (id == R.id.charts) {
             Intent intent = new Intent(MyTicketsActivity.this, ChartsActivity.class);
             startActivity(intent);

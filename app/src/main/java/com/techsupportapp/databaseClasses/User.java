@@ -24,19 +24,14 @@ public class User {
     public final static int DEPARTMENT_MEMBER = 1;
 
     /**
-     * Администратор компании, ответственен за управление базой данных. Роль консультанта пользователей.
+     * Диспетчер службы поддержки. Распределяет заявки между консультантами.
      */
-    public final static int ADMINISTRATOR = 2;
+    public final static int MANAGER = 2;
 
     /**
      * Начальник отдела поддержки. Роль консультанта пользователей.
      */
     public final static int DEPARTMENT_CHIEF = 4;
-
-    /**
-     * Диспетчер службы поддержки. Распределяет заявки между консультантами.
-     */
-    public final static int MANAGER = 8;
 
     //endregion
 

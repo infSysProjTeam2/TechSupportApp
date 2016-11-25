@@ -162,7 +162,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         Menu nav_menu = navigationView.getMenu();
 
         userType.setText("Диспетчер");
-        nav_menu.findItem(R.id.userActions).setVisible(false);
         nav_menu.findItem(R.id.charts).setVisible(false);
         nav_menu.findItem(R.id.acceptedTickets).setVisible(false);
     }
@@ -182,7 +181,10 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.settings) {
+        if (id == R.id.userActions) {
+            Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
