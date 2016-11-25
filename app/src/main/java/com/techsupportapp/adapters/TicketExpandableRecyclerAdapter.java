@@ -19,6 +19,7 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
+import com.techsupportapp.AssignTicketActivity;
 import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
@@ -34,7 +35,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Адаптер для ExpandableRecyclerView с разделением заявок на категории
@@ -57,26 +61,17 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
     private Context context;
     private int type;
-    private final ArrayList<User> users;
-    private FragmentManager fragmentManager;
-    private DatabaseReference databaseReference;
 
     /**
      * Передача информации в адаптер
      * @param type тип адаптера. TYPE_AVAILABLE - список доступных заявок. TYPE_ACTIVE - список заявок, закрытых текущим пользователм. TYPE_CLOSED - список всех закрытых заявок.
-     * @param databaseReference ссылка на базу данных
      * @param values список заявок, определенных типом списка (type)
-     * @param users список пользователей
-     * @param fragmentManager менеджер фрагментов
      */
-    public TicketExpandableRecyclerAdapter(int type, Context context, DatabaseReference databaseReference, ArrayList<TicketListItem> values, ArrayList<User> users, FragmentManager fragmentManager) {
+    public TicketExpandableRecyclerAdapter(int type, Context context, ArrayList<TicketListItem> values) {
         super(context);
 
         this.context = context;
         this.type = type;
-        this.users = users;
-        this.fragmentManager = fragmentManager;
-        this.databaseReference = databaseReference;
 
         setItems(values);
     }
@@ -188,9 +183,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         }
 
         private void bind(int position) {
-            final String userId = visibleItems.get(position).ticket.getUserId();
-            final String adminId = visibleItems.get(position).ticket.getSpecialistId();
-
             final Ticket currentTicket = visibleItems.get(position).ticket;
 
             authorText.setText(currentTicket.getUserName());
@@ -203,28 +195,48 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
             View rootView = ticketImage.getRootView();
 
-            if (type == TYPE_AVAILABLE) {
+            if (type == TYPE_ACTIVE){
                 rootView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         new MaterialDialog.Builder(context)
-                                .title(currentTicket.getTopic() + "\nПолное описание заявки:")
-                                .content(currentTicket.getMessage())
-                                .positiveText("Принять")
+                                .title(currentTicket.getTopic())
+                                .content("Отозвать заявку?")
+                                .positiveText("Отозвать")
                                 .negativeText(android.R.string.cancel)
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        currentTicket.addAdmin(Globals.currentUser.getLogin(), Globals.currentUser.getUserName());
-
-                                        databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).child(currentTicket.getTicketId()).setValue(currentTicket);
-                                        databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
-
-                                        //Отправка полного описания заявки в виде первого сообщения в чате
-                                        ChatMessage firstMessage = new ChatMessage(currentTicket.getMessage(), currentTicket.getUserName(), currentTicket.getUserId(), "", false);
-                                        FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId()).push().setValue(firstMessage);
-
-                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
+                                        //TODO сделать отзыв заявки обратно в пул
+                                        DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
+                                    }
+                                })
+                                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        dialog.cancel();
+                                    }
+                                })
+                                .show();
+                    }
+                });
+            } else if (type == TYPE_AVAILABLE) {
+                rootView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new MaterialDialog.Builder(context)
+                                .title(currentTicket.getTopic())
+                                .content("Полное описание заявки:\n" + currentTicket.getMessage())
+                                .positiveText("Распределить")
+                                .negativeText(android.R.string.cancel)
+                                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                                    @Override
+                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                        Intent intent = new Intent(context, AssignTicketActivity.class);
+                                        intent.putExtra("assign", true);
+                                        intent.putExtra("currentTicket", (Serializable) currentTicket);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        context.startActivity(intent);
                                     }
                                 })
                                 .onNegative(new MaterialDialog.SingleButtonCallback() {

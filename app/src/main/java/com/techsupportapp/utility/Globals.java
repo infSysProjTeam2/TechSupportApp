@@ -194,12 +194,20 @@ public class Globals {
              * @param overseerLogin Логин ответственного, заявки которого нужно получить.
              * @return Заявки определенного ответственного.
              */
-            public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin) {
+            public static ArrayList<Ticket> getOverseerTicketList(DataSnapshot dataSnapshot, String overseerLogin, boolean exceptFolder) {
                 ArrayList<Ticket> resultList = new ArrayList<Ticket>();
-                for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                if (exceptFolder) {
+                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
+                        Ticket ticket = ticketRecord.getValue(Ticket.class);
+                        if (ticket.getSpecialistId().equals(overseerLogin))
+                            resultList.add(ticket);
+                    }
+                } else {
+                    for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.FullPath.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
                     if (ticket.getSpecialistId().equals(overseerLogin))
                         resultList.add(ticket);
+                    }
                 }
                 return resultList;
             }

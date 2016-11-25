@@ -114,7 +114,6 @@ public class SignUpActivity extends AppCompatActivity {
      * Инициализация переменных и элементов макета
      */
     private void initializeComponents() {
-
         loginET = (EditText)findViewById(R.id.loginET);
         userNameET = (EditText)findViewById(R.id.userNameET);
         workPlaceET = (EditText)findViewById(R.id.workPlaceET);
