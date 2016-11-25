@@ -24,7 +24,7 @@ import com.techsupportapp.utility.Globals;
 public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private String userId;
-    private String adminId;
+    private String specialistId;
     private String userName;
     private String login;
     private String regDate;
@@ -34,15 +34,15 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     /**
      * Создание нового фрагмента.
      * @param userId Login обычного пользователя, привязанного к заявке.
-     * @param adminId Login администратора, привязанного к заявке.
+     * @param specialistId Login специалиста, привязанного к заявке.
      * @param user объект пользователя, профиль которого будет просмотрен.
      */
-    public static BottomSheetFragment newInstance(String userId, String adminId, User user) {
+    public static BottomSheetFragment newInstance(String userId, String specialistId, User user) {
         BottomSheetFragment fragment = new BottomSheetFragment();
 
         Bundle args = new Bundle();
         args.putString("userId", userId);
-        args.putString("adminId", adminId);
+        args.putString("specialistId", specialistId);
         args.putString("userName", user.getUserName());
         args.putString("login", user.getLogin());
         args.putString("regDate", user.getRegistrationDate());
@@ -61,7 +61,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         userId = getArguments().getString("userId");
-        adminId = getArguments().getString("adminId");
+        specialistId = getArguments().getString("specialistId");
         userName = getArguments().getString("userName");
         login = getArguments().getString("login");
         regDate = getArguments().getString("regDate");
@@ -144,18 +144,16 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         //Проверка Login текущего пользователя
         String find = userId;
         if (Globals.currentUser.getLogin().equals(userId))
-            find = adminId;
+            find = specialistId;
 
-        //Если пользователь - не администратор и это не его профиль, то редактировать его нельзя
-        if (Globals.currentUser.getRole() != User.ADMINISTRATOR && !Globals.currentUser.getLogin().equals(find))
+        //Если пользователь - не диспетчер и это не его профиль, то редактировать его нельзя
+        if (Globals.currentUser.getRole() != User.MANAGER && !Globals.currentUser.getLogin().equals(find))
             toolbar.findViewById(R.id.editUser).setVisibility(View.GONE);
 
         if (role == User.SIMPLE_USER)
             accessLevelTV.setText("Пользователь");
         else if (role == User.DEPARTMENT_MEMBER)
             accessLevelTV.setText("Работник отдела");
-        else if (role == User.ADMINISTRATOR)
-            accessLevelTV.setText("Администратор");
         else if (role == User.DEPARTMENT_CHIEF)
             accessLevelTV.setText("Начальник отдела");
         else if (role == User.MANAGER)

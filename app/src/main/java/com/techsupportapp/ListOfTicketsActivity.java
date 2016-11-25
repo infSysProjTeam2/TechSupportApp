@@ -37,7 +37,7 @@ import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
 
-public class ScheduleOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private DatabaseReference databaseUserReference;
     private DatabaseReference databaseTicketReference;
@@ -57,9 +57,9 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     ValueEventListener userListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
             usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
         }
         @Override
         public void onCancelled(DatabaseError databaseError) {
@@ -70,16 +70,16 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     ValueEventListener ticketListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - НАЧАТО");
             listOfAvailableTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE);
             listOfClosedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
             listOfActiveTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
 
-            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ScheduleOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
-            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ScheduleOfTicketsActivity.this);
-            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ScheduleOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
+            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ListOfTicketsActivity.this);
 
-            Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
+            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
         }
 
         @Override
@@ -105,8 +105,26 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
 
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else
-            finish();
+        else {
+            new MaterialDialog.Builder(this)
+                    .title("Закрыть приложение")
+                    .content("Вы действительно хотите закрыть приложение?")
+                    .positiveText(android.R.string.yes)
+                    .negativeText(android.R.string.no)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            ListOfTicketsActivity.this.finishAffinity();
+                        }
+                    })
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
+        }
     }
 
     private void initializeComponents() {
@@ -129,7 +147,7 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ScheduleOfTicketsActivity.this)));
+        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
 
         mSectionsPagerAdapter = new ListOfTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -143,21 +161,9 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
         userName.setText(Globals.currentUser.getUserName());
         Menu nav_menu = navigationView.getMenu();
 
-        int role = Globals.currentUser.getRole();
-
-        if (role == User.ADMINISTRATOR) {
-            userType.setText("Администратор");
-            nav_menu.findItem(R.id.charts).setVisible(false);
-        }
-        else if (role == User.DEPARTMENT_CHIEF) {
-            userType.setText("Начальник отдела");
-            nav_menu.findItem(R.id.userActions).setVisible(false);
-        }
-        else if (role == User.DEPARTMENT_MEMBER){
-            userType.setText("Работник отдела");
-            nav_menu.findItem(R.id.userActions).setVisible(false);
-            nav_menu.findItem(R.id.charts).setVisible(false);
-        }
+        userType.setText("Диспетчер");
+        nav_menu.findItem(R.id.charts).setVisible(false);
+        nav_menu.findItem(R.id.acceptedTickets).setVisible(false);
     }
 
     private void setEvents() {
@@ -175,21 +181,14 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.acceptedTickets) {
-            finish();
-        } else if (id == R.id.userActions) {
-            Intent intent = new Intent(ScheduleOfTicketsActivity.this, UserActionsActivity.class);
+        if (id == R.id.userActions) {
+            Intent intent = new Intent(ListOfTicketsActivity.this, UserActionsActivity.class);
             startActivity(intent);
-            finish();
-        } else if (id == R.id.charts) {
-            Intent intent = new Intent(ScheduleOfTicketsActivity.this, ChartsActivity.class);
-            startActivity(intent);
-            finish();
         } else if (id == R.id.settings) {
             Intent intent = new Intent(this, PreferencesActivity.class);
             startActivity(intent);
         } else if (id == R.id.about) {
-            Globals.showAbout(ScheduleOfTicketsActivity.this);
+            Globals.showAbout(ListOfTicketsActivity.this);
         } else if (id == R.id.logOut) {
             Intent intent = new Intent(this, SignInActivity.class);
             startActivity(intent);
@@ -202,11 +201,11 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                            if (PreferenceManager.getDefaultSharedPreferences(ScheduleOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
+                            if (PreferenceManager.getDefaultSharedPreferences(ListOfTicketsActivity.this).getBoolean("allowNotifications", false)) {
                                 MessagingService.stopMessagingService(getApplicationContext());
                                 Log.e("СЛУЖБА", "ОСТАНОВЛЕНА");
                             }
-                            ScheduleOfTicketsActivity.this.finishAffinity();
+                            ListOfTicketsActivity.this.finishAffinity();
                         }
                     })
                     .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -227,7 +226,7 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     protected void onResume() {
         databaseTicketReference.addValueEventListener(ticketListener);
         databaseUserReference.addValueEventListener(userListener);
-        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
         super.onResume();
     }
 
@@ -235,7 +234,7 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     protected void onPause() {
         databaseTicketReference.removeEventListener(ticketListener);
         databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
         super.onPause();
     }
 
@@ -243,7 +242,7 @@ public class ScheduleOfTicketsActivity extends AppCompatActivity implements Navi
     protected void onStop() {
         databaseTicketReference.removeEventListener(ticketListener);
         databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(ScheduleOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
+        Globals.logInfoAPK(ListOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
         super.onStop();
     }
 }

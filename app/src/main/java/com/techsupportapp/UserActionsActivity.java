@@ -121,8 +121,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         tabLayout.setupWithViewPager(viewPager);
 
         userName.setText(Globals.currentUser.getUserName());
-        userType.setText("Администратор");
+        userType.setText("Диспетчер");
         navigationView.getMenu().findItem(R.id.charts).setVisible(false);
+        navigationView.getMenu().findItem(R.id.acceptedTickets).setVisible(false);
 
         search = false;
     }
@@ -135,8 +136,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             return resultString + "ПОЛЬЗОВАТЕЛЯ";
         else if (role == User.DEPARTMENT_MEMBER)
             return resultString + "РАБОТНИКА ОТДЕЛА";
-        else if (role == User.ADMINISTRATOR)
-            return resultString + "АДМИНИСТРАТОРА";
         else if (role == User.DEPARTMENT_CHIEF)
             return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
         else if (role == User.MANAGER)
@@ -149,9 +148,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (role == User.SIMPLE_USER)
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
         else if (role == User.DEPARTMENT_MEMBER)
-            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_WORKER_TABLE;
-        else if (role == User.ADMINISTRATOR)
-            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SPECIALIST_TABLE;
         else if (role == User.DEPARTMENT_CHIEF)
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE;
         else if (role == User.MANAGER)
@@ -210,7 +207,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (id == R.id.acceptedTickets) {
             finish();
         } else if (id == R.id.listOfTickets) {
-            Intent intent = new Intent(UserActionsActivity.this, ScheduleOfTicketsActivity.class);
+            Intent intent = new Intent(UserActionsActivity.this, ListOfTicketsActivity.class);
             startActivity(intent);
             finish();
         } else if (id == R.id.charts) {

@@ -190,7 +190,7 @@ public class SignInActivity extends AppCompatActivity {
             return false;
         } else if (index >= 0) {
             Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
-                    "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
+                    "Подождите, пока диспетчер не примет ее", Toast.LENGTH_LONG).show();
             return false;
         } else return true;
     }
@@ -354,7 +354,7 @@ public class SignInActivity extends AppCompatActivity {
 
         Globals.currentUser = user;
         if (user.getRole() != User.MANAGER)
-            startActivity(new Intent(SignInActivity.this, TicketsActivity.class));
-        else startActivity(new Intent(SignInActivity.this, ManagerActivity.class));
+            startActivity(new Intent(SignInActivity.this, MyTicketsActivity.class));
+        else startActivity(new Intent(SignInActivity.this, ListOfTicketsActivity.class));
     }
 }

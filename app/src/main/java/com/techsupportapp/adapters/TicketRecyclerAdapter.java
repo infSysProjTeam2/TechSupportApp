@@ -63,16 +63,16 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
     public void onBindViewHolder(final ViewHolder holder, int pos) {
         final int position = holder.getAdapterPosition();
         final String userId = values.get(position).getUserId();
-        final String adminId = values.get(position).getAdminId();
+        final String specialistId = values.get(position).getSpecialistId();
 
         if (Globals.currentUser.getRole() != User.SIMPLE_USER){
             holder.authorText.setText(values.get(position).getUserName());
         }
-        else if (adminId == null || adminId.equals("")) {
+        else if (specialistId == null || specialistId.equals("")) {
             holder.authorText.setText("не установлено");
             holder.authorLabel.setText("Консультант:");
         } else {
-            holder.authorText.setText(values.get(position).getAdminName());
+            holder.authorText.setText(values.get(position).getSpecialistName());
             holder.authorLabel.setText("Консультант:");
         }
 
@@ -85,20 +85,20 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (values.get(position).getAdminName() != null) {
-                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, adminId, getUser(userId, adminId));
+                if (values.get(position).getSpecialistName() != null) {
+                    BottomSheetDialogFragment bottomSheetDialogFragment = BottomSheetFragment.newInstance(userId, specialistId, getUser(userId, specialistId));
                     bottomSheetDialogFragment.show(fragmentManager, bottomSheetDialogFragment.getTag());
                 }
             }
         });
     }
 
-    private User getUser(String userId, String adminId) {
+    private User getUser(String userId, String specialistId) {
         String find;
         find = userId;
 
         if (Globals.currentUser.getLogin().equals(userId))
-            find = adminId;
+            find = specialistId;
 
         ArrayList<String> idList = new ArrayList<>();
         Collections.sort(users, new Comparator<User>() {

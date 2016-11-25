@@ -70,8 +70,6 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
             return "Пользователь";
         else if (role == User.DEPARTMENT_MEMBER)
             return "Работник отдела";
-        else if (role == User.ADMINISTRATOR)
-            return "Администратор";
         else if (role == User.DEPARTMENT_CHIEF)
             return "Начальник отдела";
         else if (role == User.MANAGER)

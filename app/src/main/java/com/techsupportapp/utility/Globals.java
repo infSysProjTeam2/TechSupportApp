@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -115,10 +114,9 @@ public class Globals {
              */
             public static ArrayList<User> getVerifiedUserList(DataSnapshot dataSnapshot) {
                 ArrayList<User> resultList = new ArrayList<User>();
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE));
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE));
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE));
-                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE));
+                resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SPECIALIST_TABLE));
                 resultList.addAll(getSpecificVerifiedUserList(dataSnapshot, DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE));
                 return resultList;
             }
@@ -200,7 +198,7 @@ public class Globals {
                 ArrayList<Ticket> resultList = new ArrayList<Ticket>();
                 for (DataSnapshot ticketRecord : dataSnapshot.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).getChildren()) {
                     Ticket ticket = ticketRecord.getValue(Ticket.class);
-                    if (ticket.getAdminId().equals(overseerLogin))
+                    if (ticket.getSpecialistId().equals(overseerLogin))
                         resultList.add(ticket);
                 }
                 return resultList;

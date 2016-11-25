@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -21,11 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.techsupportapp.MessagingActivity;
 import com.techsupportapp.R;
-import com.techsupportapp.TicketsActivity;
-import com.techsupportapp.UserActionsActivity;
 import com.techsupportapp.adapters.TicketRecyclerAdapter;
-import com.techsupportapp.adapters.UnverifiedUserRecyclerAdapter;
-import com.techsupportapp.adapters.UserRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseStorage;
@@ -36,7 +31,7 @@ import com.techsupportapp.utility.ItemClickSupport;
 import java.util.ArrayList;
 
 /**
- * Класс для фрагментов ViewPager, находящегося в TicketsActivity.class.
+ * Класс для фрагментов ViewPager, находящегося в MyTicketsActivity.class.
  * @author ahgpoug
  */
 public class MyTicketsFragments {
@@ -165,7 +160,7 @@ public class MyTicketsFragments {
                         intent.putExtra("isActive", true);
                     }
                     else {
-                        if (ticketsList.get(position).getAdminId() == null || ticketsList.get(position).getAdminId().equals("")) {
+                        if (ticketsList.get(position).getSpecialistId() == null || ticketsList.get(position).getSpecialistId().equals("")) {
                             Toast.makeText(context, "Администратор еще не просматривал ваше сообщение, пожалуйста подождите", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -192,7 +187,7 @@ public class MyTicketsFragments {
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        selectedTicket.removeAdmin();
+                                        selectedTicket.removeSpecialist();
                                         DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
                                         databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
                                         databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
@@ -209,7 +204,7 @@ public class MyTicketsFragments {
                     }
                     else if (role == User.SIMPLE_USER){
                         final Ticket selectedTicket = ticketsList.get(position);
-                        if (selectedTicket.getAdminId() == null || selectedTicket.getAdminId().equals("")) {
+                        if (selectedTicket.getSpecialistId() == null || selectedTicket.getSpecialistId().equals("")) {
                             new MaterialDialog.Builder(context)
                                     .title("Отзыв заявки " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
                                     .content("Вы действительно хотите отозвать данную заявку?")

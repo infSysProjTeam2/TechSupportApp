@@ -119,7 +119,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                             chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
                                                     User.SIMPLE_USER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
                                             databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
-                                            databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).removeValue();
+                                            databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).removeValue();
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                         }
@@ -128,20 +128,20 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                         Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
                                     } else
                                         Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
-                                } else if (usersList.get(userPosition).getRole() != User.ADMINISTRATOR) {
+                                } else if (usersList.get(userPosition).getRole() != User.MANAGER) {
                                     User chUser;
                                     try {
                                         chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                                User.ADMINISTRATOR, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
-                                        databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                                User.MANAGER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                                        databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                         databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
                                     changedRole = true;
-                                    Toast.makeText(getApplicationContext(), "Переведен в статус администратора", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Переведен в статус диспетчера", Toast.LENGTH_LONG).show();
                                 } else
-                                    Toast.makeText(getApplicationContext(), "Уже является администратором", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getApplicationContext(), "Уже является диспетчером", Toast.LENGTH_LONG).show();
 
                                 if (changedRole && mUserId.equals(Globals.currentUser.getLogin())) {
                                     Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
@@ -171,14 +171,14 @@ public class EditUserProfileActivity extends AppCompatActivity{
                         try {
                             User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPassword,
                                     usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
-                            if (chUser.getRole() == User.ADMINISTRATOR)
-                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_ADMIN_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                            if (chUser.getRole() == User.MANAGER)
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.SIMPLE_USER)
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.DEPARTMENT_CHIEF)
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_CHIEF_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.DEPARTMENT_MEMBER)
-                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_WORKER_TABLE).child(chUser.getBranchId()).setValue(chUser);
+                                databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SPECIALIST_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.MANAGER)
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
 

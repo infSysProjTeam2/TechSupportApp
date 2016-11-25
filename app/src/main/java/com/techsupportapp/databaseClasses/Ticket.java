@@ -60,12 +60,12 @@ public class Ticket {
     /**
      * Идентификатор консультанта, отвечающего за решение заявки.
      */
-    private String adminId;
+    private String specialistId;
 
     /**
      * Имя консультанта, отвещающего за решение заявки.
      */
-    private String adminName;
+    private String specialistName;
 
     /**
      * Имя пользователя - создателя заявки.
@@ -109,7 +109,7 @@ public class Ticket {
         this.userName = userName;
         this.topic = topic;
         this.message = message;
-        this.adminId = null;
+        this.specialistId = null;
         SimpleDateFormat formatter = new SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH);
         this.createDate = formatter.format(Calendar.getInstance().getTime());
         this.ticketState = Ticket.NOT_ACCEPTED;
@@ -121,17 +121,17 @@ public class Ticket {
      * @param adminName Имя консультанта, отвещающего за решение заявки.
      */
     public void addAdmin(String adminId, String adminName) {
-        this.adminId = adminId;
-        this.adminName = adminName;
+        this.specialistId = adminId;
+        this.specialistName = adminName;
         this.ticketState = Ticket.ACCEPTED;
     }
 
     /**
      * Метод, отзывающий консультанта и переводящий заявку в список нерассматриваемых.
      */
-    public void removeAdmin(){
-        this.adminId = null;
-        this.adminName = null;
+    public void removeSpecialist(){
+        this.specialistId = null;
+        this.specialistName = null;
         this.ticketState = Ticket.NOT_ACCEPTED;
     }
 
@@ -152,8 +152,8 @@ public class Ticket {
     /**
      * @return Идентификатор администратора отвечающего за решение заявки.
      */
-    public String getAdminId() {
-        return adminId;
+    public String getSpecialistId() {
+        return specialistId;
     }
 
     /**
@@ -194,8 +194,8 @@ public class Ticket {
     /**
      * @return Имя консультанта, отвещающего за решение заявки.
      */
-    public String getAdminName() {
-        return adminName;
+    public String getSpecialistName() {
+        return specialistName;
     }
 
 }
