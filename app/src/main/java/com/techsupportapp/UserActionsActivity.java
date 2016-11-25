@@ -121,8 +121,9 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         tabLayout.setupWithViewPager(viewPager);
 
         userName.setText(Globals.currentUser.getUserName());
-        userType.setText("Администратор");
+        userType.setText("Диспетчер");
         navigationView.getMenu().findItem(R.id.charts).setVisible(false);
+        navigationView.getMenu().findItem(R.id.acceptedTickets).setVisible(false);
 
         search = false;
     }

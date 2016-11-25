@@ -190,7 +190,7 @@ public class SignInActivity extends AppCompatActivity {
             return false;
         } else if (index >= 0) {
             Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
-                    "Подождите, пока администратор не примет ее", Toast.LENGTH_LONG).show();
+                    "Подождите, пока диспетчер не примет ее", Toast.LENGTH_LONG).show();
             return false;
         } else return true;
     }

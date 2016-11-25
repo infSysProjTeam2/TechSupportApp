@@ -224,7 +224,7 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             databaseIndexReference.setValue(userCount);
-            Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение администратору");
+            Globals.showLongTimeToast(getApplicationContext(), "Ваша заявка отправлена на рассмотрение дипетчеру");
             databaseUserReference.removeEventListener(databaseUserListener);
             databaseIndexReference.removeEventListener(databaseIndexListener);
             SignUpActivity.super.finish();
