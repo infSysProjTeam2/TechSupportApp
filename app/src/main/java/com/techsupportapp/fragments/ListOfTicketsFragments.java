@@ -161,7 +161,7 @@ public class ListOfTicketsFragments {
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
             //Создание нового адаптера для viewOfAvailableTickets
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, databaseReference, ticketListItems, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, ticketListItems);
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -224,7 +224,7 @@ public class ListOfTicketsFragments {
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
             //Создание нового адаптера для viewOfMyClosedTickets
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_ACTIVE, context, null, ticketListItems, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_ACTIVE, context, ticketListItems);
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
@@ -289,7 +289,7 @@ public class ListOfTicketsFragments {
                 ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
 
             //Создание нового адаптера для viewOfSolvedTickets
-            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, null, ticketListItems, usersList, getFragmentManager());
+            TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, ticketListItems);
             adapter.setMode(ExpandableRecyclerAdapter.MODE_ACCORDION);
 
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);

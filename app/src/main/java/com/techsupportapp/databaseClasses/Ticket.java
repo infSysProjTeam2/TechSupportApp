@@ -1,5 +1,6 @@
 package com.techsupportapp.databaseClasses;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -9,7 +10,7 @@ import java.util.Locale;
  * Основной {@link #Ticket(String ticketId, String userId, String userName, String topic, String message) конструктор}.
  * @author Monarch
  */
-public class Ticket {
+public class Ticket implements Serializable {
 
     //region Constants
 
@@ -120,7 +121,7 @@ public class Ticket {
      * @param adminId Идентификатор консультанта, отвечающего за решение заявки.
      * @param adminName Имя консультанта, отвещающего за решение заявки.
      */
-    public void addAdmin(String adminId, String adminName) {
+    public void addSpecialist(String adminId, String adminName) {
         this.specialistId = adminId;
         this.specialistName = adminName;
         this.ticketState = Ticket.ACCEPTED;
