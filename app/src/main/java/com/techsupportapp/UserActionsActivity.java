@@ -135,8 +135,6 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
             return resultString + "ПОЛЬЗОВАТЕЛЯ";
         else if (role == User.DEPARTMENT_MEMBER)
             return resultString + "РАБОТНИКА ОТДЕЛА";
-        else if (role == User.ADMINISTRATOR)
-            return resultString + "АДМИНИСТРАТОРА";
         else if (role == User.DEPARTMENT_CHIEF)
             return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
         else if (role == User.MANAGER)
@@ -149,9 +147,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (role == User.SIMPLE_USER)
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE;
         else if (role == User.DEPARTMENT_MEMBER)
-            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_WORKER_TABLE;
-        else if (role == User.ADMINISTRATOR)
-            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_ADMIN_TABLE;
+            return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_SPECIALIST_TABLE;
         else if (role == User.DEPARTMENT_CHIEF)
             return DatabaseVariables.FullPath.Users.DATABASE_VERIFIED_CHIEF_TABLE;
         else if (role == User.MANAGER)

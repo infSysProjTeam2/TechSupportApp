@@ -3,7 +3,6 @@ package com.techsupportapp.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.BottomSheetDialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -26,7 +24,6 @@ import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.ChatMessage;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
-import com.techsupportapp.fragments.BottomSheetFragment;
 import com.techsupportapp.utility.DatabaseStorage;
 import com.techsupportapp.utility.DatabaseVariables;
 import com.techsupportapp.utility.Globals;
@@ -38,8 +35,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 
 /**
  * Адаптер для ExpandableRecyclerView с разделением заявок на категории
@@ -194,7 +189,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
 
         private void bind(int position) {
             final String userId = visibleItems.get(position).ticket.getUserId();
-            final String adminId = visibleItems.get(position).ticket.getAdminId();
+            final String adminId = visibleItems.get(position).ticket.getSpecialistId();
 
             final Ticket currentTicket = visibleItems.get(position).ticket;
 

@@ -13,8 +13,7 @@ public class DatabaseVariables {
             public static final String DATABASE_VERIFIED_USER_TABLE = "user_table/verified_table";
 
             public static final String DATABASE_VERIFIED_SIMPLE_USER_TABLE = "user_table/verified_table/simple_user_table";
-            public static final String DATABASE_VERIFIED_ADMIN_TABLE = "user_table/verified_table/admin_table";
-            public static final String DATABASE_VERIFIED_WORKER_TABLE = "user_table/verified_table/worker_table";
+            public static final String DATABASE_VERIFIED_SPECIALIST_TABLE = "user_table/verified_table/worker_table";
             public static final String DATABASE_VERIFIED_CHIEF_TABLE = "user_table/verified_table/chief_table";
             public static final String DATABASE_VERIFIED_MANAGER_TABLE = "user_table/verified_table/manager_table";
         }
@@ -41,14 +40,12 @@ public class DatabaseVariables {
             public static final String DATABASE_VERIFIED_USER_TABLE = "verified_table";
 
             public static final String DATABASE_VERIFIED_SIMPLE_USER_TABLE = "verified_table/simple_user_table";
-            public static final String DATABASE_VERIFIED_ADMIN_TABLE = "verified_table/admin_table";
-            public static final String DATABASE_VERIFIED_WORKER_TABLE = "verified_table/worker_table";
+            public static final String DATABASE_VERIFIED_SPECIALIST_TABLE = "verified_table/worker_table";
             public static final String DATABASE_VERIFIED_CHIEF_TABLE = "verified_table/chief_table";
             public static final String DATABASE_VERIFIED_MANAGER_TABLE = "verified_table/manager_table";
 
             public static final String DATABASE_SIMPLE_USER_TABLE = "simple_user_table";
-            public static final String DATABASE_ADMIN_TABLE = "admin_table";
-            public static final String DATABASE_WORKER_TABLE = "worker_table";
+            public static final String DATABASE_SPECIALIST_TABLE = "worker_table";
             public static final String DATABASE_CHIEF_TABLE = "chief_table";
             public static final String DATABASE_MANAGER_TABLE = "manager_table";
         }

@@ -160,7 +160,7 @@ public class MyTicketsFragments {
                         intent.putExtra("isActive", true);
                     }
                     else {
-                        if (ticketsList.get(position).getAdminId() == null || ticketsList.get(position).getAdminId().equals("")) {
+                        if (ticketsList.get(position).getSpecialistId() == null || ticketsList.get(position).getSpecialistId().equals("")) {
                             Toast.makeText(context, "Администратор еще не просматривал ваше сообщение, пожалуйста подождите", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -187,7 +187,7 @@ public class MyTicketsFragments {
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        selectedTicket.removeAdmin();
+                                        selectedTicket.removeSpecialist();
                                         DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
                                         databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
                                         databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
@@ -204,7 +204,7 @@ public class MyTicketsFragments {
                     }
                     else if (role == User.SIMPLE_USER){
                         final Ticket selectedTicket = ticketsList.get(position);
-                        if (selectedTicket.getAdminId() == null || selectedTicket.getAdminId().equals("")) {
+                        if (selectedTicket.getSpecialistId() == null || selectedTicket.getSpecialistId().equals("")) {
                             new MaterialDialog.Builder(context)
                                     .title("Отзыв заявки " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
                                     .content("Вы действительно хотите отозвать данную заявку?")
