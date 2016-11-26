@@ -85,12 +85,16 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
                 switch (groupPosition){
                     case 0:
                         type = Ticket.TYPE_SOFTWARE;
+                        break;
                     case 1:
                         type = Ticket.TYPE_HARDWARE;
+                        break;
                     case 2:
                         type = Ticket.TYPE_EXTERNAL_DEVICES;
+                        break;
                     case 3:
                         type = Ticket.TYPE_NETWORK;
+                        break;
                 }
 
                 String ticketTopic = expandableListView.getExpandableListAdapter().getChild(groupPosition, childPosition).toString();
@@ -192,8 +196,8 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.yes)
-                    .negativeText(android.R.string.no)
+                    .positiveText("Да")
+                    .negativeText("Нет")
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

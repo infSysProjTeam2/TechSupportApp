@@ -3,19 +3,37 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
-        android:id="@+id/userName"
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/userName_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="30dp"
-        android:hint="Имя пользователя"/>
+        android:paddingTop="8dp"
+        android:layout_marginTop="8dp">
+        <EditText
+            android:id="@+id/userName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Имя пользователя"/>
+    </android.support.design.widget.TextInputLayout>
 
-    <EditText
-        android:id="@+id/workPlace"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/workPlace_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="10dp"
-        android:hint="Рабочее место"/>
+        android:layout_marginTop="8dp">
+        <EditText
+            android:id="@+id/workPlace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Рабочее место"/>
+    </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
         android:id="@+id/middle"

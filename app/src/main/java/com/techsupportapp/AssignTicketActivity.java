@@ -14,7 +14,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
 import com.techsupportapp.adapters.SpecialistsExpandableRecyclerAdapter;
-import com.techsupportapp.adapters.TicketExpandableRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.DatabaseVariables;

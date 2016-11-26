@@ -216,5 +216,4 @@ public class Ticket implements Serializable {
     public int getType(){
         return type;
     }
-
 }

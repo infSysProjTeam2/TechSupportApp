@@ -16,7 +16,6 @@ import com.innodroid.expandablerecycler.ExpandableRecyclerAdapter;
 import com.techsupportapp.R;
 import com.techsupportapp.adapters.TicketExpandableRecyclerAdapter;
 import com.techsupportapp.databaseClasses.Ticket;
-import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.Globals;
 
 import java.util.ArrayList;
@@ -96,32 +95,29 @@ public class ListOfTicketsFragments {
         /**
          * Метод для обновления информации на первом фрагменте.
          * @param listOfAvailableTickets список заявок, доступных для принятия.
-         * @param usersList список всех пользователей.
          * @param context контекст Activity, где был создан фрагмент.
          * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
          */
-        public void updateFirstFragment(ArrayList<Ticket> listOfAvailableTickets, ArrayList<User> usersList, Context context, DatabaseReference databaseReference){
-            firstFragment.updateContent(listOfAvailableTickets, usersList, context, databaseReference);
+        public void updateFirstFragment(ArrayList<Ticket> listOfAvailableTickets, Context context, DatabaseReference databaseReference){
+            firstFragment.updateContent(listOfAvailableTickets, context, databaseReference);
         }
 
         /**
          * Метод для обновления информации на втором фрагменте.
-         * @param listOfMyClosedTickets список заявок, закрытых текущим пользователем.
-         * @param usersList список всех пользователей.
+         * @param listOfMyActiveTickets список заявок, закрытых текущим пользователем.
          * @param context контекст Activity, где был создан фрагмент.
          */
-        public void updateSecondFragment(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
-            secondFragment.updateContent(listOfMyClosedTickets, usersList, context);
+        public void updateSecondFragment(ArrayList<Ticket> listOfMyActiveTickets, Context context){
+            secondFragment.updateContent(listOfMyActiveTickets, context);
         }
 
         /**
          * Метод для обновления информации на третьем фрагменте.
          * @param listOfSolvedTickets список заявок, закрытых всеми пользователями.
-         * @param usersList список всех пользователей.
          * @param context контекст Activity, где был создан фрагмент.
          */
-        public void updateThirdFragment(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
-            thirdFragment.updateContent(listOfSolvedTickets, usersList, context);
+        public void updateThirdFragment(ArrayList<Ticket> listOfSolvedTickets, Context context){
+            thirdFragment.updateContent(listOfSolvedTickets, context);
         }
     }
 
@@ -146,19 +142,24 @@ public class ListOfTicketsFragments {
         /**
          * Метод для обновления информации на первом фрагменте.
          * @param listOfAvailableTickets список заявок, доступных для принятия.
-         * @param usersList список всех пользователей.
          * @param context контекст Activity, где был создан фрагмент.
          * @param databaseReference контекст ссыылка на базу данных для ее редактирования.
          */
-        public void updateContent(final ArrayList<Ticket> listOfAvailableTickets, final ArrayList<User> usersList, final Context context, final DatabaseReference databaseReference){
+        public void updateContent(final ArrayList<Ticket> listOfAvailableTickets, final Context context, final DatabaseReference databaseReference){
             //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
-            //TODO сделать категории
             //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
-            for (Ticket ticket : listOfAvailableTickets)
-                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+            for (int i = 10; i < 14; i++) {
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i)));
+                int index = 0;
+                for (Ticket ticket : listOfAvailableTickets)
+                    if (ticket.getType() == i) {
+                        ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+                        index++;
+                    }
+                ticketListItems.set(ticketListItems.size() - index - 1, new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i) + " (" + index + ")"));
+            }
 
             //Создание нового адаптера для viewOfAvailableTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_AVAILABLE, context, ticketListItems);
@@ -209,19 +210,24 @@ public class ListOfTicketsFragments {
 
         /**
          * Метод для обновления информации на втором фрагменте.
-         * @param listOfMyClosedTickets список заявок, закрытых текущим пользователем.
-         * @param usersList список всех пользователей.
+         * @param listOfActiveTickets список текущих заявок
          * @param context контекст Activity, где был создан фрагмент.
          */
-        public void updateContent(ArrayList<Ticket> listOfMyClosedTickets, ArrayList<User> usersList, Context context){
+        public void updateContent(ArrayList<Ticket> listOfActiveTickets, Context context){
             //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
-            //TODO сделать категории
             //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
-            for (Ticket ticket : listOfMyClosedTickets)
-                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+            for (int i = 10; i < 14; i++) {
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i)));
+                int index = 0;
+                for (Ticket ticket : listOfActiveTickets)
+                    if (ticket.getType() == i) {
+                        ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+                        index++;
+                    }
+                ticketListItems.set(ticketListItems.size() - index - 1, new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i) + " (" + index + ")"));
+            }
 
             //Создание нового адаптера для viewOfMyClosedTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_ACTIVE, context, ticketListItems);
@@ -275,18 +281,23 @@ public class ListOfTicketsFragments {
         /**
          * Метод для обновления информации на третьем фрагменте.
          * @param listOfSolvedTickets список заявок, закрытых всеми пользователями.
-         * @param usersList список всех пользователей.
          * @param context контекст Activity, где был создан фрагмент.
          */
-        public void updateContent(ArrayList<Ticket> listOfSolvedTickets, ArrayList<User> usersList, Context context){
+        public void updateContent(ArrayList<Ticket> listOfSolvedTickets, Context context){
             //Создание списка заявок для передачи в TicketExpandableRecyclerAdapter.class
             ArrayList<TicketExpandableRecyclerAdapter.TicketListItem> ticketListItems = new ArrayList<>();
 
-            //TODO сделать категории
             //Заполнение списка заявок для передачи в TicketExpandableRecyclerAdapter.class
-            ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem("Категория 1"));
-            for (Ticket ticket : listOfSolvedTickets)
-                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+            for (int i = 10; i < 14; i++) {
+                ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i)));
+                int index = 0;
+                for (Ticket ticket : listOfSolvedTickets)
+                    if (ticket.getType() == i) {
+                        ticketListItems.add(new TicketExpandableRecyclerAdapter.TicketListItem(ticket));
+                        index++;
+                    }
+                ticketListItems.set(ticketListItems.size() - index - 1, new TicketExpandableRecyclerAdapter.TicketListItem(Globals.getTicketTypeName(context, i) + " (" + index + ")"));
+            }
 
             //Создание нового адаптера для viewOfSolvedTickets
             TicketExpandableRecyclerAdapter adapter = new TicketExpandableRecyclerAdapter(TicketExpandableRecyclerAdapter.TYPE_CLOSED, context, ticketListItems);

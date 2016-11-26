@@ -177,39 +177,14 @@ public class MyTicketsFragments {
             ItemClickSupport.addTo(activeTicketsView).setOnItemLongClickListener(new ItemClickSupport.OnItemLongClickListener () {
                 @Override
                 public boolean onItemLongClicked(RecyclerView recyclerView, int position, View v) {
-                    if (role == User.DEPARTMENT_CHIEF) {
-                        final Ticket selectedTicket = ticketsList.get(position);
-                        new MaterialDialog.Builder(context)
-                                .title("Отказ от заявки пользователя " + selectedTicket.getUserName())
-                                .content("Вы действительно хотите отказаться от данной заявки?")
-                                .positiveText(android.R.string.yes)
-                                .negativeText(android.R.string.no)
-                                .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        selectedTicket.removeSpecialist();
-                                        DatabaseReference databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
-                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).setValue(selectedTicket);
-                                        databaseTicketReference.child(DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE).child(selectedTicket.getTicketId()).removeValue();
-                                        DatabaseStorage.updateLogFile(context, selectedTicket.getTicketId(), DatabaseStorage.ACTION_WITHDRAWN, Globals.currentUser);
-                                    }
-                                })
-                                .onNegative(new MaterialDialog.SingleButtonCallback() {
-                                    @Override
-                                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                        dialog.cancel();
-                                    }
-                                })
-                                .show();
-                    }
-                    else if (role == User.SIMPLE_USER){
+                    if (role == User.SIMPLE_USER){
                         final Ticket selectedTicket = ticketsList.get(position);
                         if (selectedTicket.getSpecialistId() == null || selectedTicket.getSpecialistId().equals("")) {
                             new MaterialDialog.Builder(context)
                                     .title("Отзыв заявки " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
                                     .content("Вы действительно хотите отозвать данную заявку?")
-                                    .positiveText(android.R.string.yes)
-                                    .negativeText(android.R.string.no)
+                                    .positiveText("Да")
+                                    .negativeText("Нет")
                                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -230,8 +205,8 @@ public class MyTicketsFragments {
                             new MaterialDialog.Builder(context)
                                     .title("Подтверждение решения проблемы по заявке " + selectedTicket.getTicketId() + " от " + selectedTicket.getCreateDate())
                                     .content("Ваша проблема действительно была решена?")
-                                    .positiveText(android.R.string.yes)
-                                    .negativeText(android.R.string.no)
+                                    .positiveText("Да")
+                                    .negativeText("Нет")
                                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                                         @Override
                                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
