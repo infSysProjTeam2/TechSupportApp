@@ -191,8 +191,8 @@ public class EditUserProfileActivity extends AppCompatActivity{
                 dialog = new MaterialDialog.Builder(EditUserProfileActivity.this)
                         .title("Смена пароля")
                         .customView(R.layout.prompts_change_password, true)
-                        .positiveText(android.R.string.ok)
-                        .negativeText(android.R.string.cancel)
+                        .positiveText("Принять")
+                        .negativeText("Отмена")
                         .onPositive(callback)
                         .cancelable(false)
                         .build();

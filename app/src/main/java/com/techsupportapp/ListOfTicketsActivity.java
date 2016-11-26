@@ -92,8 +92,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.yes)
-                    .negativeText(android.R.string.no)
+                    .positiveText("Да")
+                    .negativeText("Нет")
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -178,8 +178,8 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.yes)
-                    .negativeText(android.R.string.no)
+                    .positiveText("Да")
+                    .negativeText("Нет")
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

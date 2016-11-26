@@ -99,7 +99,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
                     new MaterialDialog.Builder(context)
                             .title("Направить заявку пользователю " + selectedUser.getUserName() + "?")
                             .positiveText("Назначить")
-                            .negativeText(android.R.string.cancel)
+                            .negativeText("Отмена")
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

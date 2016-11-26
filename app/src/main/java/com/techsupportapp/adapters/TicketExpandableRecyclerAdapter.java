@@ -195,7 +195,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                 .title(currentTicket.getTopic())
                                 .content("Отозвать заявку?")
                                 .positiveText("Отозвать")
-                                .negativeText(android.R.string.cancel)
+                                .negativeText("Отмена")
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -220,7 +220,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                 .title(currentTicket.getTopic())
                                 .content("Полное описание заявки:\n" + currentTicket.getMessage())
                                 .positiveText("Распределить")
-                                .negativeText(android.R.string.cancel)
+                                .negativeText("Отмена")
                                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -253,7 +253,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                             final MaterialDialog materialDialog = new MaterialDialog.Builder(context)
                                                     .title("Лог")
                                                     .content("Загрузка...")
-                                                    .positiveText(android.R.string.ok)
+                                                    .positiveText("Ок")
                                                     .show();
 
                                             final StorageReference storageReference = FirebaseStorage.getInstance().getReference("logs").child(currentTicket.getTicketId() + ".log");

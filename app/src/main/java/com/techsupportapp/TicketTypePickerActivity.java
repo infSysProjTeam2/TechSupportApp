@@ -191,8 +191,8 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
             new MaterialDialog.Builder(this)
                     .title("Закрыть приложение")
                     .content("Вы действительно хотите закрыть приложение?")
-                    .positiveText(android.R.string.yes)
-                    .negativeText(android.R.string.no)
+                    .positiveText("Да")
+                    .negativeText("Нет")
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

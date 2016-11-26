@@ -46,7 +46,7 @@ public class Globals {
         new MaterialDialog.Builder(context)
                 .title("О программе")
                 .content(String.format("Tech Support App V%s", context.getString(R.string.app_version)))
-                .positiveText(android.R.string.ok)
+                .positiveText("Ок")
                 .show();
     }
 
