@@ -9,6 +9,12 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.techsupportapp.SignInActivity">
 
+    <LinearLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_width="0px"
+        android:layout_height="0px"/>
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,39 +27,43 @@
             android:orientation="vertical"
             android:gravity="center">
 
-            <LinearLayout
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/login_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical">
-
+                android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/loginET"
-                    android:gravity="center"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:maxLines="1"
                     android:minWidth="200dp"
                     android:hint="Логин"
                     android:inputType="text" />
+            </android.support.design.widget.TextInputLayout>
 
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/password_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/passwordET"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="center"
                     android:inputType="textPassword"
                     android:maxLines="1"
                     android:minWidth="200dp"
                     android:hint="Пароль"/>
+            </android.support.design.widget.TextInputLayout>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAlignment="center"
-                    android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
-
-            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="center"
+                android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
