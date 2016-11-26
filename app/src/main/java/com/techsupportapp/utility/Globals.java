@@ -31,6 +31,16 @@ public class Globals {
     /**
      * Метод, вызывающий информацию о приложении.
      * @param context Контекст вызывающего класса.
+     * @param t id типа заявки
+     */
+    public static String getTicketTypeName(Context context, int t){
+        String[] groups = context.getResources().getStringArray(R.array.ticket_types_array);
+        return groups[t - 10];
+    }
+
+    /**
+     * Метод, вызывающий информацию о приложении.
+     * @param context Контекст вызывающего класса.
      */
     public static void showAbout(Context context) {
         new MaterialDialog.Builder(context)

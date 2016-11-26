@@ -1,5 +1,9 @@
 package com.techsupportapp.databaseClasses;
 
+import android.content.Context;
+
+import com.techsupportapp.R;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -216,5 +220,4 @@ public class Ticket implements Serializable {
     public int getType(){
         return type;
     }
-
 }

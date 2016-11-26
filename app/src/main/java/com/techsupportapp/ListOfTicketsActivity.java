@@ -39,33 +39,17 @@ import java.util.ArrayList;
 
 public class ListOfTicketsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
-    private DatabaseReference databaseUserReference;
     private DatabaseReference databaseTicketReference;
 
     private ArrayList<Ticket> listOfAvailableTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfActiveTickets = new ArrayList<>();
     private ArrayList<Ticket> listOfClosedTickets = new ArrayList<>();
 
-    private ArrayList<User> usersList = new ArrayList<>();
-
     private ListOfTicketsFragments.SectionsPagerAdapter mSectionsPagerAdapter;
 
     private ImageView currUserImage;
 
     //region Listeners
-
-    ValueEventListener userListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - НАЧАТО");
-            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-            Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание данных зарегистрированных пользователей - ОКОНЧЕНО");
-        }
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
 
     ValueEventListener ticketListener = new ValueEventListener() {
         @Override
@@ -75,9 +59,9 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
             listOfClosedTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_SOLVED_TICKET_TABLE);
             listOfActiveTickets = Globals.Downloads.Tickets.getSpecificTickets(dataSnapshot, DatabaseVariables.ExceptFolder.Tickets.DATABASE_MARKED_TICKET_TABLE);
 
-            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, usersList, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
-            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, usersList, ListOfTicketsActivity.this);
-            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, usersList, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateFirstFragment(listOfAvailableTickets, ListOfTicketsActivity.this, FirebaseDatabase.getInstance().getReference());
+            mSectionsPagerAdapter.updateSecondFragment(listOfActiveTickets, ListOfTicketsActivity.this);
+            mSectionsPagerAdapter.updateThirdFragment(listOfClosedTickets, ListOfTicketsActivity.this);
 
             Globals.logInfoAPK(ListOfTicketsActivity.this, "Скачивание заявок - ОКОНЧЕНО");
         }
@@ -128,7 +112,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     }
 
     private void initializeComponents() {
-        databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
         databaseTicketReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Tickets.DATABASE_ALL_TICKET_TABLE);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -225,7 +208,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     @Override
     protected void onResume() {
         databaseTicketReference.addValueEventListener(ticketListener);
-        databaseUserReference.addValueEventListener(userListener);
         Globals.logInfoAPK(ListOfTicketsActivity.this, "onResume - ВЫПОЛНЕН");
         super.onResume();
     }
@@ -233,7 +215,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     @Override
     protected void onPause() {
         databaseTicketReference.removeEventListener(ticketListener);
-        databaseUserReference.removeEventListener(userListener);
         Globals.logInfoAPK(ListOfTicketsActivity.this, "onPause - ВЫПОЛНЕН");
         super.onPause();
     }
@@ -241,7 +222,6 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
     @Override
     protected void onStop() {
         databaseTicketReference.removeEventListener(ticketListener);
-        databaseUserReference.removeEventListener(userListener);
         Globals.logInfoAPK(ListOfTicketsActivity.this, "onStop - ВЫПОЛНЕН");
         super.onStop();
     }
