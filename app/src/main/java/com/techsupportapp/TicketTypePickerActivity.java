@@ -19,6 +19,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -84,12 +85,16 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
                 switch (groupPosition){
                     case 0:
                         type = Ticket.TYPE_SOFTWARE;
+                        break;
                     case 1:
                         type = Ticket.TYPE_HARDWARE;
+                        break;
                     case 2:
                         type = Ticket.TYPE_EXTERNAL_DEVICES;
+                        break;
                     case 3:
                         type = Ticket.TYPE_NETWORK;
+                        break;
                 }
 
                 String ticketTopic = expandableListView.getExpandableListAdapter().getChild(groupPosition, childPosition).toString();

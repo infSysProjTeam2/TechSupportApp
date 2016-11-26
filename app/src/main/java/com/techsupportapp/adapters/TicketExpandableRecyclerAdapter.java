@@ -163,6 +163,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
         private TextView topicText;
         private TextView descText;
         private ImageView ticketImage;
+        private TextView descLabel;
 
         private TicketViewHolder(View view) {
             super(view);
@@ -172,16 +173,23 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
             dateText = (TextView) view.findViewById(R.id.ticketDate);
             topicText = (TextView) view.findViewById(R.id.ticketTopic);
             descText = (TextView) view.findViewById(R.id.ticketDesc);
+            descLabel = (TextView) view.findViewById(R.id.descLabel);
         }
 
         private void bind(int position) {
             final Ticket currentTicket = visibleItems.get(position).ticket;
 
             authorText.setText(currentTicket.getUserName());
-
             dateText.setText(currentTicket.getCreateDate());
             topicText.setText(currentTicket.getTopic());
-            descText.setText(currentTicket.getMessage());
+
+            if (type == TYPE_ACTIVE || type == TYPE_CLOSED) {
+                descLabel.setText("Консультант:");
+                descText.setText(currentTicket.getSpecialistName());
+            } else {
+                descLabel.setVisibility(View.INVISIBLE);
+                descText.setVisibility(View.INVISIBLE);
+            }
 
             ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getTopic(), context));
 
