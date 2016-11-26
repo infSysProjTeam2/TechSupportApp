@@ -27,7 +27,6 @@ public class AssignTicketActivity extends AppCompatActivity {
     RecyclerView specialistsView;
     ArrayList<User> specialistsList;
     DatabaseReference databaseReference;
-    boolean assign;
     Ticket currentTicket;
 
     ValueEventListener userListener = new ValueEventListener() {
@@ -67,7 +66,6 @@ public class AssignTicketActivity extends AppCompatActivity {
         setContentView(R.layout.activity_assign_ticket);
         setTitle("Специалисты");
 
-        assign = getIntent().getExtras().getBoolean("assign");
         currentTicket = (Ticket) getIntent().getExtras().getSerializable("currentTicket");
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -115,5 +113,4 @@ public class AssignTicketActivity extends AppCompatActivity {
             onBackPressed();
         return super.onOptionsItemSelected(item);
     }
-
 }

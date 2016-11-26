@@ -217,7 +217,7 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
                 Intent intent = new Intent(MyTicketsActivity.this, ListOfTicketsActivity.class);
                 startActivity(intent);
             } else {
-                Intent intent = new Intent(MyTicketsActivity.this, CreateTicketActivity.class);
+                Intent intent = new Intent(MyTicketsActivity.this, TicketTypePickerActivity.class);
                 startActivity(intent);
             }
         } else if (id == R.id.charts) {

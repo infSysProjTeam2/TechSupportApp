@@ -233,7 +233,6 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                                     @Override
                                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                         Intent intent = new Intent(context, AssignTicketActivity.class);
-                                        intent.putExtra("assign", true);
                                         intent.putExtra("currentTicket", (Serializable) currentTicket);
                                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                         context.startActivity(intent);
