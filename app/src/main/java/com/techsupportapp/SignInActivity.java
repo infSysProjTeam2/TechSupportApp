@@ -55,7 +55,6 @@ public class SignInActivity extends AppCompatActivity {
 
     //region Composite Controls
 
-    private Button closeAppBut;
     private Button signInBut;
 
     private EditText loginET;
@@ -246,7 +245,6 @@ public class SignInActivity extends AppCompatActivity {
      * Инициализация переменных и элементов макета.
      */
     private void initializeComponents() {
-        closeAppBut = (Button)findViewById(R.id.closeAppButton);
         signInBut = (Button)findViewById(R.id.signInButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
@@ -282,13 +280,6 @@ public class SignInActivity extends AppCompatActivity {
      * Создание методов для событий.
      */
     private void setEvents() {
-        closeAppBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
-
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

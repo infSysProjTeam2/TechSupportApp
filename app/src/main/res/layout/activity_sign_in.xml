@@ -18,27 +18,31 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true">
 
         <LinearLayout
-            android:paddingTop="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center">
 
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@mipmap/icon_inv"/>
+
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/login_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="16dp">
                 <EditText
                     android:id="@+id/loginET"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:minWidth="300dp"
                     android:hint="Логин"
                     android:inputType="text" />
             </android.support.design.widget.TextInputLayout>
@@ -52,57 +56,37 @@
                     android:id="@+id/passwordET"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:minWidth="300dp"
                     android:hint="Пароль"/>
             </android.support.design.widget.TextInputLayout>
 
-            <TextView
+            <Button
+                android:id="@+id/signInButton"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:textColor="@android:color/white"
+                android:text="Вход"/>
+
+            <CheckBox
+                android:id="@+id/checkBoxBold"
+                android:text="Сохранить логин и пароль"
                 android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleX="1.20"
+                android:scaleY="1.20"
+                android:checked="true"/>
+
+            <TextView
+                android:paddingTop="12dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
-                android:text="Забыли пароль? Обратитесь к администратору вашей компании."/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/closeAppButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Закрыть"/>
-
-                <Button
-                    android:id="@+id/signInButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Вход"/>
-
-            </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <CheckBox
-                        android:id="@+id/checkBoxBold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"/>
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAlignment="center"
-                        android:text="Сохранить логин и пароль"
-                        android:clickable="true"/>
-
-                </LinearLayout>
+                android:text="Забыли пароль?\n Обратитесь к администратору вашей компании."/>
 
         </LinearLayout>
 
