@@ -1,13 +1,18 @@
 package com.techsupportapp;
 
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,6 +57,8 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText repeatPasswordET;
 
     private BetterSpinner spinner;
+
+    private Button submitBtn;
 
     //endregion
 
@@ -119,6 +126,7 @@ public class SignUpActivity extends AppCompatActivity {
         workPlaceET = (EditText)findViewById(R.id.workPlaceET);
         passwordET = (EditText)findViewById(R.id.passwordET);
         repeatPasswordET = (EditText)findViewById(R.id.repeatPasswordET);
+        submitBtn = (Button) findViewById(R.id.submitBtn);
 
         databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
         databaseIndexReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Indexes.DATABASE_USER_INDEX_COUNTER);
@@ -146,23 +154,88 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
-    }
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                tryAddUser();
+            }
+        });
 
-   @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_sign_up, menu);
-        return true;
+        loginET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout loginLayout = (TextInputLayout) findViewById(R.id.login_layout);
+                loginLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        userNameET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout userNameLayout = (TextInputLayout) findViewById(R.id.userName_layout);
+                userNameLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        workPlaceET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout workPlaceLayout = (TextInputLayout) findViewById(R.id.workPlace_layout);
+                workPlaceLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        passwordET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.password_layout);
+                passwordLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        repeatPasswordET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout repeatPasswordLayout = (TextInputLayout) findViewById(R.id.repeat_password_layout);
+                repeatPasswordLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
+        });
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_sign_up) {
-            tryAddUser();
-            return true;
-        }
-        else if (id == android.R.id.home)
+        if (id == android.R.id.home)
             this.finish();
         return super.onOptionsItemSelected(item);
     }
@@ -178,31 +251,47 @@ public class SignUpActivity extends AppCompatActivity {
                 return lhs.compareTo(rhs);
             }
         });
-        if (loginET.getText().toString().equals("")) {
-            Toast.makeText(getApplicationContext(), "Поле логина пусто", Toast.LENGTH_LONG).show();
+        if (loginET.getText().toString().isEmpty()) {
             loginET.requestFocus();
+            TextInputLayout loginLayout = (TextInputLayout) findViewById(R.id.login_layout);
+            loginLayout.setErrorEnabled(true);
+            loginLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignUpActivity.this, loginET);
         }
-        else if (userNameET.getText().toString().equals("")) {
-            Toast.makeText(getApplicationContext(), "Поле имени пользователя пусто", Toast.LENGTH_LONG).show();
+        else if (userNameET.getText().toString().isEmpty()) {
             userNameET.requestFocus();
+            TextInputLayout userNameLayout = (TextInputLayout) findViewById(R.id.userName_layout);
+            userNameLayout.setErrorEnabled(true);
+            userNameLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignUpActivity.this, userNameET);
         }
-        else if (workPlaceET.getText().toString().equals("")) {
-            Toast.makeText(getApplicationContext(), "Поле рабочего места пользователя пусто", Toast.LENGTH_LONG).show();
+        else if (workPlaceET.getText().toString().isEmpty()) {
             workPlaceET.requestFocus();
+            TextInputLayout workPlaceLayout = (TextInputLayout) findViewById(R.id.workPlace_layout);
+            workPlaceLayout.setErrorEnabled(true);
+            workPlaceLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignUpActivity.this, workPlaceET);
         }
-        else if (passwordET.getText().toString().equals("")) {
-            Toast.makeText(getApplicationContext(), "Поле пароля пусто", Toast.LENGTH_LONG).show();
+        else if (passwordET.getText().toString().isEmpty()) {
             passwordET.requestFocus();
+            TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.password_layout);
+            passwordLayout.setErrorEnabled(true);
+            passwordLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignUpActivity.this, passwordET);
         }
         else if (!passwordET.getText().toString().equals(repeatPasswordET.getText().toString())) {
-            passwordET.requestFocus();
-            Toast.makeText(getApplicationContext(), "Пароли не совпадают", Toast.LENGTH_LONG).show();
-            passwordET.setText("");
-            repeatPasswordET.setText("");
+            repeatPasswordET.requestFocus();
+            TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.repeat_password_layout);
+            passwordLayout.setErrorEnabled(true);
+            passwordLayout.setError("Пароли должны совпадать");
+            Globals.showKeyboardOnEditText(SignUpActivity.this, repeatPasswordET);
         }
         else if (index >= 0) {
-            loginET.setText("");
-            Toast.makeText(getApplicationContext(), "Такой логин уже существует, выберите другой", Toast.LENGTH_LONG).show();
+            loginET.requestFocus();
+            TextInputLayout loginLayout = (TextInputLayout) findViewById(R.id.login_layout);
+            loginLayout.setErrorEnabled(true);
+            loginLayout.setError("Этот логин уже занят");
+            Globals.showKeyboardOnEditText(SignUpActivity.this, loginET);
         } else return true;
         return false;
         //TODO Сделать проверку парольей на длину и англ символы (уже есть в Globals)

@@ -8,6 +8,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -36,6 +38,11 @@ public class Globals {
     public static String getTicketTypeName(Context context, int t){
         String[] groups = context.getResources().getStringArray(R.array.ticket_types_array);
         return groups[t - 10];
+    }
+
+    public static void showKeyboardOnEditText(Context context, EditText editText){
+        InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT);
     }
 
     /**
