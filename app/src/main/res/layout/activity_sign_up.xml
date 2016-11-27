@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     tools:context=".SignUpActivity">
 
     <LinearLayout
@@ -11,54 +12,48 @@
         android:layout_width="0px"
         android:layout_height="0px"/>
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:paddingTop="16dp"
-        android:layout_centerHorizontal="true">
+        android:overScrollMode="never"
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
+            android:gravity="center_horizontal">
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/login_layout"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/loginET"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:width="300dp"
                     android:hint="Логин"
                     android:inputType="text" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/userName_layout"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/userNameET"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:width="300dp"
                     android:hint="Отображаемое имя"
                     android:inputType="textCapWords" />
             </android.support.design.widget.TextInputLayout>
-
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/workPlace_layout"
@@ -67,60 +62,63 @@
                 android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/workPlaceET"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:width="300dp"
                     android:hint="Рабочее место"
                     android:inputType="textCapWords" />
             </android.support.design.widget.TextInputLayout>
 
-
             <com.weiwangcn.betterspinner.library.BetterSpinner
                 android:id="@+id/spinner"
-                android:gravity="center"
                 android:paddingTop="32dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:minWidth="200dp" />
+                android:width="300dp" />
 
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/password_layout"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="12dp">
                 <EditText
                     android:id="@+id/passwordET"
-                    android:paddingTop="32dp"
-                    android:gravity="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:width="300dp"
                     android:hint="Пароль"/>
             </android.support.design.widget.TextInputLayout>
 
-
             <android.support.design.widget.TextInputLayout
                 android:id="@+id/repeat_password_layout"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp">
                 <EditText
                     android:id="@+id/repeatPasswordET"
-                    android:gravity="center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:maxLines="1"
-                    android:minWidth="200dp"
+                    android:width="300dp"
                     android:hint="Повторите пароль"/>
             </android.support.design.widget.TextInputLayout>
 
+            <Button
+                android:id="@+id/submitBtn"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary"
+                android:textColor="@android:color/white"
+                android:text="Подтвердить"/>
+
         </LinearLayout>
 
-    </RelativeLayout>
+    </ScrollView>
 
-</RelativeLayout>
+</LinearLayout>

@@ -8,12 +8,16 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -55,13 +59,14 @@ public class SignInActivity extends AppCompatActivity {
 
     //region Composite Controls
 
-    private Button closeAppBut;
     private Button signInBut;
 
     private EditText loginET;
     private EditText passwordET;
 
     private CheckBox rememberPasCB;
+
+    private TextView signUpTV;
 
     private MaterialDialog loadingDialog;
 
@@ -127,13 +132,6 @@ public class SignInActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_sign_in, menu);
-        return true;
-    }
-
-    @Override
     protected void onStop() {
         super.onStop();
         savePassAndLogin();
@@ -143,16 +141,6 @@ public class SignInActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         savePassAndLogin();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_sign_up) {
-            startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -180,13 +168,19 @@ public class SignInActivity extends AppCompatActivity {
                 return lhs.compareTo(rhs);
             }
         });
-        if (loginET.getText().toString().equals("")) {
+        if (loginET.getText().toString().isEmpty()) {
             loginET.requestFocus();
-            Toast.makeText(getApplicationContext(), "Введите логин", Toast.LENGTH_LONG).show();
+            TextInputLayout loginLayout = (TextInputLayout) findViewById(R.id.login_layout);
+            loginLayout.setErrorEnabled(true);
+            loginLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignInActivity.this, loginET);
             return false;
-        } else if (passwordET.getText().toString().equals("")) {
+        } else if (passwordET.getText().toString().isEmpty()) {
             passwordET.requestFocus();
-            Toast.makeText(getApplicationContext(), "Введите пароль", Toast.LENGTH_LONG).show();
+            TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.password_layout);
+            passwordLayout.setErrorEnabled(true);
+            passwordLayout.setError(getResources().getString(R.string.empty_field));
+            Globals.showKeyboardOnEditText(SignInActivity.this, passwordET);
             return false;
         } else if (index >= 0) {
             Toast.makeText(getApplicationContext(), "Ваша заявка в списке ожидания. " +
@@ -246,17 +240,17 @@ public class SignInActivity extends AppCompatActivity {
      * Инициализация переменных и элементов макета.
      */
     private void initializeComponents() {
-        closeAppBut = (Button)findViewById(R.id.closeAppButton);
         signInBut = (Button)findViewById(R.id.signInButton);
 
         loginET = (EditText)findViewById(R.id.loginET);
         passwordET = (EditText)findViewById(R.id.passwordET);
 
+        signUpTV = (TextView) findViewById(R.id.signUp);
+
         rememberPasCB = (CheckBox)findViewById((R.id.checkBoxBold));
 
         databaseReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
 
-        setTitle("Авторизация");
         isDownloaded = false;
     }
 
@@ -282,13 +276,12 @@ public class SignInActivity extends AppCompatActivity {
      * Создание методов для событий.
      */
     private void setEvents() {
-        closeAppBut.setOnClickListener(new View.OnClickListener() {
+        signUpTV.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                onBackPressed();
+            public void onClick(View view) {
+                startActivity(new Intent(SignInActivity.this, SignUpActivity.class));
             }
         });
-
         signInBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -322,6 +315,38 @@ public class SignInActivity extends AppCompatActivity {
                 else Toast.makeText(getApplicationContext(), "Нет подключения к интернету", Toast.LENGTH_LONG).show();
                 return true;
             }
+        });
+
+        loginET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout loginLayout = (TextInputLayout) findViewById(R.id.login_layout);
+                loginLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        passwordET.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                TextInputLayout passwordLayout = (TextInputLayout) findViewById(R.id.password_layout);
+                passwordLayout.setErrorEnabled(false);
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {}
         });
     }
 
