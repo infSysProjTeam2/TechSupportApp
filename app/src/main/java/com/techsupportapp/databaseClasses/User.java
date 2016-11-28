@@ -1,5 +1,6 @@
 package com.techsupportapp.databaseClasses;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -9,7 +10,7 @@ import java.util.Locale;
  * Основной {@link #User(String branchId, boolean isBlocked, String login, String password, int role, String userName, String workPlace) конструктор}.
  * @author Monarch
  */
-public class User {
+public class User implements Serializable{
 
     //region Constants
 

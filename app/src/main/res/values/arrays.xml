@@ -3,7 +3,7 @@
 
     <string-array name="roles_array">
         <item>Пользователь</item>
-        <item>Работник отдела</item>
+        <item>Специалист</item>
         <item>Администратор</item>
         <item>Начальник отдела</item>
     </string-array>
