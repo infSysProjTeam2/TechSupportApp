@@ -51,7 +51,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
         try {
             holder.userNameText.setText(values.get(position).getUserName());
             holder.userPermission.setText(getStringRole(values.get(position)));
-            holder.userImage.setImageDrawable(Globals.ImageMethods.getRoundImage(values.get(position).getUserName()));
+            holder.userImage.setImageDrawable(Globals.ImageMethods.getRoundImage(context, values.get(position).getUserName()));
         }
         catch (Exception e) {
             Globals.showLongTimeToast(context, e.getMessage() + "Обратитесь к разработчику");
@@ -69,7 +69,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
         if (role == User.SIMPLE_USER)
             return "Пользователь";
         else if (role == User.DEPARTMENT_MEMBER)
-            return "Работник отдела";
+            return "Специалист";
         else if (role == User.DEPARTMENT_CHIEF)
             return "Начальник отдела";
         else if (role == User.MANAGER)

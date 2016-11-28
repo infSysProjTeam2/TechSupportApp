@@ -191,7 +191,7 @@ public class TicketExpandableRecyclerAdapter extends ExpandableRecyclerAdapter<T
                 descText.setVisibility(View.INVISIBLE);
             }
 
-            ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(currentTicket.getTopic()));
+            ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(context, currentTicket.getTopic()));
 
             View rootView = ticketImage.getRootView();
 

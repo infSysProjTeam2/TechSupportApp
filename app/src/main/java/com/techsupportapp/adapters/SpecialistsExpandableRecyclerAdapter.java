@@ -110,7 +110,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
                                     databaseReference.child(DatabaseVariables.FullPath.Tickets.DATABASE_UNMARKED_TICKET_TABLE).child(currentTicket.getTicketId()).removeValue();
 
                                     //Отправка полного описания заявки в виде первого сообщения в чате
-                                    ChatMessage firstMessage = new ChatMessage(currentTicket.getMessage(), currentTicket.getUserName(), currentTicket.getUserId(), "", false);
+                                    ChatMessage firstMessage = new ChatMessage(currentTicket.getTopic() + ":\n\n" + currentTicket.getMessage(), currentTicket.getUserName(), currentTicket.getUserId(), "", false);
                                     FirebaseDatabase.getInstance().getReference("chat").child(currentTicket.getTicketId()).push().setValue(firstMessage);
 
                                     DatabaseStorage.updateLogFile(context, currentTicket.getTicketId(), DatabaseStorage.ACTION_ACCEPTED, Globals.currentUser);
@@ -159,7 +159,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
             topicText.setText(currentTicket.getTopic());
             descText.setText(currentTicket.getMessage());
 
-            ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(currentTicket.getTopic()));
+            ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(context, currentTicket.getTopic()));
         }
     }
 

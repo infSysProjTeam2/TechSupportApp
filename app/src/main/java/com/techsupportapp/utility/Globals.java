@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -86,24 +87,36 @@ public class Globals {
          * @param name Отображаемое имя.
          * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
-        public static TextDrawable getSquareImage(String name) {
+        public static TextDrawable getSquareImage(Context context, String name) {
             ColorGenerator generator = ColorGenerator.MATERIAL;
             int color = generator.getColor(name);
 
-            TextDrawable drawable = TextDrawable.builder().buildRect(String.valueOf(name.charAt(0)).toUpperCase(), color);
+            TextDrawable drawable = TextDrawable.builder()
+                    .beginConfig()
+                    .useFont(Typeface.createFromAsset(context.getAssets(), "OpenSans-Light.ttf"))
+                    .bold()
+                    .withBorder(2)
+                    .endConfig()
+                    .buildRect(String.valueOf(name.charAt(0)).toUpperCase(), color);
             return drawable;
         }
 
         /**
          * Метод, создающий круглую картинку первой
-         * @param name Отображаемое имя пользователя.
+         * @param name Отображаемое имя.
          * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
-        public static TextDrawable getRoundImage(String name) {
+        public static TextDrawable getRoundImage(Context context, String name) {
             ColorGenerator generator = ColorGenerator.MATERIAL;
             int color = generator.getColor(name);
 
-            TextDrawable drawable = TextDrawable.builder().buildRound(String.valueOf(name.charAt(0)).toUpperCase(), color);
+            TextDrawable drawable = TextDrawable.builder()
+                    .beginConfig()
+                    .useFont(Typeface.createFromAsset(context.getAssets(), "OpenSans-Light.ttf"))
+                    .bold()
+                    .withBorder(2)
+                    .endConfig()
+                    .buildRound(String.valueOf(name.charAt(0)).toUpperCase(), color);
             return drawable;
         }
     }

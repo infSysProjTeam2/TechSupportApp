@@ -80,7 +80,7 @@ public class TicketRecyclerAdapter extends RecyclerView.Adapter<TicketRecyclerAd
         holder.topicText.setText(values.get(position).getTopic());
         holder.descText.setText(values.get(position).getMessage());
 
-        holder.ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(values.get(position).getTopic()));
+        holder.ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(context, values.get(position).getTopic()));
 
         holder.ticketImage.setOnClickListener(new View.OnClickListener() {
             @Override

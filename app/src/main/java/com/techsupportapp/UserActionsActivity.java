@@ -109,7 +109,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageDrawable(Globals.ImageMethods.getSquareImage(Globals.currentUser.getUserName()));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(UserActionsActivity.this, Globals.currentUser.getUserName()));
 
         mSectionsPagerAdapter = new UserActionsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -135,7 +135,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         if (role == User.SIMPLE_USER)
             return resultString + "ПОЛЬЗОВАТЕЛЯ";
         else if (role == User.DEPARTMENT_MEMBER)
-            return resultString + "РАБОТНИКА ОТДЕЛА";
+            return resultString + "СПЕЦИАЛИСТА";
         else if (role == User.DEPARTMENT_CHIEF)
             return resultString + "НАЧАЛЬНИКА ОТДЕЛА";
         else if (role == User.MANAGER)

@@ -64,7 +64,7 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(Globals.currentUser.getUserName()));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(TicketTypePickerActivity.this, Globals.currentUser.getUserName()));
 
         userName.setText(Globals.currentUser.getUserName());
         userType.setText("Пользователь");

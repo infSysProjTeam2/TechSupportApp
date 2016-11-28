@@ -142,7 +142,7 @@ public class MessagingService extends Service {
         Notification.Builder builder = new Notification.Builder(getApplicationContext())
                 .setContentTitle("Новые сообщения")
                 .setContentText("Количество новых сообщений " + messagesCount)
-                .setSmallIcon(R.mipmap.icon);
+                .setSmallIcon(R.mipmap.ic_launcher);
         Notification notification = builder.build();
         notificationManager.notify(3, notification);
     }

@@ -140,7 +140,7 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(Globals.currentUser.getUserName()));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(MyTicketsActivity.this, Globals.currentUser.getUserName()));
 
         sectionsPagerAdapter = new MyTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
