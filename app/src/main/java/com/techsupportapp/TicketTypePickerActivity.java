@@ -19,7 +19,6 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -65,7 +64,7 @@ public class TicketTypePickerActivity extends AppCompatActivity implements Navig
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), TicketTypePickerActivity.this)));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(TicketTypePickerActivity.this, Globals.currentUser.getUserName()));
 
         userName.setText(Globals.currentUser.getUserName());
         userType.setText("Пользователь");

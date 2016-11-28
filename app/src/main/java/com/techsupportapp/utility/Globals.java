@@ -3,16 +3,20 @@ package com.techsupportapp.utility;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.google.firebase.database.DataSnapshot;
 import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.Ticket;
@@ -79,38 +83,41 @@ public class Globals {
 
     public static class ImageMethods {
         /**
-         * Метод, создающий картинку пользователя с первой буквой его имени по центру.
-         * @param name Отображаемое имя пользователя.
-         * @param context Контекст вызывающего класса.
-         * @return Возвращает картинку (класс Bitmap) с первой буквой имени пользователя по центру.
+         * Метод, создающий квадратную картинку первой
+         * @param name Отображаемое имя.
+         * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
-        public static Bitmap createUserImage(String name, Context context) {
-            int COVER_IMAGE_SIZE = 100;
-            LetterBitmap letterBitmap = new LetterBitmap(context);
-            Bitmap letterTile = letterBitmap.getLetterTile(name.substring(0), name, COVER_IMAGE_SIZE, COVER_IMAGE_SIZE);
-            return (letterTile);
+        public static TextDrawable getSquareImage(Context context, String name) {
+            ColorGenerator generator = ColorGenerator.MATERIAL;
+            int color = generator.getColor(name);
+
+            TextDrawable drawable = TextDrawable.builder()
+                    .beginConfig()
+                    .useFont(Typeface.createFromAsset(context.getAssets(), "OpenSans-Light.ttf"))
+                    .bold()
+                    .withBorder(2)
+                    .endConfig()
+                    .buildRect(String.valueOf(name.charAt(0)).toUpperCase(), color);
+            return drawable;
         }
 
         /**
-         * Метод, задающий округлую форму картинки.
-         * @param bitmap Изображение, форму которого необходимо изменить.
-         * @return Возвращает закругленную картинку (класс Bitmap).
+         * Метод, создающий круглую картинку первой
+         * @param name Отображаемое имя.
+         * @return Возвращает картинку (класс TextDrawable) с первой буквой по центру.
          */
-        public static Bitmap getClip(Bitmap bitmap) {
-            Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                    bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(output);
+        public static TextDrawable getRoundImage(Context context, String name) {
+            ColorGenerator generator = ColorGenerator.MATERIAL;
+            int color = generator.getColor(name);
 
-            final Paint paint = new Paint();
-            final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-
-            paint.setAntiAlias(true);
-            canvas.drawARGB(0, 0, 0, 0);
-            canvas.drawCircle(bitmap.getWidth() / 2, bitmap.getHeight() / 2,
-                    bitmap.getWidth() / 2, paint);
-            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-            canvas.drawBitmap(bitmap, rect, rect, paint);
-            return output;
+            TextDrawable drawable = TextDrawable.builder()
+                    .beginConfig()
+                    .useFont(Typeface.createFromAsset(context.getAssets(), "OpenSans-Light.ttf"))
+                    .bold()
+                    .withBorder(2)
+                    .endConfig()
+                    .buildRound(String.valueOf(name.charAt(0)).toUpperCase(), color);
+            return drawable;
         }
     }
 

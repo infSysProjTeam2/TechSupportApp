@@ -129,7 +129,7 @@ public class ListOfTicketsActivity extends AppCompatActivity implements Navigati
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ListOfTicketsActivity.this)));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(ListOfTicketsActivity.this, Globals.currentUser.getUserName()));
 
         mSectionsPagerAdapter = new ListOfTicketsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 
