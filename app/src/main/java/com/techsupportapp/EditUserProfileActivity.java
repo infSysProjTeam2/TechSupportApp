@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,9 +38,11 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private EditText userName;
     private EditText workPlace;
+
     private Button saveBtn;
     private Button changePasswordBtn;
     private Button changeUserTypeBtn;
+    private Button resetPasswordBtn;
 
     private String newPassword = "";
 
@@ -65,11 +68,18 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
         changePasswordBtn = (Button)findViewById(R.id.changePasswordBtn);
         changeUserTypeBtn = (Button)findViewById(R.id.changeUserTypeBtn);
+        resetPasswordBtn = (Button)findViewById(R.id.resetPasswordBtn);
 
         saveBtn = (Button)findViewById(R.id.saveBtn);
 
-        if (Globals.currentUser.getRole() == User.SIMPLE_USER) {
+        if (Globals.currentUser.getRole() != User.MANAGER) {
             changeUserTypeBtn.setVisibility(View.GONE);
+            resetPasswordBtn.setVisibility(View.GONE);
+        }
+
+        if (Globals.currentUser.getRole() != User.DEPARTMENT_CHIEF && user.getRole() == User.DEPARTMENT_CHIEF){
+            changeUserTypeBtn.setVisibility(View.GONE);
+            resetPasswordBtn.setVisibility(View.GONE);
         }
 
         userName.setText(user.getUserName());
@@ -81,7 +91,9 @@ public class EditUserProfileActivity extends AppCompatActivity{
             userName.setEnabled(false);
             workPlace.setEnabled(false);
             changePasswordBtn.setVisibility(View.GONE);
+            resetPasswordBtn.setVisibility(View.GONE);
         }
+
         changedRole = false;
     }
 

@@ -136,14 +136,14 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             find = specialistId;
 
         //Если пользователь - не диспетчер и это не его профиль, то редактировать его нельзя
-        if (Globals.currentUser.getRole() != User.MANAGER && !Globals.currentUser.getLogin().equals(find))
+        if ((Globals.currentUser.getRole() != User.MANAGER && !Globals.currentUser.getLogin().equals(find)) || (user.getRole() == User.DEPARTMENT_CHIEF && Globals.currentUser.getRole() != User.DEPARTMENT_CHIEF))
             toolbar.findViewById(R.id.editUser).setVisibility(View.GONE);
 
         int role = user.getRole();
         if (role == User.SIMPLE_USER)
             accessLevelTV.setText("Пользователь");
         else if (role == User.DEPARTMENT_MEMBER)
-            accessLevelTV.setText("Работник отдела");
+            accessLevelTV.setText("Специалист");
         else if (role == User.DEPARTMENT_CHIEF)
             accessLevelTV.setText("Начальник отдела");
         else if (role == User.MANAGER)

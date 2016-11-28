@@ -159,7 +159,7 @@ public class MyTicketsActivity extends AppCompatActivity implements NavigationVi
             userType.setText("Начальник отдела");
             nav_menu.findItem(R.id.listOfTickets).setVisible(false);
         } else if (role == User.DEPARTMENT_MEMBER){
-            userType.setText("Работник отдела");
+            userType.setText("Специалист");
             nav_menu.findItem(R.id.charts).setVisible(false);
             nav_menu.findItem(R.id.listOfTickets).setVisible(false);
         } else {

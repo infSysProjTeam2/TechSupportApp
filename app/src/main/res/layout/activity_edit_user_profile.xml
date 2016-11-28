@@ -77,7 +77,7 @@
                 android:text="Изменить пароль"/>
 
             <Button
-                android:id="@+id/reloadPassword"
+                android:id="@+id/resetPasswordBtn"
                 android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -89,6 +89,7 @@
             <Button
                 android:id="@+id/saveBtn"
                 android:layout_marginTop="25dp"
+                android:layout_marginBottom="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:width="300dp"
