@@ -29,14 +29,9 @@ import java.util.Collections;
 import java.util.Comparator;
 
 public class EditUserProfileActivity extends AppCompatActivity{
-
     private DatabaseReference databaseUserReference;
 
-    private ArrayList<User> usersList = new ArrayList<>();
-
-    private String mUserId;
-
-    private int userPosition;
+    private User user;
 
     private boolean changedRole;
 
@@ -48,31 +43,15 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private String newPassword = "";
 
-    //region Listeners
-
-    ValueEventListener userListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(DataSnapshot dataSnapshot) {
-            Globals.logInfoAPK(EditUserProfileActivity.this, "Загрузка данных зарегистрированных пользователей - НАЧАТА");
-            usersList = Globals.Downloads.Users.getVerifiedUserList(dataSnapshot);
-            setData();
-            Globals.logInfoAPK(EditUserProfileActivity.this, "Загрузка данных зарегистрированных пользователей - ЗАКОНЧЕНА");
-        }
-
-        @Override
-        public void onCancelled(DatabaseError databaseError) {
-
-        }
-    };
-
-    //endregion
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mUserId = getIntent().getExtras().getString("userId");
+        user = (User) getIntent().getExtras().getSerializable("user");
         setContentView(R.layout.activity_edit_user_profile);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         initializeComponents();
         setEvents();
@@ -80,9 +59,6 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
     private void initializeComponents(){
         databaseUserReference = FirebaseDatabase.getInstance().getReference(DatabaseVariables.FullPath.Users.DATABASE_ALL_USER_TABLE);
-
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         userName = (EditText)findViewById(R.id.userName);
         workPlace = (EditText)findViewById(R.id.workPlace);
@@ -92,16 +68,24 @@ public class EditUserProfileActivity extends AppCompatActivity{
 
         saveBtn = (Button)findViewById(R.id.saveBtn);
 
-        if (!mUserId.equals(Globals.currentUser.getLogin())) {
+        if (Globals.currentUser.getRole() == User.SIMPLE_USER) {
+            changeUserTypeBtn.setVisibility(View.GONE);
+        }
+
+        userName.setText(user.getUserName());
+        workPlace.setText(user.getWorkPlace());
+
+        setTitle("Профиль");
+
+        if (!user.getLogin().equals(Globals.currentUser.getLogin())) {
             userName.setEnabled(false);
             workPlace.setEnabled(false);
-            changePasswordBtn.setEnabled(false);
+            changePasswordBtn.setVisibility(View.GONE);
         }
         changedRole = false;
     }
 
     private void setEvents(){
-
         changeUserTypeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,11 +97,10 @@ public class EditUserProfileActivity extends AppCompatActivity{
                             public void onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
                                 //TODO сделать это
                                 if (text.equals("Пользователь")) {
-                                    if (usersList.get(userPosition).getRole() != User.SIMPLE_USER) {
+                                    if (user.getRole() != User.SIMPLE_USER) {
                                         User chUser;
                                         try {
-                                            chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                                    User.SIMPLE_USER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                                            chUser = new User(user.getBranchId(), false, user.getLogin(), user.getPassword(), User.SIMPLE_USER, user.getLogin(), user.getWorkPlace());
                                             databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                             databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).removeValue();
                                         } catch (Exception e) {
@@ -128,11 +111,11 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                         Toast.makeText(getApplicationContext(), "Переведен в статус пользователя", Toast.LENGTH_LONG).show();
                                     } else
                                         Toast.makeText(getApplicationContext(), "Уже является пользователем", Toast.LENGTH_LONG).show();
-                                } else if (usersList.get(userPosition).getRole() != User.MANAGER) {
+                                } else if (user.getRole() != User.MANAGER) {
                                     User chUser;
                                     try {
-                                        chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getPassword(),
-                                                User.MANAGER, usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                                        chUser = new User(user.getBranchId(), false, user.getLogin(), user.getPassword(),
+                                                User.MANAGER, user.getLogin(), user.getWorkPlace());
                                         databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                                         databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_SIMPLE_USER_TABLE).child(chUser.getBranchId()).removeValue();
                                     } catch (Exception e) {
@@ -143,7 +126,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                                 } else
                                     Toast.makeText(getApplicationContext(), "Уже является диспетчером", Toast.LENGTH_LONG).show();
 
-                                if (changedRole && mUserId.equals(Globals.currentUser.getLogin())) {
+                                if (changedRole && user.getLogin().equals(Globals.currentUser.getLogin())) {
                                     Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
                                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(i);
@@ -169,8 +152,7 @@ public class EditUserProfileActivity extends AppCompatActivity{
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                         try {
-                            User chUser = new User(usersList.get(userPosition).getBranchId(), false, usersList.get(userPosition).getLogin(), newPassword,
-                                    usersList.get(userPosition).getRole(), usersList.get(userPosition).getLogin(), usersList.get(userPosition).getWorkPlace());
+                            User chUser = new User(user.getBranchId(), false, user.getLogin(), newPassword, user.getRole(), user.getLogin(), user.getWorkPlace());
                             if (chUser.getRole() == User.MANAGER)
                                 databaseUserReference.child(DatabaseVariables.ExceptFolder.Users.DATABASE_VERIFIED_MANAGER_TABLE).child(chUser.getBranchId()).setValue(chUser);
                             else if (chUser.getRole() == User.SIMPLE_USER)
@@ -212,19 +194,26 @@ public class EditUserProfileActivity extends AppCompatActivity{
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         if (currentPasswordET.getText().toString().equals("")) {
                             hintTV.setText("Поле текущего пароля пусто");
-                        } else if (newPasswordET.getText().toString().equals(""))
+                            positiveAction.setEnabled(false);
+                        } else if (newPasswordET.getText().toString().equals("")) {
                             hintTV.setText("Поле нового пароля пусто");
-                        else if (newPasswordRepeatET.getText().toString().equals(""))
+                            positiveAction.setEnabled(false);
+                        } else if (newPasswordRepeatET.getText().toString().equals("")) {
                             hintTV.setText("Нужно повторить пароль");
-                        else if (!currentPasswordET.getText().toString().equals(usersList.get(userPosition).getPassword()))
+                            positiveAction.setEnabled(false);
+                        } else if (!currentPasswordET.getText().toString().equals(user.getPassword())) {
                             hintTV.setText("Введен неправильный пароль");
-                        else if (!newPasswordET.getText().toString().equals(newPasswordRepeatET.getText().toString()))
+                            positiveAction.setEnabled(false);
+                        } else if (!newPasswordET.getText().toString().equals(newPasswordRepeatET.getText().toString())) {
                             hintTV.setText("Пароли должны совпадать");
-                        else if (newPasswordET.getText().toString().length() < 5 || newPasswordRepeatET.getText().toString().length() < 5)
+                            positiveAction.setEnabled(false);
+                        } else if (newPasswordET.getText().toString().length() < 5 || newPasswordRepeatET.getText().toString().length() < 5) {
                             hintTV.setText("Пароль должен быть содержать не менее 5 символов");
-                        else if (!Globals.isEnglishWord(newPasswordET.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeatET.getText().toString()))
+                            positiveAction.setEnabled(false);
+                        } else if (!Globals.isEnglishWord(newPasswordET.getText().toString()) || !Globals.isEnglishWord(newPasswordRepeatET.getText().toString())) {
                             hintTV.setText("Пароли должны содержать только английские символы и цифры");
-                        else {
+                            positiveAction.setEnabled(false);
+                        } else {
                             newPassword = newPasswordET.getText().toString();
                             hintTV.setText("");
                             positiveAction.setEnabled(true);
@@ -255,58 +244,11 @@ public class EditUserProfileActivity extends AppCompatActivity{
         });
     }
 
-    private void setData(){
-        ArrayList<String> idList = new ArrayList<>();
-        Collections.sort(usersList, new Comparator<User>() {
-            @Override
-            public int compare(User lhs, User rhs) {
-                return lhs.getLogin().compareTo(rhs.getLogin());
-            }
-        });
-        for (int i = 0; i < usersList.size(); i++)
-            idList.add(usersList.get(i).getLogin());
-        userPosition = Collections.binarySearch(idList, mUserId, new Comparator<String>() {
-            @Override
-            public int compare(String lhs, String rhs) {
-                return lhs.compareTo(rhs);
-            }
-        });
-
-        if (Globals.currentUser.getRole() == User.SIMPLE_USER)
-            changeUserTypeBtn.setEnabled(false);
-
-        userName.setText(usersList.get(userPosition).getUserName());
-        workPlace.setText(usersList.get(userPosition).getWorkPlace());
-
-        setTitle("Профиль " + usersList.get(userPosition).getUserName());
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem menuItem) {
         if (menuItem.getItemId() == android.R.id.home) {
             finish();
         }
         return super.onOptionsItemSelected(menuItem);
-    }
-
-    @Override
-    protected void onPause() {
-        databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(EditUserProfileActivity.this, "onPause - ВЫПОЛНЕН");
-        super.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        databaseUserReference.removeEventListener(userListener);
-        Globals.logInfoAPK(EditUserProfileActivity.this, "onStop - ВЫПОЛНЕН");
-        super.onStop();
-    }
-
-    @Override
-    protected void onResume() {
-        databaseUserReference.addValueEventListener(userListener);
-        Globals.logInfoAPK(EditUserProfileActivity.this, "onResume - ВЫПОЛНЕН");
-        super.onResume();
     }
 }

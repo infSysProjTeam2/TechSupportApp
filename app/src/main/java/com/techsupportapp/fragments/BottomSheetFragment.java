@@ -17,6 +17,8 @@ import com.techsupportapp.R;
 import com.techsupportapp.databaseClasses.User;
 import com.techsupportapp.utility.Globals;
 
+import java.io.Serializable;
+
 /**
  * Класс для фрагмента диалогового окна, выдвигающегося снизу.
  * @author ahgpoug
@@ -25,11 +27,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
 
     private String userId;
     private String specialistId;
-    private String userName;
-    private String login;
-    private String regDate;
-    private String workPlace;
-    private int role;
+    private User user;
 
     /**
      * Создание нового фрагмента.
@@ -43,11 +41,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         Bundle args = new Bundle();
         args.putString("userId", userId);
         args.putString("specialistId", specialistId);
-        args.putString("userName", user.getUserName());
-        args.putString("login", user.getLogin());
-        args.putString("regDate", user.getRegistrationDate());
-        args.putString("workPlace", user.getWorkPlace());
-        args.putInt("role", user.getRole());
+        args.putSerializable("user", user);
 
         fragment.setArguments(args);
 
@@ -62,11 +56,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         super.onCreate(savedInstanceState);
         userId = getArguments().getString("userId");
         specialistId = getArguments().getString("specialistId");
-        userName = getArguments().getString("userName");
-        login = getArguments().getString("login");
-        regDate = getArguments().getString("regDate");
-        workPlace = getArguments().getString("workPlace");
-        role = getArguments().getInt("role");
+        user = (User) getArguments().getSerializable("user");
     }
 
     /**
@@ -120,8 +110,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 if (id == R.id.editUser) { //Вызов EditUserProfileActivity.class для редактирования профиля
                     Intent intent;
                     intent = new Intent(getContext(), EditUserProfileActivity.class);
-                    intent.putExtra("userId", userId);
-                    intent.putExtra("currUserId", Globals.currentUser.getLogin());
+                    intent.putExtra("user", (Serializable) user);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
                 }
@@ -129,7 +118,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
         toolbar.inflateMenu(R.menu.menu_bottom_dialog);
-        toolbar.setTitle(userName);
+        toolbar.setTitle(user.getUserName());
 
         //Запись данных о пользователе в TextView
         final TextView userIdTV = (TextView) contentView.findViewById(R.id.userId);
@@ -137,9 +126,9 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         TextView workPlaceTV = (TextView) contentView.findViewById(R.id.workPlace);
         TextView accessLevelTV = (TextView) contentView.findViewById(R.id.accessLevel);
 
-        userIdTV.setText(login);
-        regDateTV.setText(regDate);
-        workPlaceTV.setText(workPlace);
+        userIdTV.setText(user.getLogin());
+        regDateTV.setText(user.getRegistrationDate());
+        workPlaceTV.setText(user.getRegistrationDate());
 
         //Проверка Login текущего пользователя
         String find = userId;
@@ -150,6 +139,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         if (Globals.currentUser.getRole() != User.MANAGER && !Globals.currentUser.getLogin().equals(find))
             toolbar.findViewById(R.id.editUser).setVisibility(View.GONE);
 
+        int role = user.getRole();
         if (role == User.SIMPLE_USER)
             accessLevelTV.setText("Пользователь");
         else if (role == User.DEPARTMENT_MEMBER)
