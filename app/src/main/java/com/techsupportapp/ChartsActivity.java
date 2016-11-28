@@ -183,7 +183,7 @@ public class ChartsActivity extends AppCompatActivity implements NavigationView.
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), ChartsActivity.this)));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getRoundImage(Globals.currentUser.getUserName()));
 
         Menu nav_menu = navigationView.getMenu();
         userName.setText(Globals.currentUser.getUserName());

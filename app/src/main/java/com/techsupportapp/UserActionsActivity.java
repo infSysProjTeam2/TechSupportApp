@@ -109,7 +109,7 @@ public class UserActionsActivity extends AppCompatActivity implements Navigation
         TextView userName = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userName);
         TextView userType = (TextView)navigationView.getHeaderView(0).findViewById(R.id.userType);
 
-        currUserImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(Globals.currentUser.getUserName(), UserActionsActivity.this)));
+        currUserImage.setImageDrawable(Globals.ImageMethods.getSquareImage(Globals.currentUser.getUserName()));
 
         mSectionsPagerAdapter = new UserActionsFragments.SectionsPagerAdapter(getSupportFragmentManager());
 

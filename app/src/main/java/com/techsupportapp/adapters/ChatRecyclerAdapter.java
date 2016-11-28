@@ -205,7 +205,7 @@ public class ChatRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                         //TODO что-то сделать
                     }
                 });
-                holder.userImage.setImageBitmap(Globals.ImageMethods.getClip(Globals.ImageMethods.createUserImage(chatMessage.getAuthor(), context)));
+                holder.userImage.setImageDrawable(Globals.ImageMethods.getRoundImage(chatMessage.getAuthor()));
             } else if (viewHolder.getItemViewType() == TYPE_REQUEST_IN){
                 final ViewHolderRequestIn holder = (ViewHolderRequestIn) viewHolder;
                 if (chatMessage.getMessage().equals("not answered")) {

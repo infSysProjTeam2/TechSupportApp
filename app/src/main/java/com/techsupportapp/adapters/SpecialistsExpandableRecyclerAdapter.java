@@ -159,7 +159,7 @@ public class SpecialistsExpandableRecyclerAdapter extends ExpandableRecyclerAdap
             topicText.setText(currentTicket.getTopic());
             descText.setText(currentTicket.getMessage());
 
-            ticketImage.setImageBitmap(Globals.ImageMethods.createUserImage(currentTicket.getTopic(), context));
+            ticketImage.setImageDrawable(Globals.ImageMethods.getSquareImage(currentTicket.getTopic()));
         }
     }
 
